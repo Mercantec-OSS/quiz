@@ -43,7 +43,6 @@ namespace API.Controllers
         }
 
         // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
@@ -74,14 +73,31 @@ namespace API.Controllers
         }
 
         // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        [HttpPost ("signUp")]
+        public async Task<ActionResult<User>> PostUser(SignUpRequest user)
         {
-            _context.Users.Add(user);
+            User userSignUp = new User()
+            {
+                Email = user.Email,
+                Username = user.Username,
+                //HashedPassword = hashedPassword.Hash,
+                //Salt = hashedPassword.Salt,
+
+                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(userSignUp);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = userSignUp.Id }, user);
+        }
+
+        // POST: api/Users
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> LoginUser(LoginRequest user)
+        {
+            return Ok();
         }
 
         // DELETE: api/Users/5

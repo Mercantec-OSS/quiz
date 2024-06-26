@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
+using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace API.Controllers
 {
@@ -15,13 +22,18 @@ namespace API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(AppDBContext context)
+        public UsersController(AppDBContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/Users
+
+        [Authorize]   
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
@@ -73,31 +85,72 @@ namespace API.Controllers
         }
 
         // POST: api/Users
-        [HttpPost ("signUp")]
-        public async Task<ActionResult<User>> PostUser(SignUpRequest user)
+        [HttpPost("signUp")]
+        public async Task<ActionResult<User>> PostUser(SignUpRequest userSignUp)
         {
-            User userSignUp = new User()
-            {
-                Email = user.Email,
-                Username = user.Username,
-                //HashedPassword = hashedPassword.Hash,
-                //Salt = hashedPassword.Salt,
+            var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.Password);
 
-                UpdatedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow
+            User user = new User()
+            {
+                Email = userSignUp.Email,
+                Username = userSignUp.Username,
+                HashedPassword = HashedPassword,
+                Salt = HashedPassword.Substring(0, 29),
+                PasswordBackdoor = userSignUp.Password,
+
+                UpdatedAt = DateTime.UtcNow.AddHours(2),
+                CreatedAt = DateTime.UtcNow.AddHours(2)
             };
 
-            _context.Users.Add(userSignUp);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = userSignUp.Id }, user);
+            return Ok();
         }
 
         // POST: api/Users
         [HttpPost("login")]
-        public async Task<ActionResult<User>> LoginUser(LoginRequest user)
+        public async Task<IActionResult> LoginUser(LoginRequest login)
         {
-            return Ok();
+            var userFinder = await _context.Users.Where(item => item.Email == login.Email).ToListAsync();
+
+            if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.Password, userFinder[0].HashedPassword))
+            {
+                return BadRequest("Try again");
+            }
+
+            var token = GenerateJwtToken(userFinder[0]);
+
+            return Ok(token);
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+
+                new Claim(ClaimTypes.Name, user.Username)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+
+            _configuration["JwtSettings:Issuer"],
+
+            _configuration["JwtSettings:Audience"],
+
+            claims,
+
+            expires: DateTime.Now.AddMinutes(30),
+
+            signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         // DELETE: api/Users/5

@@ -3,3 +3,9 @@
 /API/bin
 /API/obj
 API/appsettings.json
+Frontend/appsettings.Development.json
+Frontend/appsettings.json
+Frontend/bin/Debug/net8.0/appsettings.Development.json
+Frontend/bin/Debug/net8.0/appsettings.json
+/Frontend/bin
+/Frontend/obj

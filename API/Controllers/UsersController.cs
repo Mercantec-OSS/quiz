@@ -98,8 +98,8 @@ namespace API.Controllers
                 Salt = HashedPassword.Substring(0, 29),
                 PasswordBackdoor = userSignUp.Password,
 
-                UpdatedAt = DateTime.UtcNow.AddHours(2),
-                CreatedAt = DateTime.UtcNow.AddHours(2)
+                CreatedAt = DateTime.UtcNow.AddHours(2),
+                UpdatedAt = DateTime.UtcNow.AddHours(2)
             };
 
             _context.Users.Add(user);
@@ -131,7 +131,9 @@ namespace API.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+
+                new Claim(ClaimTypes.SerialNumber, user.Id.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
@@ -146,7 +148,7 @@ namespace API.Controllers
 
             claims,
 
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddDays(1),
 
             signingCredentials: creds);
 

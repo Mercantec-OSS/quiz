@@ -25,6 +25,11 @@ namespace API
             string connectionString = Configuration.GetConnectionString("DefaultConnection")
             ?? Environment.GetEnvironmentVariable("DefaultConnection");
 
+            Console.WriteLine(connectionString);
+            Console.WriteLine(Configuration["JwtSettings:Issuer"]);
+            Console.WriteLine(Configuration["JwtSettings:Audience"]);
+            Console.WriteLine(Configuration["JwtSettings:Key"]);
+
             builder.Services.AddDbContext<AppDBContext>(options => options.UseNpgsql(connectionString));
 
             builder.Services.AddAuthentication(x =>

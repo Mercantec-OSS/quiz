@@ -13,7 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-
+using API.Migrations;
 
 namespace API.Controllers
 {
@@ -31,8 +31,6 @@ namespace API.Controllers
         }
 
         // GET: api/Users
-
-        [Authorize]   
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()

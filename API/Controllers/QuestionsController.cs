@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
+using API.Migrations;
 
 namespace API.Controllers
 {

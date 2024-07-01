@@ -1,7 +1,8 @@
 ﻿using API.Models;
 
-public class QuizTimer : Common
+public class QuizTimer
 {
+    public int? Id { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public TimeSpan Duration => EndTime - StartTime;
@@ -19,7 +20,6 @@ namespace API.Models
         public string InvitedUsers { get; set; }
 		public User Creator { get; set; }
 		public int CreatorId { get; set; }
-        public User UserId { get; set; }
         public QuizTimer Timer { get; set; } // Custom timer for more complex functionality
         public Difficulty difficulty { get; set; }
         public string Maindifficulty { get; set; }

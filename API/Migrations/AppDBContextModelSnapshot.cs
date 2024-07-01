@@ -128,6 +128,9 @@ namespace API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("InvitedUsers")
                         .IsRequired()
                         .HasColumnType("text");
@@ -152,19 +155,16 @@ namespace API.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserIdId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("difficultyId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatorId");
+
                     b.HasIndex("QuestionId");
 
                     b.HasIndex("TimerId");
-
-                    b.HasIndex("UserIdId");
 
                     b.HasIndex("difficultyId");
 
@@ -259,6 +259,12 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
+                    b.HasOne("API.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("API.Models.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
@@ -271,23 +277,17 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.User", "UserId")
-                        .WithMany()
-                        .HasForeignKey("UserIdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("API.Models.Difficulty", "difficulty")
                         .WithMany()
                         .HasForeignKey("difficultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Creator");
+
                     b.Navigation("Question");
 
                     b.Navigation("Timer");
-
-                    b.Navigation("UserId");
 
                     b.Navigation("difficulty");
                 });

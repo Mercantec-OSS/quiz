@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -7,39 +8,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class quiz : Migration
+    public partial class fixAll : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Questions_Users_CreatorÍdId",
-                table: "Questions");
-
-            migrationBuilder.RenameColumn(
-                name: "CreatorÍdId",
-                table: "Questions",
-                newName: "MainDifficultyId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Questions_CreatorÍdId",
-                table: "Questions",
-                newName: "IX_Questions_MainDifficultyId");
-
-            migrationBuilder.AddColumn<int>(
-                name: "CreatorId",
-                table: "Questions",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<string>(
-                name: "UnderCategory",
-                table: "Questions",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.CreateTable(
                 name: "Difficulty",
                 columns: table => new
@@ -77,6 +50,61 @@ namespace API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    HashedPassword = table.Column<string>(type: "text", nullable: false),
+                    Salt = table.Column<string>(type: "text", nullable: false),
+                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PasswordBackdoor = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Category = table.Column<string>(type: "text", nullable: false),
+                    UnderCategory = table.Column<string>(type: "text", nullable: false),
+                    PossibleAnswers = table.Column<List<string>>(type: "text[]", nullable: false),
+                    CorrectAnswer = table.Column<string>(type: "text", nullable: false),
+                    Picture = table.Column<string>(type: "text", nullable: false),
+                    MainDifficultyId = table.Column<int>(type: "integer", nullable: false),
+                    Difficulty = table.Column<string>(type: "text", nullable: false),
+                    CreatorId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_Difficulty_MainDifficultyId",
+                        column: x => x.MainDifficultyId,
+                        principalTable: "Difficulty",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Users_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Quizs",
                 columns: table => new
                 {
@@ -86,7 +114,7 @@ namespace API.Migrations
                     QuestionId = table.Column<int>(type: "integer", nullable: false),
                     QuestionAmount = table.Column<int>(type: "integer", nullable: false),
                     InvitedUsers = table.Column<string>(type: "text", nullable: false),
-                    UserIdId = table.Column<int>(type: "integer", nullable: false),
+                    CreatorId = table.Column<int>(type: "integer", nullable: false),
                     TimerId = table.Column<int>(type: "integer", nullable: false),
                     difficultyId = table.Column<int>(type: "integer", nullable: false),
                     Maindifficulty = table.Column<string>(type: "text", nullable: false),
@@ -115,8 +143,8 @@ namespace API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Quizs_Users_UserIdId",
-                        column: x => x.UserIdId,
+                        name: "FK_Quizs_Users_CreatorId",
+                        column: x => x.CreatorId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -125,6 +153,16 @@ namespace API.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_CreatorId",
                 table: "Questions",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_MainDifficultyId",
+                table: "Questions",
+                column: "MainDifficultyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Quizs_CreatorId",
+                table: "Quizs",
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
@@ -141,78 +179,25 @@ namespace API.Migrations
                 name: "IX_Quizs_TimerId",
                 table: "Quizs",
                 column: "TimerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Quizs_UserIdId",
-                table: "Quizs",
-                column: "UserIdId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Questions_Difficulty_MainDifficultyId",
-                table: "Questions",
-                column: "MainDifficultyId",
-                principalTable: "Difficulty",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Questions_Users_CreatorId",
-                table: "Questions",
-                column: "CreatorId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Questions_Difficulty_MainDifficultyId",
-                table: "Questions");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Questions_Users_CreatorId",
-                table: "Questions");
-
             migrationBuilder.DropTable(
                 name: "Quizs");
+
+            migrationBuilder.DropTable(
+                name: "Questions");
+
+            migrationBuilder.DropTable(
+                name: "QuizTimer");
 
             migrationBuilder.DropTable(
                 name: "Difficulty");
 
             migrationBuilder.DropTable(
-                name: "QuizTimer");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Questions_CreatorId",
-                table: "Questions");
-
-            migrationBuilder.DropColumn(
-                name: "CreatorId",
-                table: "Questions");
-
-            migrationBuilder.DropColumn(
-                name: "UnderCategory",
-                table: "Questions");
-
-            migrationBuilder.RenameColumn(
-                name: "MainDifficultyId",
-                table: "Questions",
-                newName: "CreatorÍdId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Questions_MainDifficultyId",
-                table: "Questions",
-                newName: "IX_Questions_CreatorÍdId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Questions_Users_CreatorÍdId",
-                table: "Questions",
-                column: "CreatorÍdId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                name: "Users");
         }
     }
 }

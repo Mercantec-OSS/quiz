@@ -86,7 +86,7 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("MainDifficultyId")
+                    b.Property<int>("MainDifficulty")
                         .HasColumnType("integer");
 
                     b.Property<string>("Picture")
@@ -112,7 +112,7 @@ namespace API.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("MainDifficultyId");
+                    b.HasIndex("MainDifficulty");
 
                     b.ToTable("Questions");
                 });
@@ -215,22 +215,16 @@ namespace API.Migrations
 
             modelBuilder.Entity("QuizTimer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -248,7 +242,7 @@ namespace API.Migrations
 
                     b.HasOne("API.Models.Difficulty", "MainDifficulty")
                         .WithMany()
-                        .HasForeignKey("MainDifficultyId")
+                        .HasForeignKey("MainDifficulty")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

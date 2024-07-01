@@ -81,7 +81,7 @@ namespace API.Migrations
                     PossibleAnswers = table.Column<List<string>>(type: "text[]", nullable: false),
                     CorrectAnswer = table.Column<string>(type: "text", nullable: false),
                     Picture = table.Column<string>(type: "text", nullable: false),
-                    MainDifficultyId = table.Column<int>(type: "integer", nullable: false),
+                    MainDifficulty = table.Column<int>(type: "integer", nullable: false),
                     Difficulty = table.Column<string>(type: "text", nullable: false),
                     CreatorId = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -91,8 +91,8 @@ namespace API.Migrations
                 {
                     table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_Difficulty_MainDifficultyId",
-                        column: x => x.MainDifficultyId,
+                        name: "FK_Questions_Difficulty_MainDifficulty",
+                        column: x => x.MainDifficulty,
                         principalTable: "Difficulty",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -156,9 +156,9 @@ namespace API.Migrations
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_MainDifficultyId",
+                name: "IX_Questions_MainDifficulty",
                 table: "Questions",
-                column: "MainDifficultyId");
+                column: "MainDifficulty");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quizs_CreatorId",

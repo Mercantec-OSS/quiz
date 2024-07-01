@@ -1,6 +1,6 @@
 ﻿using API.Models;
 
-public class QuizTimer
+public class QuizTimer : Common
 {
     public int? Id { get; set; }
     public DateTime StartTime { get; set; }

@@ -89,7 +89,7 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("MainDifficultyId")
+                    b.Property<int>("MainDifficulty")
                         .HasColumnType("integer");
 
                     b.Property<string>("Picture")
@@ -115,7 +115,7 @@ namespace API.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("MainDifficultyId");
+                    b.HasIndex("MainDifficulty");
 
                     b.ToTable("Questions");
                 });
@@ -251,7 +251,7 @@ namespace API.Migrations
 
                     b.HasOne("API.Models.Difficulty", "MainDifficulty")
                         .WithMany()
-                        .HasForeignKey("MainDifficultyId")
+                        .HasForeignKey("MainDifficulty")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

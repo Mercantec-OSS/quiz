@@ -5,7 +5,8 @@
         public string Title {  get; set; }
         public Question QuestionId { get; set; }
         public string InvitedUsers { get; set; }
-        public User UserId { get; set; }
-        public Timer timer { get; set; } // Overall quiz timer
+		public User Creator { get; set; }
+		public int CreatorId { get; set; }
+        public Timer Timer { get; set; } // Overall quiz timer
     }
 }

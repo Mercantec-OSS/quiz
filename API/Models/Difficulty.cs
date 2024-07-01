@@ -2,7 +2,6 @@
 {
     public class Difficulty
     {
-        public Question QuestionId {  get; set; }
         public int GF2 { get; set; }
         public int H1 { get; set; }
         public int H2 { get; set; }

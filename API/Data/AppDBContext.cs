@@ -14,5 +14,6 @@ namespace API.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<Quiz> Quizs { get; set; }
     }
 }

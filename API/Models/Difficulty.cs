@@ -1,6 +1,6 @@
 ﻿namespace API.Models
 {
-    public class Difficulty
+    public class Difficulty : Common
     {
         public int GF2 { get; set; }
         public int H1 { get; set; }

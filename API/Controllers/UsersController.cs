@@ -124,6 +124,7 @@ namespace API.Controllers
             return Ok(token);
         }
 
+        // JWT Token used to login users and how long their session is valid for
         private string GenerateJwtToken(User user)
         {
 

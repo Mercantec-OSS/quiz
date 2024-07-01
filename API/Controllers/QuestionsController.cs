@@ -74,8 +74,6 @@ namespace API.Controllers
             return NoContent();
         }
 
-
-
         // POST: api/Questions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -85,6 +83,7 @@ namespace API.Controllers
             {
                 Title = questionDTO.Title,
                 Category = questionDTO.Category,
+                UnderCategory = questionDTO.UnderCategory,
                 PossibleAnswers = questionDTO.PossibleAnswers,
                 CorrectAnswer = questionDTO.CorrectAnswer,
                 Picture = questionDTO.Picture,

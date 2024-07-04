@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240701110950_fixAll")]
-    partial class fixAll
+    [Migration("20240704111329_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,22 +37,11 @@ namespace API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("GF2")
-                        .HasColumnType("integer");
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<int>("H1")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("H2")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("H3")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("H4")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("H5")
+                    b.Property<int>("Points")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -61,6 +50,56 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Difficulty");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "GF2",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "H1",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "H2",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "H3",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "H4",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DifficultyLevel = "H5",
+                            Points = 100,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("API.Models.Question", b =>
@@ -85,11 +124,11 @@ namespace API.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Difficulty")
+                    b.Property<string>("DifficultyLevel")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("MainDifficulty")
+                    b.Property<int?>("MainDifficultyId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Picture")
@@ -99,6 +138,12 @@ namespace API.Migrations
                     b.Property<List<string>>("PossibleAnswers")
                         .IsRequired()
                         .HasColumnType("text[]");
+
+                    b.Property<int?>("QuizId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TimerId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -115,7 +160,11 @@ namespace API.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("MainDifficulty");
+                    b.HasIndex("MainDifficultyId");
+
+                    b.HasIndex("QuizId");
+
+                    b.HasIndex("TimerId");
 
                     b.ToTable("Questions");
                 });
@@ -134,15 +183,15 @@ namespace API.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("InvitedUsers")
+                    b.Property<string>("DifficultyLevel")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Maindifficulty")
+                    b.Property<List<string>>("InvitedUsers")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text[]");
 
-                    b.Property<int>("QuestionAmount")
+                    b.Property<int>("MaindifficultyId")
                         .HasColumnType("integer");
 
                     b.Property<int>("QuestionId")
@@ -158,18 +207,13 @@ namespace API.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("difficultyId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("QuestionId");
+                    b.HasIndex("MaindifficultyId");
 
                     b.HasIndex("TimerId");
-
-                    b.HasIndex("difficultyId");
 
                     b.ToTable("Quizs");
                 });
@@ -216,13 +260,29 @@ namespace API.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("QuizTimer", b =>
+            modelBuilder.Entity("QuestionTimer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
+
+                    b.Property<DateTime>("Timer")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestionTimer");
+                });
+
+            modelBuilder.Entity("QuizTimer", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -251,13 +311,23 @@ namespace API.Migrations
 
                     b.HasOne("API.Models.Difficulty", "MainDifficulty")
                         .WithMany()
-                        .HasForeignKey("MainDifficulty")
+                        .HasForeignKey("MainDifficultyId");
+
+                    b.HasOne("API.Models.Quiz", null)
+                        .WithMany("Question")
+                        .HasForeignKey("QuizId");
+
+                    b.HasOne("QuestionTimer", "Timer")
+                        .WithMany()
+                        .HasForeignKey("TimerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Creator");
 
                     b.Navigation("MainDifficulty");
+
+                    b.Navigation("Timer");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>
@@ -268,9 +338,9 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.Question", "Question")
+                    b.HasOne("API.Models.Difficulty", "Maindifficulty")
                         .WithMany()
-                        .HasForeignKey("QuestionId")
+                        .HasForeignKey("MaindifficultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -280,19 +350,16 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.Difficulty", "difficulty")
-                        .WithMany()
-                        .HasForeignKey("difficultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Creator");
 
-                    b.Navigation("Question");
+                    b.Navigation("Maindifficulty");
 
                     b.Navigation("Timer");
+                });
 
-                    b.Navigation("difficulty");
+            modelBuilder.Entity("API.Models.Quiz", b =>
+                {
+                    b.Navigation("Question");
                 });
 #pragma warning restore 612, 618
         }

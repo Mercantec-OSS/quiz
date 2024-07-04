@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
-using API.Migrations;
 
 namespace API.Controllers
 {
@@ -80,10 +79,9 @@ namespace API.Controllers
             Quiz quiz = new Quiz()
             {
                 Title = quizDTO.Title,
-                QuestionAmount = quizDTO.QuestionAmount,
                 InvitedUsers = quizDTO.InvitedUsers,
                 Timer = quizDTO.Timer,
-                Maindifficulty = quizDTO.Maindifficulty,
+                DifficultyLevel = quizDTO.DifficultyLevel
             };
 
             _context.Quizs.Add(quiz);

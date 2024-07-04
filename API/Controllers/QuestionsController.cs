@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
-using API.Migrations;
 
 namespace API.Controllers
 {
@@ -88,7 +87,7 @@ namespace API.Controllers
                 PossibleAnswers = questionDTO.PossibleAnswers,
                 CorrectAnswer = questionDTO.CorrectAnswer,
                 Picture = questionDTO.Picture,
-                Difficulty = questionDTO.Difficulty,
+                DifficultyLevel = questionDTO.DifficultyLevel,
 
                 CreatorId = questionDTO.CreatorId,
 

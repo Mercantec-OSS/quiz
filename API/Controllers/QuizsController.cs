@@ -81,7 +81,8 @@ namespace API.Controllers
                 Title = quizDTO.Title,
                 InvitedUsers = quizDTO.InvitedUsers,
                 Timer = quizDTO.Timer,
-                DifficultyLevel = quizDTO.DifficultyLevel
+                DifficultyLevel = quizDTO.DifficultyLevel,
+                CreatorId = quizDTO.CreatorId
             };
 
             _context.Quizs.Add(quiz);

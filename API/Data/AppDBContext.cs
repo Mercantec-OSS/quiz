@@ -28,6 +28,8 @@ namespace API.Data
                 .WithMany() // Assuming User does not have a collection of Quizs
                 .HasForeignKey(q => q.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict); // Optional: Set the delete behavior
+                                                    // Question to Difficulty relationship
+         
 
             // Question to Difficulty relationship
             modelBuilder.Entity<Question>()
@@ -44,7 +46,6 @@ namespace API.Data
                 new Difficulty { Id = 4, DifficultyLevel = "H3", Points = 100 },
                 new Difficulty { Id = 5, DifficultyLevel = "H4", Points = 100 },
                 new Difficulty { Id = 6, DifficultyLevel = "H5", Points = 100 }
-
             );
         }
     }

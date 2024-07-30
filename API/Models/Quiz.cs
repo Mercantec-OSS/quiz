@@ -19,7 +19,7 @@ namespace API.Models
     {
         public string Title { get; set; }
         public int CreatorId { get; set; }
-        public List<string> InvitedUsers { get; set; }
+        public List<string> InvitedUsers { get; set; } 
         public DateTime Timer { get; set; } // Custom timer for more complex functionality
         public string DifficultyLevel { get; set;}
     }

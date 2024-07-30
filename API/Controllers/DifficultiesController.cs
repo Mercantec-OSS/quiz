@@ -43,7 +43,6 @@ namespace API.Controllers
         }
 
         // PUT: api/Difficulties/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDifficulty(int id, Difficulty difficulty)
         {
@@ -74,7 +73,6 @@ namespace API.Controllers
         }
 
         // POST: api/Difficulties
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Difficulty>> PostDifficulty(DifficultyDTO difficultyDTO)
         {
@@ -82,9 +80,6 @@ namespace API.Controllers
             {
                 DifficultyLevel = difficultyDTO.DifficultyLevel,
                 Points = difficultyDTO.Points,
-
-                CreatedAt = DateTime.UtcNow.AddHours(2),
-                UpdatedAt = DateTime.UtcNow.AddHours(2)
             };
 
             _context.Difficulty.Add(difficulty);

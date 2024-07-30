@@ -1,6 +1,4 @@
-﻿using API.Models;
-
-namespace API.Models
+﻿namespace API.Models
 {
     public class Quiz : Common
     {
@@ -11,7 +9,6 @@ namespace API.Models
 		public User Creator { get; set; }
 		public int CreatorId { get; set; }
         public DateTime Timer { get; set; } // Custom timer for more complex functionality
-        public Difficulty Maindifficulty { get; set; }
         public int MaindifficultyId { get; set; }
         public string DifficultyLevel { get; set; }
     }

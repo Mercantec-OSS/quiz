@@ -82,6 +82,7 @@ namespace API.Controllers
                 InvitedUsers = quizDTO.InvitedUsers,
                 Timer = quizDTO.Timer,
                 DifficultyLevel = quizDTO.DifficultyLevel,
+                MaindifficultyId = quizDTO.MaindifficultyId,
                 CreatorId = quizDTO.CreatorId
             };
 

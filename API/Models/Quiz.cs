@@ -12,6 +12,7 @@ namespace API.Models
 		public int CreatorId { get; set; }
         public DateTime Timer { get; set; } // Custom timer for more complex functionality
         public Difficulty Maindifficulty { get; set; }
+        public int MaindifficultyId { get; set; }
         public string DifficultyLevel { get; set; }
     }
 
@@ -21,6 +22,7 @@ namespace API.Models
         public int CreatorId { get; set; }
         public List<string> InvitedUsers { get; set; } 
         public DateTime Timer { get; set; } // Custom timer for more complex functionality
+        public int MaindifficultyId { get; set; }
         public string DifficultyLevel { get; set;}
     }
 }

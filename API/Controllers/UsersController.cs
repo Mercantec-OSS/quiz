@@ -14,7 +14,6 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 
-
 namespace API.Controllers
 {
     [Route("api/[controller]")]
@@ -31,8 +30,6 @@ namespace API.Controllers
         }
 
         // GET: api/Users
-
-        [Authorize]   
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
@@ -124,6 +121,7 @@ namespace API.Controllers
             return Ok(token);
         }
 
+        // JWT Token used to login users and how long their session is valid for
         private string GenerateJwtToken(User user)
         {
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240704111329_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,8 +142,8 @@ namespace API.Migrations
                     b.Property<int?>("QuizId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Timer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("TimerId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -160,6 +163,8 @@ namespace API.Migrations
                     b.HasIndex("MainDifficultyId");
 
                     b.HasIndex("QuizId");
+
+                    b.HasIndex("TimerId");
 
                     b.ToTable("Questions");
                 });
@@ -192,8 +197,8 @@ namespace API.Migrations
                     b.Property<int>("QuestionId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Timer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("TimerId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -207,6 +212,8 @@ namespace API.Migrations
                     b.HasIndex("CreatorId");
 
                     b.HasIndex("MaindifficultyId");
+
+                    b.HasIndex("TimerId");
 
                     b.ToTable("Quizs");
                 });
@@ -253,6 +260,47 @@ namespace API.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("QuestionTimer", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
+
+                    b.Property<DateTime>("Timer")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestionTimer");
+                });
+
+            modelBuilder.Entity("QuizTimer", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuizTimer");
+                });
+
             modelBuilder.Entity("API.Models.Question", b =>
                 {
                     b.HasOne("API.Models.User", "Creator")
@@ -269,9 +317,17 @@ namespace API.Migrations
                         .WithMany("Question")
                         .HasForeignKey("QuizId");
 
+                    b.HasOne("QuestionTimer", "Timer")
+                        .WithMany()
+                        .HasForeignKey("TimerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Creator");
 
                     b.Navigation("MainDifficulty");
+
+                    b.Navigation("Timer");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>
@@ -279,7 +335,7 @@ namespace API.Migrations
                     b.HasOne("API.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("API.Models.Difficulty", "Maindifficulty")
@@ -288,9 +344,17 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QuizTimer", "Timer")
+                        .WithMany()
+                        .HasForeignKey("TimerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Creator");
 
                     b.Navigation("Maindifficulty");
+
+                    b.Navigation("Timer");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>

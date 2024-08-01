@@ -1,4 +1,6 @@
-﻿namespace API.Controllers
+﻿using API.Models;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -18,7 +20,7 @@
             return await _context.Questions.ToListAsync();
         }
 
-        // GET: api/Questions/5
+        // GET: api/Questions/id
         [HttpGet("{id}")]
         public async Task<ActionResult<Question>> GetQuestion(int id)
         {
@@ -32,7 +34,46 @@
             return question;
         }
 
-        // PUT: api/Questions/5
+        [HttpGet("Category/{Category}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionCategory(string Category)
+        {
+            var questionsList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+
+            if (questionsList == null)
+            {
+                return NotFound();
+            }
+
+            return questionsList;
+        }
+
+        [HttpGet("Difficulty/{Difficulty}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionDifficulty(string Difficulty)
+        {
+            var difficultyList = await _context.Questions.Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
+
+            if (difficultyList == null)
+            {
+                return NotFound();
+            }
+
+            return difficultyList;
+        }
+
+        [HttpGet("{Category}/{Difficulty}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionCategoryDifficulty(string Category, string Difficulty)
+        {
+            var questionsDifficultyList = await _context.Questions.Where(c => c.Category == Category).Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
+
+            if (questionsDifficultyList == null)
+            {
+                return NotFound();
+            }
+
+            return questionsDifficultyList;
+        }
+
+        // PUT: api/Questions/id
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuestion(int id, Question question)
         {
@@ -66,7 +107,7 @@
         [HttpPost]
         public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
         {
-            Question question = new Question()
+            Question question = new()
             {
                 Title = questionDTO.Title,
                 Category = questionDTO.Category,
@@ -75,6 +116,7 @@
                 CorrectAnswer = questionDTO.CorrectAnswer,
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
+                Time = questionDTO.Time,
 
                 CreatorId = questionDTO.CreatorId,
 
@@ -88,7 +130,7 @@
             return CreatedAtAction("GetQuestion", new { id = question.Id }, question);
         }
 
-        // DELETE: api/Questions/5
+        // DELETE: api/Questions/id
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id, int creatorId)
         {

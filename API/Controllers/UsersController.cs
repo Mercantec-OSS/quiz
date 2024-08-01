@@ -71,13 +71,12 @@
         {
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.Password);
 
-            User user = new User()
+            User user = new()
             {
                 Email = userSignUp.Email,
                 Username = userSignUp.Username,
                 HashedPassword = HashedPassword,
                 Salt = HashedPassword.Substring(0, 29),
-                PasswordBackdoor = userSignUp.Password,
 
                 CreatedAt = DateTime.UtcNow.AddHours(2),
                 UpdatedAt = DateTime.UtcNow.AddHours(2)
@@ -93,14 +92,14 @@
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser(LoginRequest login)
         {
-            var userFinder = await _context.Users.Where(item => item.Email == login.Email).ToListAsync();
+            User? userFinder = await _context.Users.FirstOrDefaultAsync(item => item.Email == login.Email);
 
-            if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.Password, userFinder[0].HashedPassword))
+            if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.Password, userFinder.HashedPassword))
             {
                 return BadRequest("Try again");
             }
 
-            var token = GenerateJwtToken(userFinder[0]);
+            var token = GenerateJwtToken(userFinder);
 
             return Ok(token);
         }

@@ -68,7 +68,7 @@
         {
             Difficulty difficulty = new Difficulty()
             {
-                DifficultyLevel = difficultyDTO.DifficultyLevel,
+                DifficultyLevel = (Difficulty.Levels)Enum.Parse(typeof(Difficulty.Levels), difficultyDTO.DifficultyLevel),
                 Points = difficultyDTO.Points,
             };
 

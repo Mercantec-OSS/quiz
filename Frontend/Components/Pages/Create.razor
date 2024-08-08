@@ -5,20 +5,46 @@
 
 
 <div class="card" style="width: 18rem;">
+    @foreach (var question in Questions){
     <div class="card-body">
-        <h5 class="card-title">Question</h5>
-        <input type="text" placeholder="enter question">
+        <h5 class="card-title">Question @((Questions.IndexOf(question) + 1 ))</h5>
+        <input type="text" placeholder="Enter question" @bind="question.QuestionText" /><br><br>
 
         <div class="answer-options">
-            <input type="radio" name="answer" input type="text"><br>
-            <input type="radio" name="answer" value="5"> 5<br>
-            <input type="radio" name="answer" value="7"> 7<br>
+            <input type="radio" name="answer-@question.Id" value1="option1" @bind="question.SelectedAnswer" /> 
+            <input type="text" placeholder="Enter answer 1" @bind="question.Answer1" /><br><br>
+
+            <input type="radio" name="answer-@question.Id" value2="option2" @bind="question.SelectedAnswer" /> 
+            <input type="text" placeholder="Enter answer 2" @bind="question.Answer2" /><br><br>
+
+            <input type="radio" name="answer-@question.Id" value3="option3" @bind="question.SelectedAnswer" /> 
+            <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" /><br><br>
         </div>
     </div>
+    }
 </div>
 
 
 
+<button class="btn btn-primary" @onclick="AddNewQuestion">Add New Question</button>
 
+@code {
+    public class QuestionModel
+    {
+        public int Id { get; set; }
+        public string QuestionText { get; set; }
+        public string Answer1 { get; set; }
+        public string Answer2 { get; set; }
+        public string Answer3 { get; set; }
+        public string SelectedAnswer { get; set; }
+    }
 
-<button>Submit</button>
+    private int nextQuestionId = 1;
+    private List<QuestionModel> Questions = new List<QuestionModel>();
+
+    private void AddNewQuestion()
+    {
+        Questions.Add(new QuestionModel { Id = nextQuestionId++ });
+    }
+
+}

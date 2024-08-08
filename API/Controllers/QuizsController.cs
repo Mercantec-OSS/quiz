@@ -1,25 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class QuizsController : ControllerBase
+    public class QuizsController(AppDBContext context) : ControllerBase
     {
-        private readonly AppDBContext _context;
-
-        public QuizsController(AppDBContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDBContext _context = context;
 
         // GET: api/Quizs
         [HttpGet]
@@ -73,15 +58,45 @@ namespace API.Controllers
         }
 
         // POST: api/Quizs
-        [HttpPost]
+        [HttpPost("/Setup-Quiz")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
         {
-            Quiz quiz = new Quiz()
+            Quiz quiz = new()
             {
-                Title = quizDTO.Title,
                 InvitedUsers = quizDTO.InvitedUsers,
+                Title = quizDTO.Title,
+                Category = quizDTO.Category,
+                AddedTime = quizDTO.AddedTime,
                 Timer = quizDTO.Timer,
-                DifficultyLevel = quizDTO.DifficultyLevel
+                DifficultyLevel = quizDTO.DifficultyLevel,
+                MaindifficultyId = quizDTO.MaindifficultyId,
+                CreatorId = quizDTO.CreatorId,
+                QuestionAmount = quizDTO.QuestionAmount,
+                Question = quizDTO.Question,
+            };
+
+            _context.Quizs.Add(quiz);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
+        }
+
+        // POST: api/Quizsz
+        [HttpPost("/Setup-Quiz-Auto-Select")]
+        public async Task<ActionResult<Quiz>> PostQuizAutoSelect(QuizDTO quizDTO)
+        {
+            Quiz quiz = new()
+            {
+                InvitedUsers = quizDTO.InvitedUsers,
+                Title = quizDTO.Title,
+                Category = quizDTO.Category,
+                AddedTime = quizDTO.AddedTime,
+                Timer = quizDTO.Timer,
+                DifficultyLevel = quizDTO.DifficultyLevel,
+                MaindifficultyId = quizDTO.MaindifficultyId,
+                CreatorId = quizDTO.CreatorId,
+                QuestionAmount = quizDTO.QuestionAmount,
+                Question = quizDTO.Question,
             };
 
             _context.Quizs.Add(quiz);

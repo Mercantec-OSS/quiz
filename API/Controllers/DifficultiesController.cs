@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -42,8 +32,24 @@ namespace API.Controllers
             return difficulty;
         }
 
+        [HttpGet("Level/{Level}")]
+        public async Task<ActionResult<List<Difficulty>>> GetQuestionTime(int Level)
+        {
+            // Casting the Level integer to Difficulty.Levels enum
+            Difficulty.Levels levelEnum = (Difficulty.Levels)Level;
+
+            var levelList = await _context.Difficulty.Where(l => l.DifficultyLevel == levelEnum).ToListAsync();
+
+            if (levelList == null || !levelList.Any())
+            {
+                return NotFound();
+            }
+
+            return levelList;
+        }
+
+
         // PUT: api/Difficulties/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDifficulty(int id, Difficulty difficulty)
         {
@@ -74,17 +80,13 @@ namespace API.Controllers
         }
 
         // POST: api/Difficulties
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Difficulty>> PostDifficulty(DifficultyDTO difficultyDTO)
         {
             Difficulty difficulty = new Difficulty()
             {
-                DifficultyLevel = difficultyDTO.DifficultyLevel,
+                DifficultyLevel = (Difficulty.Levels)Enum.Parse(typeof(Difficulty.Levels), difficultyDTO.DifficultyLevel),
                 Points = difficultyDTO.Points,
-
-                CreatedAt = DateTime.UtcNow.AddHours(2),
-                UpdatedAt = DateTime.UtcNow.AddHours(2)
             };
 
             _context.Difficulty.Add(difficulty);

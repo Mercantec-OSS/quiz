@@ -1,7 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using API.Models;
-using System.Security.Cryptography.X509Certificates;
-
 namespace API.Data
 {
 
@@ -12,12 +8,10 @@ namespace API.Data
         {
 
         }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Quiz> Quizs { get; set; }
         public DbSet<Difficulty> Difficulty { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,6 +22,7 @@ namespace API.Data
                 .WithMany() // Assuming User does not have a collection of Quizs
                 .HasForeignKey(q => q.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict); // Optional: Set the delete behavior
+                                                    // Question to Difficulty relationship
 
             // Question to Difficulty relationship
             modelBuilder.Entity<Question>()
@@ -38,13 +33,12 @@ namespace API.Data
 
             // Seed initial data (optional, for testing)
             modelBuilder.Entity<Difficulty>().HasData(
-                new Difficulty { Id = 1, DifficultyLevel = "GF2", Points = 100 },
-                new Difficulty { Id = 2, DifficultyLevel = "H1", Points = 100 },
-                new Difficulty { Id = 3, DifficultyLevel = "H2", Points = 100 },
-                new Difficulty { Id = 4, DifficultyLevel = "H3", Points = 100 },
-                new Difficulty { Id = 5, DifficultyLevel = "H4", Points = 100 },
-                new Difficulty { Id = 6, DifficultyLevel = "H5", Points = 100 }
-
+                new() { DifficultyLevel = Models.Difficulty.Levels.GF2, Id = 1 },
+                new() { DifficultyLevel = Models.Difficulty.Levels.H1, Id = 2 },
+                new() { DifficultyLevel = Models.Difficulty.Levels.H2, Id = 3 },
+                new() { DifficultyLevel = Models.Difficulty.Levels.H3, Id = 4 },
+                new() { DifficultyLevel = Models.Difficulty.Levels.H4, Id = 5 },
+                new() { DifficultyLevel = Models.Difficulty.Levels.H5, Id = 6 }
             );
         }
     }

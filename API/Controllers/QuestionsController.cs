@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using API.Models;
 
 namespace API.Controllers
 {
@@ -29,7 +20,7 @@ namespace API.Controllers
             return await _context.Questions.ToListAsync();
         }
 
-        // GET: api/Questions/5
+        // GET: api/Questions/id
         [HttpGet("{id}")]
         public async Task<ActionResult<Question>> GetQuestion(int id)
         {
@@ -43,8 +34,85 @@ namespace API.Controllers
             return question;
         }
 
-        // PUT: api/Questions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpGet("Time/{Time}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionTime(int Time)
+        {
+            var timeList = await _context.Questions.Where(t => t.Time == Time).ToListAsync();
+
+            if (timeList == null)
+            {
+                return NotFound();
+            }
+
+            return timeList;
+        }
+
+        [HttpGet("Status/{Status}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionStatus(bool Status)
+        {
+            var statusList = await _context.Questions.Where(s => s.QuestionStatus == Status).ToListAsync();
+
+            if (statusList == null)
+            {
+                return NotFound();
+            }
+
+            return statusList;
+        }
+
+        [HttpGet("Category/{Category}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionCategory(string Category)
+        {
+            var categoryList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+
+            if (categoryList == null)
+            {
+                return NotFound();
+            }
+
+            return categoryList;
+        }
+
+        [HttpGet("UnderCategory/{UnderCategory}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionUnderCategory(string Category)
+        {
+            var underCategoryList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+
+            if (underCategoryList == null)
+            {
+                return NotFound();
+            }
+
+            return underCategoryList;
+        }
+
+        [HttpGet("Difficulty/{Difficulty}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionDifficulty(string Difficulty)
+        {
+            var difficultyList = await _context.Questions.Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
+
+            if (difficultyList == null)
+            {
+                return NotFound();
+            }
+
+            return difficultyList;
+        }
+
+        [HttpGet("{Category}/{Difficulty}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionCategoryDifficulty(string Category, string Difficulty)
+        {
+            var categoryDifficultyList = await _context.Questions.Where(c => c.Category == Category).Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
+
+            if (categoryDifficultyList == null)
+            {
+                return NotFound();
+            }
+
+            return categoryDifficultyList;
+        }
+
+        // PUT: api/Questions/id
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuestion(int id, Question question)
         {
@@ -75,11 +143,10 @@ namespace API.Controllers
         }
 
         // POST: api/Questions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
         {
-            Question question = new Question()
+            Question question = new()
             {
                 Title = questionDTO.Title,
                 Category = questionDTO.Category,
@@ -88,6 +155,7 @@ namespace API.Controllers
                 CorrectAnswer = questionDTO.CorrectAnswer,
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
+                Time = questionDTO.Time,
 
                 CreatorId = questionDTO.CreatorId,
 
@@ -101,7 +169,7 @@ namespace API.Controllers
             return CreatedAtAction("GetQuestion", new { id = question.Id }, question);
         }
 
-        // DELETE: api/Questions/5
+        // DELETE: api/Questions/id
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id, int creatorId)
         {

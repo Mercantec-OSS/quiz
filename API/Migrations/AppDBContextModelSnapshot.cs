@@ -31,18 +31,11 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("DifficultyLevel")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Points")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -52,50 +45,38 @@ namespace API.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "GF2",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 1,
+                            Points = 100
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "H1",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 2,
+                            Points = 100
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "H2",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 3,
+                            Points = 100
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "H3",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 4,
+                            Points = 100
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "H4",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 5,
+                            Points = 100
                         },
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DifficultyLevel = "H5",
-                            Points = 100,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            DifficultyLevel = 6,
+                            Points = 100
                         });
                 });
 
@@ -108,7 +89,6 @@ namespace API.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CorrectAnswer")
@@ -129,25 +109,25 @@ namespace API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Picture")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<List<string>>("PossibleAnswers")
                         .IsRequired()
                         .HasColumnType("text[]");
 
+                    b.Property<bool>("QuestionStatus")
+                        .HasColumnType("boolean");
+
                     b.Property<int?>("QuizId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Timer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("Time")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UnderCategory")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -172,6 +152,12 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AddedTime")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -189,14 +175,16 @@ namespace API.Migrations
                     b.Property<int>("MaindifficultyId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("QuestionAmount")
+                        .HasColumnType("integer");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Timer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("Timer")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -205,8 +193,6 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
-
-                    b.HasIndex("MaindifficultyId");
 
                     b.ToTable("Quizs");
                 });
@@ -282,15 +268,7 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("API.Models.Difficulty", "Maindifficulty")
-                        .WithMany()
-                        .HasForeignKey("MaindifficultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Creator");
-
-                    b.Navigation("Maindifficulty");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>

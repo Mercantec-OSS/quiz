@@ -4,6 +4,12 @@
     flex-direction: column;
 }
 
+.home, .counter, .weather{
+    display:flex;
+    position: relative;
+    left: -80%
+}
+
 main {
     flex: 1;
 }
@@ -13,7 +19,7 @@ main {
 }
 
 .top-row {
-    background-color: #f7f7f7;
+    background-color: #ff7575;
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 3.5rem;
@@ -49,13 +55,6 @@ main {
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
     }
 
     .top-row {

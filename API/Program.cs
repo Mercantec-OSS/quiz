@@ -1,10 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using NuGet.Protocol;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-
 namespace API
 {
     public class Program
@@ -22,8 +15,7 @@ namespace API
 
             IConfiguration Configuration = builder.Configuration;
 
-            string connectionString = Configuration.GetConnectionString("DefaultConnection")
-            ?? Environment.GetEnvironmentVariable("DefaultConnection");
+            string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("DefaultConnection");
 
             builder.Services.AddDbContext<AppDBContext>(options => options.UseNpgsql(connectionString));
 

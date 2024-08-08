@@ -32,6 +32,23 @@
             return difficulty;
         }
 
+        [HttpGet("Level/{Level}")]
+        public async Task<ActionResult<List<Difficulty>>> GetQuestionTime(int Level)
+        {
+            // Casting the Level integer to Difficulty.Levels enum
+            Difficulty.Levels levelEnum = (Difficulty.Levels)Level;
+
+            var levelList = await _context.Difficulty.Where(l => l.DifficultyLevel == levelEnum).ToListAsync();
+
+            if (levelList == null || !levelList.Any())
+            {
+                return NotFound();
+            }
+
+            return levelList;
+        }
+
+
         // PUT: api/Difficulties/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDifficulty(int id, Difficulty difficulty)

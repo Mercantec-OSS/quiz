@@ -8,12 +8,10 @@ namespace API.Data
         {
 
         }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Quiz> Quizs { get; set; }
         public DbSet<Difficulty> Difficulty { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -34,17 +34,56 @@ namespace API.Controllers
             return question;
         }
 
-        [HttpGet("Category/{Category}")]
-        public async Task<ActionResult<List<Question>>> GetQuestionCategory(string Category)
+        [HttpGet("Time/{Time}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionTime(int Time)
         {
-            var questionsList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+            var timeList = await _context.Questions.Where(t => t.Time == Time).ToListAsync();
 
-            if (questionsList == null)
+            if (timeList == null)
             {
                 return NotFound();
             }
 
-            return questionsList;
+            return timeList;
+        }
+
+        [HttpGet("Status/{Status}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionStatus(bool Status)
+        {
+            var statusList = await _context.Questions.Where(s => s.QuestionStatus == Status).ToListAsync();
+
+            if (statusList == null)
+            {
+                return NotFound();
+            }
+
+            return statusList;
+        }
+
+        [HttpGet("Category/{Category}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionCategory(string Category)
+        {
+            var categoryList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+
+            if (categoryList == null)
+            {
+                return NotFound();
+            }
+
+            return categoryList;
+        }
+
+        [HttpGet("UnderCategory/{UnderCategory}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionUnderCategory(string Category)
+        {
+            var underCategoryList = await _context.Questions.Where(c => c.Category == Category).ToListAsync();
+
+            if (underCategoryList == null)
+            {
+                return NotFound();
+            }
+
+            return underCategoryList;
         }
 
         [HttpGet("Difficulty/{Difficulty}")]
@@ -63,14 +102,14 @@ namespace API.Controllers
         [HttpGet("{Category}/{Difficulty}")]
         public async Task<ActionResult<List<Question>>> GetQuestionCategoryDifficulty(string Category, string Difficulty)
         {
-            var questionsDifficultyList = await _context.Questions.Where(c => c.Category == Category).Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
+            var categoryDifficultyList = await _context.Questions.Where(c => c.Category == Category).Where(d => d.DifficultyLevel == Difficulty).ToListAsync();
 
-            if (questionsDifficultyList == null)
+            if (categoryDifficultyList == null)
             {
                 return NotFound();
             }
 
-            return questionsDifficultyList;
+            return categoryDifficultyList;
         }
 
         // PUT: api/Questions/id

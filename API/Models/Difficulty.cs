@@ -2,7 +2,7 @@
 {
     public class Difficulty
     {
-        public int Id { get; set; } = -1;
+        public int Id { get; set; }
         public Levels DifficultyLevel { get; set; } = Levels.Unassigned;
         public int Points { get; set; } = 100;
 

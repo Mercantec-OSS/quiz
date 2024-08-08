@@ -13,8 +13,7 @@
 
         // ------------------------------------ //
 
-        public string DifficultyLevel { get; set; }
-        public int MaindifficultyId { get; set; } // ID
+        public string Maindifficulty { get; set; }
 
         // ------------------------------------ //
 
@@ -23,9 +22,11 @@
         
         // ------------------------------------ //
         
-        public List<Question> Question { get; set; } // To greate a relation between Quiz and question
+        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
         public int QuestionId {  get; set; } // Question Id
         public int QuestionAmount { get; set; }
+        public Dictionary<string, int> QuestionAmountsByDifficulty { get; set; } // Number of questions for each difficulty level
+
     }
 
     public class QuizDTO
@@ -41,16 +42,15 @@
 
         // ------------------------------------ //
 
-        public string DifficultyLevel { get; set; }
-        public int MaindifficultyId { get; set; }
+        public string Maindifficulty { get; set; }
 
         // ------------------------------------ //
 
         public int CreatorId { get; set; } // Their ID
 
         // ------------------------------------ //
-
-        public List<Question> Question { get; set; } // To greate a relation between Quiz and question
         public int QuestionAmount { get; set; }
+        public Dictionary<string, int> QuestionAmountsByDifficulty { get; set; } // Number of questions for each difficulty level
     }
+
 }

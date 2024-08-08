@@ -61,6 +61,8 @@
         [HttpPost("/Setup-Quiz")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
         {
+            List<Question> selectedQuestions = new List<Question>();
+
             Quiz quiz = new()
             {
                 InvitedUsers = quizDTO.InvitedUsers,
@@ -68,11 +70,10 @@
                 Category = quizDTO.Category,
                 AddedTime = quizDTO.AddedTime,
                 Timer = quizDTO.Timer,
-                DifficultyLevel = quizDTO.DifficultyLevel,
-                MaindifficultyId = quizDTO.MaindifficultyId,
                 CreatorId = quizDTO.CreatorId,
-                QuestionAmount = quizDTO.QuestionAmount,
-                Question = quizDTO.Question,
+                Maindifficulty = quizDTO.Maindifficulty,
+                QuestionAmount = selectedQuestions.Count,
+                Questions = selectedQuestions // assuming Quiz entity has a collection of Questions
             };
 
             _context.Quizs.Add(quiz);
@@ -81,10 +82,30 @@
             return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
         }
 
-        // POST: api/Quizsz
+        // POST: api/Quizs
         [HttpPost("/Setup-Quiz-Auto-Select")]
         public async Task<ActionResult<Quiz>> PostQuizAutoSelect(QuizDTO quizDTO)
         {
+            List<Question> selectedQuestions = new List<Question>();
+
+            // Fetch and randomly select questions for each specified difficulty level
+            foreach (var entry in quizDTO.QuestionAmountsByDifficulty)
+            {
+                string difficulty = entry.Key;
+                int amount = entry.Value;
+
+                var questions = await _context.Questions.Where(q => q.DifficultyLevel == difficulty).ToListAsync();
+
+                if (questions.Count < amount)
+                {
+                    return BadRequest($"Not enough questions available for difficulty level {difficulty}.");
+                }
+
+                var randomQuestions = questions.OrderBy(q => Guid.NewGuid()).Take(amount).ToList();
+                selectedQuestions.AddRange(randomQuestions);
+            }
+
+            // Map the selected questions to the quiz
             Quiz quiz = new()
             {
                 InvitedUsers = quizDTO.InvitedUsers,
@@ -92,11 +113,10 @@
                 Category = quizDTO.Category,
                 AddedTime = quizDTO.AddedTime,
                 Timer = quizDTO.Timer,
-                DifficultyLevel = quizDTO.DifficultyLevel,
-                MaindifficultyId = quizDTO.MaindifficultyId,
                 CreatorId = quizDTO.CreatorId,
-                QuestionAmount = quizDTO.QuestionAmount,
-                Question = quizDTO.Question,
+                Maindifficulty = quizDTO.Maindifficulty,
+                QuestionAmount = selectedQuestions.Count,
+                Questions = selectedQuestions // assuming Quiz entity has a collection of Questions
             };
 
             _context.Quizs.Add(quiz);

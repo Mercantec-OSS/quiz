@@ -19,6 +19,7 @@
                 <input type="radio" name="answer-@question.Id" value="option2" checked="@IsChecked(question.SelectedAnswer, "option2")" @onclick='() => question.SelectedAnswer = "option2" ' />
                 <input type="text" placeholder="Enter answer2" @bind="question.Answer2" />
 
+
                 <input type="radio" name="answer-@question.Id" value="option3" checked="@IsChecked(question.SelectedAnswer, "option3")" @onclick='() => question.SelectedAnswer = "option3"' />
                 <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
 

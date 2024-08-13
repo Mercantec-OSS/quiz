@@ -25,8 +25,6 @@
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
         public int QuestionId {  get; set; } // Question Id
         public int QuestionAmount { get; set; }
-        public Dictionary<string, int> QuestionAmountsByDifficulty { get; set; } // Number of questions for each difficulty level
-
     }
 
     public class QuizDTO
@@ -46,11 +44,12 @@
 
         // ------------------------------------ //
 
+        public User Creator { get; set; } // The user that created the quiz
         public int CreatorId { get; set; } // Their ID
 
         // ------------------------------------ //
+        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
         public int QuestionAmount { get; set; }
-        public Dictionary<string, int> QuestionAmountsByDifficulty { get; set; } // Number of questions for each difficulty level
     }
 
 }

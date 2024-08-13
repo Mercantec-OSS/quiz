@@ -3,7 +3,7 @@
     public class Difficulty
     {
         public int Id { get; set; }
-        public Levels DifficultyLevel { get; set; }
+        public string DifficultyLevel { get; set; }
         public int Points { get; set; } = 100;
         public class Levels
         {
@@ -19,7 +19,7 @@
 
     public class DifficultyDTO
     {
-        public Difficulty.Levels DifficultyLevel { get; set; }
+        public string DifficultyLevel { get; set; }
         public int Points { get; set; } = 100;
     }
 }

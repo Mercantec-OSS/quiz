@@ -23,7 +23,7 @@
                 <input type="radio" name="answer-@question.Id" value="option3" checked="@IsChecked(question.SelectedAnswer, "option3")" @onclick='() => question.SelectedAnswer = "option3"' />
                 <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
 
-            </div>
+            </div> <br> <br>
 
             <button class="btn btn-secondary" @onclick="() => ShowAnswerInCard(question)"> Show question & Answer</button>
         </div>

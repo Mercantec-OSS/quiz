@@ -39,6 +39,12 @@
 <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
 
 
+@if (Questions.Count >= MaxQuestions)
+{
+    <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
+}
+
+
 @if (SelectedQuestion !=null)
 {
     <div class="card" style="width: 18rem;">
@@ -75,7 +81,10 @@
 
     private void AddNewQuestion()
     {
-        Questions.Add(new QuestionModel { Id = nextQuestionId++ });
+        if (Questions.Count < MaxQuestions) 
+        {
+            Questions.Add(new QuestionModel { Id = nextQuestionId++ });
+        }
     }
 
     private void ShowAnswerInCard(QuestionModel question)

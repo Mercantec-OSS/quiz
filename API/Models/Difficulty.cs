@@ -3,24 +3,23 @@
     public class Difficulty
     {
         public int Id { get; set; }
-        public Levels DifficultyLevel { get; set; } = Levels.Unassigned;
+        public string DifficultyLevel { get; set; }
         public int Points { get; set; } = 100;
-
-        public enum Levels // This is another type of array
+        public class Levels
         {
-            Unassigned,
-            GF2,
-            H1,
-            H2,
-            H3,
-            H4,
-            H5,
+            public const string Unassigned = "Unassigned";
+            public const string GF2 = "GF2";
+            public const string H1 = "H1";
+            public const string H2 = "H2";
+            public const string H3 = "H3";
+            public const string H4 = "H4";
+            public const string H5 = "H5";
         }
     }
 
     public class DifficultyDTO
     {
-        public string DifficultyLevel { get; set; } = Difficulty.Levels.Unassigned.ToString();
+        public string DifficultyLevel { get; set; }
         public int Points { get; set; } = 100;
     }
 }

@@ -33,12 +33,11 @@
         }
 
         [HttpGet("Level/{Level}")]
-        public async Task<ActionResult<List<Difficulty>>> GetQuestionTime(int Level)
+        public async Task<ActionResult<List<Difficulty>>> GetQuestionTime(string Level)
         {
             // Casting the Level integer to Difficulty.Levels enum
-            Difficulty.Levels levelEnum = (Difficulty.Levels)Level;
 
-            var levelList = await _context.Difficulty.Where(l => l.DifficultyLevel == levelEnum).ToListAsync();
+            var levelList = await _context.Difficulty.Where(l => l.DifficultyLevel == Level).ToListAsync();
 
             if (levelList == null || !levelList.Any())
             {
@@ -85,7 +84,7 @@
         {
             Difficulty difficulty = new Difficulty()
             {
-                DifficultyLevel = (Difficulty.Levels)Enum.Parse(typeof(Difficulty.Levels), difficultyDTO.DifficultyLevel),
+                DifficultyLevel = difficultyDTO.DifficultyLevel,
                 Points = difficultyDTO.Points,
             };
 

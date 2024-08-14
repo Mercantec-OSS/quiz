@@ -30,16 +30,6 @@ namespace API.Data
                 .WithMany() // No navigation property in Difficulty
                 .HasForeignKey("MainDifficultyId") // Foreign key name
                 .IsRequired(false); // Optional relationship if necessary
-
-            // Seed initial data (optional, for testing)
-            modelBuilder.Entity<Difficulty>().HasData(
-                new() { DifficultyLevel = Models.Difficulty.Levels.GF2, Id = 1 },
-                new() { DifficultyLevel = Models.Difficulty.Levels.H1, Id = 2 },
-                new() { DifficultyLevel = Models.Difficulty.Levels.H2, Id = 3 },
-                new() { DifficultyLevel = Models.Difficulty.Levels.H3, Id = 4 },
-                new() { DifficultyLevel = Models.Difficulty.Levels.H4, Id = 5 },
-                new() { DifficultyLevel = Models.Difficulty.Levels.H5, Id = 6 }
-            );
         }
     }
 }

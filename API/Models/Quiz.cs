@@ -13,8 +13,7 @@
 
         // ------------------------------------ //
 
-        public string DifficultyLevel { get; set; }
-        public int MaindifficultyId { get; set; } // ID
+        public string Maindifficulty { get; set; }
 
         // ------------------------------------ //
 
@@ -23,7 +22,7 @@
         
         // ------------------------------------ //
         
-        public List<Question> Question { get; set; } // To greate a relation between Quiz and question
+        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
         public int QuestionId {  get; set; } // Question Id
         public int QuestionAmount { get; set; }
     }
@@ -41,16 +40,16 @@
 
         // ------------------------------------ //
 
-        public string DifficultyLevel { get; set; }
-        public int MaindifficultyId { get; set; }
+        public string Maindifficulty { get; set; }
 
         // ------------------------------------ //
 
+        public User Creator { get; set; } // The user that created the quiz
         public int CreatorId { get; set; } // Their ID
 
         // ------------------------------------ //
-
-        public List<Question> Question { get; set; } // To greate a relation between Quiz and question
+        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
         public int QuestionAmount { get; set; }
     }
+
 }

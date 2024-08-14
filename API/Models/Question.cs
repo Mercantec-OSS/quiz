@@ -17,6 +17,7 @@
         // ------------------------------------ //
 
         public string DifficultyLevel { get; set; }
+        public int QuestionAmount { get; set; }
         public Difficulty MainDifficulty { get; set; } // To create a relation between questions to difficulty
 
         // ------------------------------------ //
@@ -41,6 +42,7 @@
         // ------------------------------------ //
 
         public string DifficultyLevel { get; set; }
+        public int QuestionAmount { get; set; }
         public bool QuestionStatus { get; set; } // To make a question active or inactive
 
         // ------------------------------------ //

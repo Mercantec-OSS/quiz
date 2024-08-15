@@ -52,4 +52,27 @@
         public int QuestionAmount { get; set; }
     }
 
+    public class QuizDTO2
+    {
+        public List<string> InvitedUsers { get; set; } // The students that are allowed to participate in the quiz
+        public string? Title { get; set; } // Fx. Website dev
+        public string? Category { get; set; } // Fx. Website
+
+        // ------------------------------------ //
+
+        public int AddedTime { get; set; } // Custom timer for more complex functionality
+        public int Timer { get; set; } // Custom timer for more complex functionality
+
+        // ------------------------------------ //
+
+        public string Maindifficulty { get; set; }
+
+        // ------------------------------------ //
+
+        public int CreatorId { get; set; } // Their ID
+
+        // ------------------------------------ //
+        public int QuestionAmount { get; set; }
+    }
+
 }

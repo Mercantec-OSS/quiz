@@ -61,7 +61,7 @@ namespace API.Controllers
 
         // POST: api/Quizs
         [HttpPost("/Setup-Quiz")]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO2 quizDTO)
         {
             List<Question> selectedQuestions = new List<Question>();
 

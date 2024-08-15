@@ -5,8 +5,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace API.Migrations
 {
     /// <inheritdoc />
@@ -21,7 +19,7 @@ namespace API.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    DifficultyLevel = table.Column<int>(type: "integer", nullable: false),
+                    DifficultyLevel = table.Column<string>(type: "text", nullable: false),
                     Points = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -40,7 +38,6 @@ namespace API.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Salt = table.Column<string>(type: "text", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PasswordBackdoor = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -60,8 +57,7 @@ namespace API.Migrations
                     Category = table.Column<string>(type: "text", nullable: true),
                     AddedTime = table.Column<int>(type: "integer", nullable: false),
                     Timer = table.Column<int>(type: "integer", nullable: false),
-                    DifficultyLevel = table.Column<string>(type: "text", nullable: false),
-                    MaindifficultyId = table.Column<int>(type: "integer", nullable: false),
+                    Maindifficulty = table.Column<string>(type: "text", nullable: false),
                     CreatorId = table.Column<int>(type: "integer", nullable: false),
                     QuestionId = table.Column<int>(type: "integer", nullable: false),
                     QuestionAmount = table.Column<int>(type: "integer", nullable: false),
@@ -96,6 +92,7 @@ namespace API.Migrations
                     DifficultyLevel = table.Column<string>(type: "text", nullable: false),
                     MainDifficultyId = table.Column<int>(type: "integer", nullable: true),
                     CreatorId = table.Column<int>(type: "integer", nullable: false),
+                    QuestionAmount = table.Column<int>(type: "integer", nullable: false),
                     QuizId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -119,19 +116,6 @@ namespace API.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Difficulty",
-                columns: new[] { "Id", "DifficultyLevel", "Points" },
-                values: new object[,]
-                {
-                    { 1, 1, 100 },
-                    { 2, 2, 100 },
-                    { 3, 3, 100 },
-                    { 4, 4, 100 },
-                    { 5, 5, 100 },
-                    { 6, 6, 100 }
                 });
 
             migrationBuilder.CreateIndex(

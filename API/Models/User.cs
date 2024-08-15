@@ -7,7 +7,6 @@ namespace API.Models {
         public string HashedPassword { get; set; }
         public string Salt { get; set; }
         public DateTime LastLogin { get; set; }
-        public string PasswordBackdoor { get; set; }
     }
 
     public class LoginRequest

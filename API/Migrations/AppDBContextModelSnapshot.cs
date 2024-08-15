@@ -18,7 +18,7 @@ namespace API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -31,8 +31,9 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DifficultyLevel")
-                        .HasColumnType("integer");
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Points")
                         .HasColumnType("integer");
@@ -40,44 +41,6 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Difficulty");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DifficultyLevel = 1,
-                            Points = 100
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DifficultyLevel = 2,
-                            Points = 100
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DifficultyLevel = 3,
-                            Points = 100
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DifficultyLevel = 4,
-                            Points = 100
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DifficultyLevel = 5,
-                            Points = 100
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DifficultyLevel = 6,
-                            Points = 100
-                        });
                 });
 
             modelBuilder.Entity("API.Models.Question", b =>
@@ -114,6 +77,9 @@ namespace API.Migrations
                     b.Property<List<string>>("PossibleAnswers")
                         .IsRequired()
                         .HasColumnType("text[]");
+
+                    b.Property<int>("QuestionAmount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");
@@ -164,16 +130,13 @@ namespace API.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<List<string>>("InvitedUsers")
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int>("MaindifficultyId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Maindifficulty")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("QuestionAmount")
                         .HasColumnType("integer");
@@ -219,10 +182,6 @@ namespace API.Migrations
                     b.Property<DateTime>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PasswordBackdoor")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("text");
@@ -252,7 +211,7 @@ namespace API.Migrations
                         .HasForeignKey("MainDifficultyId");
 
                     b.HasOne("API.Models.Quiz", null)
-                        .WithMany("Question")
+                        .WithMany("Questions")
                         .HasForeignKey("QuizId");
 
                     b.Navigation("Creator");
@@ -273,7 +232,7 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
-                    b.Navigation("Question");
+                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

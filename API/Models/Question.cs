@@ -17,13 +17,14 @@
         // ------------------------------------ //
 
         public string DifficultyLevel { get; set; }
-        public int QuestionAmount { get; set; }
         public Difficulty MainDifficulty { get; set; } // To create a relation between questions to difficulty
 
         // ------------------------------------ //
 
         public User Creator { get; set; } // The user that created the quiz
         public int CreatorId { get; set; } // Their ID
+
+        public int QuestionAmount { get; set; }
     }
 
     public class QuestionDTO
@@ -42,7 +43,6 @@
         // ------------------------------------ //
 
         public string DifficultyLevel { get; set; }
-        public int QuestionAmount { get; set; }
         public bool QuestionStatus { get; set; } // To make a question active or inactive
 
         // ------------------------------------ //

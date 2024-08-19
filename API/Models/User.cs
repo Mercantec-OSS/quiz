@@ -1,3 +1,5 @@
+using System.Security.AccessControl;
+
 namespace API.Models {
 
     public class User : Common
@@ -22,4 +24,14 @@ namespace API.Models {
         public string Password { get; set; }
 
     }
+
+    public class Admin : Common
+    {
+        public string AdminEmail {  get; set; }
+        public string AdminUsername { get; set; }
+        public string HashedPassword { get; set; }
+        public string Salt { get; set; }
+        public DateTime LastLogin { get; set; }
+    }
+
 }

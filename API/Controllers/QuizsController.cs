@@ -61,7 +61,7 @@ namespace API.Controllers
 
         // POST: api/Quizs
         [HttpPost("/Setup-Quiz")]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO2 quizDTO)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
         {
             List<Question> selectedQuestions = new List<Question>();
 
@@ -70,6 +70,7 @@ namespace API.Controllers
                 InvitedUsers = quizDTO.InvitedUsers,
                 Title = quizDTO.Title,
                 Category = quizDTO.Category,
+                QuizDate = quizDTO.QuizDate,
                 AddedTime = quizDTO.AddedTime,
                 Timer = quizDTO.Timer,
                 CreatorId = quizDTO.CreatorId,
@@ -113,6 +114,7 @@ namespace API.Controllers
                 InvitedUsers = quizDTO.InvitedUsers,
                 Title = quizDTO.Title,
                 Category = quizDTO.Category,
+                QuizDate = quizDTO.QuizDate,
                 AddedTime = quizDTO.AddedTime,
                 Timer = quizDTO.Timer,
                 CreatorId = quizDTO.CreatorId,

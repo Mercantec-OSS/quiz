@@ -23,9 +23,39 @@
                 <input type="radio" name="answer-@question.Id" value="option3" checked="@IsChecked(question.SelectedAnswer, "option3")" @onclick='() => question.SelectedAnswer = "option3"' />
                 <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
 
-            </div>
+            </div> <br> <br>
 
-            <button class="btn btn-secondary" @onclick="() => ShowAnswerInCard(question)"> Show question & Answer</button>
+            <button class="btn btn-secondary" @onclick="() => ToggleAnswerCard(question)"> Show question & Answer</button>
+
+            @if (SelectedQuestion != null && SelectedQuestion.Id == question.Id)
+            {
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-body">
+                            <h5 class="card-title">@SelectedQuestion.QuestionText</h5>
+                            <p class="card-text">
+                                @if (SelectedQuestion.SelectedAnswer == "option1")
+                                {
+                                    @SelectedQuestion.Answer1
+                                }
+                                else if (SelectedQuestion.SelectedAnswer == "option2")
+                                {
+                                    @SelectedQuestion.Answer2
+                                }
+                                else if (SelectedQuestion.SelectedAnswer == "option3")
+                                {
+                                    @SelectedQuestion.Answer3
+                                }
+                                else
+                                {
+                                    <i>No answer selected</i>
+                                }
+                            </p>
+                        </h5>
+                    </div>
+                </div>
+            }
+
         </div>
         <hr>
     }
@@ -45,22 +75,7 @@
 }
 
 
-@if (SelectedQuestion !=null)
-{
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-body">
-                <h5 class="card-title">@SelectedQuestion.QuestionText</h5>
-                <p class="card-text">
-                    @if (SelectedQuestion.SelectedAnswer == "option1") {@SelectedQuestion.Answer1}
-                    else if (SelectedQuestion.SelectedAnswer == "option2") {@SelectedQuestion.Answer2}
-                    else if (SelectedQuestion.SelectedAnswer == "option3") {@SelectedQuestion.Answer3}
-                    else { <i>No answer selected</i>}
-                </p>
-            </h5>
-        </div>
-    </div>
-}
+
 
 
 @code {
@@ -79,17 +94,26 @@
     private List<QuestionModel> Questions = new List<QuestionModel>();
     private QuestionModel SelectedQuestion;
 
+
+    private void ToggleAnswerCard(QuestionModel question)
+    {
+        if (SelectedQuestion == question)
+        {
+            SelectedQuestion = null;
+        }
+        else
+        {
+            SelectedQuestion = question;
+        }
+    }
+
+
     private void AddNewQuestion()
     {
         if (Questions.Count < MaxQuestions) 
         {
             Questions.Add(new QuestionModel { Id = nextQuestionId++ });
         }
-    }
-
-    private void ShowAnswerInCard(QuestionModel question)
-    {
-        SelectedQuestion = question;
     }
 
     private bool IsChecked(string selectedAnswer, string option)

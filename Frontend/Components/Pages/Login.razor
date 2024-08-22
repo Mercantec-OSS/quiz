@@ -1,31 +1,45 @@
 ﻿@page "/login"
-@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Authentication
+@inject NavigationManager Navigation
 
-<PageTitle>Login</PageTitle>
+<pagetitle>login</pagetitle>
 
-<h1>Login</h1>
-
-<div class="container">
+<h1>login</h1>
 
 
+<EditForm Model="@HandleLogin" OnValidSubmit="@HandleLogin">
+    <DataAnnotationsValidator />
+    <label for="username">Username:</label>
+    <InputText id="username" @bind-Value="LoginRequest.Email" />
+    <label for="password">Password:</label>
+    <InputText id="password" @bind-Value="LoginRequest.Password" type="password" />
+    <button type="submit">Login</button>
+</EditForm>
+
+ 
+@* <div class="container">
     <div class="row">
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-tittle"> Login Elev</h5>
+                    <h5 class="card-tittle"> login elev</h5>
                     <p class="card-text"> this is where the login should be</p>
                 </div>
             </div>
         </div>
-    </div>
+    
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">login lærer</h5>
+                    <p class="card-text"> this is where login should be</p>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Login Lærer</h5>
-                <p class="card-text"> This is where login should be</p>
+                </div>
             </div>
         </div>
-    </div>
 
-</div>
+  </div>
+</div> *@
+
+

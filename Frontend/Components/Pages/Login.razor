@@ -1,13 +1,15 @@
 ﻿@page "/login"
 @using Microsoft.AspNetCore.Authentication
 @inject NavigationManager Navigation
+@using API.Models;
 
 <pagetitle>login</pagetitle>
 
 <h1>login</h1>
 
 
-<EditForm Model="@HandleLogin" OnValidSubmit="@HandleLogin">
+
+<EditForm Model="@LoginRequest" OnValidSubmit="@HandleLogin" FormName="loginForm">
     <DataAnnotationsValidator />
     <label for="username">Username:</label>
     <InputText id="username" @bind-Value="LoginRequest.Email" />

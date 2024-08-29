@@ -10,10 +10,4 @@
     <ProjectReference Include="..\API\API.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Components\Pages\Login.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
-  </ItemGroup>
-
 </Project>

@@ -1,43 +1,45 @@
 ﻿@page "/"
 
+
 <PageTitle>Home</PageTitle>
 
-<body>
-    <main>
-    <h1>QUIZ</h1>
-    <br><br><br>
 
-    <h2>
-        Search for a quiz
-    </h2>
-    
-    <div id="cover">
-        <form method="get" action="">
-            <div class="tb">
-                <div class="td"><input type="text" placeholder="Search" required></div>
-                <div class="td" id="s-cover">
-                    <button type="submit">
-                        <div id="s-circle"></div>
-                        <span></span>
-                    </button>
-                </div>
+    <body>
+        <main>
+            <h1>QUIZ</h1>
+            <br><br><br>
+
+            <h2>
+                Search for a quiz
+            </h2>
+
+            <div id="cover">
+                <form method="get" action="">
+                    <div class="tb">
+                        <div class="td"><input type="text" placeholder="Search" required></div>
+                        <div class="td" id="s-cover">
+                            <button type="submit">
+                                <div id="s-circle"></div>
+                                <span></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-    
 
-        <div class="flex-container">
-            <a href="/create">
-                <button type="button" class="btn btn-primary" id="create-btn">Create</button>
-            </a>
 
-            <a class="browse-btn" href="/browse">
-                <button type="button" class="btn btn-primary" id="browse-btn">Browse</button>
-            </a>
-        </div>
-    </main>
+            <div class="flex-container">
+                <a href="/create">
+                    <button type="button" class="btn btn-primary" id="create-btn">Create</button>
+                </a>
 
-</body>
+                <a class="browse-btn" href="/browse">
+                    <button type="button" class="btn btn-primary" id="browse-btn">Browse</button>
+                </a>
+            </div>
+        </main>
+
+    </body>
 
 
 <style>

@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 <PageTitle>Login</PageTitle>
 
@@ -59,6 +60,8 @@
                 responseMessage = $"Status Code: {response.StatusCode}";
                 jwtToken = responseContent;  // Assuming the JWT is the response content
                 loginSuccess = true;
+
+                NavigationManager.NavigateTo("/");
             }
             else
             {

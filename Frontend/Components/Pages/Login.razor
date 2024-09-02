@@ -1,0 +1,86 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<!-- Email and Password input fields -->
+<div>
+    <label for="email">Email:</label>
+    <input type="email" @bind="loginRequest.email" id="email" />
+</div>
+
+<div>
+    <label for="password">Password:</label>
+    <input type="password" @bind="loginRequest.password" id="password" />
+</div>
+
+<!-- Login button -->
+<button @onclick="HandleLogin">Login</button>
+
+<!-- Displaying response status, errors, and success message -->
+@if (!string.IsNullOrEmpty(responseMessage))
+{
+    <p>@responseMessage</p>
+}
+@if (loginSuccess)
+{
+    <p><strong>Login Successful!</strong></p>
+    <p>Email: @loginRequest.email</p>
+    <p>Password: @loginRequest.password</p>
+    <p>JWT: @jwtToken</p>
+}
+
+@code {
+    private LoginRequest loginRequest = new LoginRequest();
+    private string responseMessage = string.Empty;
+    private string jwtToken = string.Empty;
+    private bool loginSuccess = false;
+
+    // Method to handle login
+    private async Task HandleLogin()
+    {
+        // Initialize HttpClient
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri("https://mercantec-quiz.onrender.com");
+
+        try
+        {
+            // Send POST request to login endpoint
+            var response = await httpClient.PostAsJsonAsync("/api/Users/login", loginRequest);
+
+            // Read response content
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                // If login is successful
+                responseMessage = $"Status Code: {response.StatusCode}";
+                jwtToken = responseContent;  // Assuming the JWT is the response content
+                loginSuccess = true;
+
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                // If login fails
+                responseMessage = $"Error: {response.StatusCode}, Message: {responseContent}";
+                loginSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handling any exceptions
+            responseMessage = $"Exception: {ex.Message}";
+        }
+    }
+
+    // Model class for login request
+    public class LoginRequest
+    {
+        public string? email { get; set; }
+        public string? password { get; set; }
+    }
+}

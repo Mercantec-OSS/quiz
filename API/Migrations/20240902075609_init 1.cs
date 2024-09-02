@@ -28,6 +28,21 @@ namespace API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserDTO",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserDTO", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -112,9 +127,9 @@ namespace API.Migrations
                         principalTable: "Quizs",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Questions_Users_CreatorId",
+                        name: "FK_Questions_UserDTO_CreatorId",
                         column: x => x.CreatorId,
-                        principalTable: "Users",
+                        principalTable: "UserDTO",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -151,6 +166,9 @@ namespace API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Quizs");
+
+            migrationBuilder.DropTable(
+                name: "UserDTO");
 
             migrationBuilder.DropTable(
                 name: "Users");

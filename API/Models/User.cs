@@ -12,6 +12,14 @@ namespace API.Models {
         public bool Role { get; set; } = false;
     }
 
+    public class UserDTO
+    {
+        public int Id { get; set; }
+        public string Email { get; set; }
+        public string Username { get; set; }
+        public bool Role { get; set; } = false;
+    }
+
     public class LoginRequest
     {
         public string Email { get; set; }

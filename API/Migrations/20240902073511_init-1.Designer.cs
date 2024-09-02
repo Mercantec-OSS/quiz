@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240815105057_init")]
-    partial class init
+    [Migration("20240902073511_init-1")]
+    partial class init1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,9 +57,9 @@ namespace API.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("text");
 
-                    b.Property<string>("CorrectAnswer")
+                    b.Property<int[]>("CorrectAnswer")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("integer[]");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -80,9 +80,6 @@ namespace API.Migrations
                     b.Property<List<string>>("PossibleAnswers")
                         .IsRequired()
                         .HasColumnType("text[]");
-
-                    b.Property<int>("QuestionAmount")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");
@@ -121,9 +118,6 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AddedTime")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Category")
                         .HasColumnType("text");
 
@@ -141,11 +135,16 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("QuestionAmount")
-                        .HasColumnType("integer");
+                    b.Property<int[]>("QuestionAmount")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("integer");
+                    b.Property<int[]>("QuestionId")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<DateTime>("QuizDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Timer")
                         .HasColumnType("integer");
@@ -155,6 +154,10 @@ namespace API.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserAnswer")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -184,6 +187,9 @@ namespace API.Migrations
 
                     b.Property<DateTime>("LastLogin")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Role")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Salt")
                         .IsRequired()

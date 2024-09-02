@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,6 +38,7 @@ namespace API.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Salt = table.Column<string>(type: "text", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Role = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -55,12 +56,13 @@ namespace API.Migrations
                     InvitedUsers = table.Column<List<string>>(type: "text[]", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Category = table.Column<string>(type: "text", nullable: true),
-                    AddedTime = table.Column<int>(type: "integer", nullable: false),
+                    UserAnswer = table.Column<string>(type: "text", nullable: false),
+                    QuizDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Timer = table.Column<int>(type: "integer", nullable: false),
                     Maindifficulty = table.Column<string>(type: "text", nullable: false),
                     CreatorId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionAmount = table.Column<int>(type: "integer", nullable: false),
+                    QuestionId = table.Column<int[]>(type: "integer[]", nullable: false),
+                    QuestionAmount = table.Column<int[]>(type: "integer[]", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -85,14 +87,13 @@ namespace API.Migrations
                     Category = table.Column<string>(type: "text", nullable: true),
                     UnderCategory = table.Column<string>(type: "text", nullable: true),
                     PossibleAnswers = table.Column<List<string>>(type: "text[]", nullable: false),
-                    CorrectAnswer = table.Column<string>(type: "text", nullable: false),
+                    CorrectAnswer = table.Column<int[]>(type: "integer[]", nullable: false),
                     Picture = table.Column<string>(type: "text", nullable: true),
                     Time = table.Column<int>(type: "integer", nullable: false),
                     QuestionStatus = table.Column<bool>(type: "boolean", nullable: false),
                     DifficultyLevel = table.Column<string>(type: "text", nullable: false),
                     MainDifficultyId = table.Column<int>(type: "integer", nullable: true),
                     CreatorId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionAmount = table.Column<int>(type: "integer", nullable: false),
                     QuizId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)

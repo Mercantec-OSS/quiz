@@ -9,7 +9,7 @@
         // ------------------------------------ //
 
         public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public string CorrectAnswer { get; set; } // The correct answer
+        public int[] CorrectAnswer { get; set; } // The correct answer
         public string? Picture { get; set; } // URL for the picture
         public int Time { get; set; } // The time a user gets to answer the question 
         public bool QuestionStatus { get; set; } // To make a question active or inactive
@@ -23,8 +23,6 @@
 
         public User Creator { get; set; } // The user that created the quiz
         public int CreatorId { get; set; } // Their ID
-
-        public int QuestionAmount { get; set; }
     }
 
     public class QuestionDTO
@@ -36,7 +34,7 @@
         // ------------------------------------ //
 
         public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public string CorrectAnswer { get; set; } // The correct answer
+        public int[] CorrectAnswer { get; set; } // The correct answer
         public string? Picture { get; set; } // URL for the picture
         public int Time { get; set; } // The time a user gets to answer the question 
 

@@ -8,8 +8,11 @@
 
         // ------------------------------------ //
 
+        public string UserAnswer { get; set; }
+
+        // ------------------------------------ //
+
         public DateTime QuizDate { get; set; }
-        public int AddedTime { get; set; } // Extra time that is able to be added if needed
         public int Timer { get; set; } // Custom timer for more complex functionality
 
         // ------------------------------------ //
@@ -24,8 +27,8 @@
         // ------------------------------------ //
         
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
-        public int QuestionId {  get; set; } // Question Id
-        public int QuestionAmount { get; set; }
+        public int[] QuestionId {  get; set; } // Question Id
+        public int[] QuestionAmount { get; set; }
     }
 
     public class QuizDTO
@@ -36,8 +39,11 @@
 
         // ------------------------------------ //
 
+        public string UserAnswer { get; set; }
+
+        // ------------------------------------ //
+
         public DateTime QuizDate { get; set; }
-        public int AddedTime { get; set; } // Custom timer for more complex functionality
         public int Timer { get; set; } // Custom timer for more complex functionality
 
         // ------------------------------------ //
@@ -51,6 +57,6 @@
 
         // ------------------------------------ //
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
-        public int QuestionAmount { get; set; }
+        public int[] QuestionAmount { get; set; }
     }
 }

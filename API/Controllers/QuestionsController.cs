@@ -152,13 +152,11 @@ namespace API.Controllers
                 Category = questionDTO.Category,
                 UnderCategory = questionDTO.UnderCategory,
                 PossibleAnswers = questionDTO.PossibleAnswers,
-                CorrectAnswer = questionDTO.CorrectAnswer,
+                CorrectAnswer = questionDTO.CorrectAnswer.ToArray(), // Convert the result to an array
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
                 Time = questionDTO.Time,
-
                 CreatorId = questionDTO.CreatorId,
-
                 CreatedAt = DateTime.UtcNow.AddHours(2),
                 UpdatedAt = DateTime.UtcNow.AddHours(2)
             };

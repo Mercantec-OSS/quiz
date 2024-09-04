@@ -9,6 +9,15 @@ namespace API.Models {
         public string HashedPassword { get; set; }
         public string Salt { get; set; }
         public DateTime LastLogin { get; set; }
+        public bool Role { get; set; } = false;
+    }
+
+    public class UserDTO
+    {
+        public int Id { get; set; }
+        public string Email { get; set; }
+        public string Username { get; set; }
+        public bool Role { get; set; } = false;
     }
 
     public class LoginRequest
@@ -25,13 +34,11 @@ namespace API.Models {
 
     }
 
-    public class Admin : Common
+    public class QuizAnswers
     {
-        public string AdminEmail {  get; set; }
-        public string AdminUsername { get; set; }
-        public string HashedPassword { get; set; }
-        public string Salt { get; set; }
-        public DateTime LastLogin { get; set; }
+        public int Id { get; set; }
+        public Quiz QuizId { get; set; }
+        public User UserId { get; set; }
+        public int[] Answer { get; set; }
     }
-
 }

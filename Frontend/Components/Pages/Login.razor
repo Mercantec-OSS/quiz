@@ -8,6 +8,9 @@
 
 <PageTitle>Login</PageTitle>
 
+
+
+
 <h1>Login</h1>
 
 
@@ -74,6 +77,7 @@
                 //store JWT in local storage
                 await LocalStorage.SetItemAsync("jwtToken", jwtToken);
 
+                //navigate to home when email/username and password is correct
                 NavigationManager.NavigateTo("/home");
             }
             else

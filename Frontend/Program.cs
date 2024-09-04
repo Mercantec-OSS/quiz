@@ -1,6 +1,7 @@
 using Frontend.Components;
 using Blazored.LocalStorage;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
 @using Blazored.LocalStorage
+@inject IJSRuntime JSRuntime
 
 <div class="page">
 
@@ -66,9 +67,13 @@
 {
     private async Task Logout()
     {
-        await LocalStorage.RemoveItemAsync("jwtToken");
 
+        await LocalStorage.RemoveItemAsync("jwtToken");
+        
+        await JSRuntime.InvokeVoidAsync("location.reload");
 
         NavigationManager.NavigateTo("/?logout=true", true);
     }
+
+    
 }

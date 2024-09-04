@@ -1,4 +1,5 @@
-﻿@page "/login"
+﻿
+@page "/"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 
@@ -27,6 +28,7 @@
 }
 @if (loginSuccess)
 {
+
     <p><strong>Login Successful!</strong></p>
     <p>Email: @loginRequest.email</p>
     <p>Password: @loginRequest.password</p>
@@ -61,7 +63,7 @@
                 jwtToken = responseContent;  // Assuming the JWT is the response content
                 loginSuccess = true;
 
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/home");
             }
             else
             {

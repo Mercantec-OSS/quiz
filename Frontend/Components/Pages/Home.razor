@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/home"
 @inject NavigationManager NavigationManager
 
 
@@ -41,24 +41,6 @@
 
     </body>
 
-
-@code
-{
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                NavigationManager.NavigateTo("/Login", true);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Navigation failed: {ex.Message}");
-            }
-        }
-    }
-}
 
 <style>
     body{

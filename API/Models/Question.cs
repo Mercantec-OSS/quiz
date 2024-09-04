@@ -21,7 +21,6 @@
 
         // ------------------------------------ //
 
-        public UserDTO Creator { get; set; } // The user that created the quiz
         public int CreatorId { get; set; } // Their ID
     }
 

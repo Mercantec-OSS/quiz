@@ -1,10 +1,18 @@
-﻿@page "/login"
+﻿@page "/"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@using Blazored.LocalStorage
+@inject NavigationManager NavManager
+@using Microsoft.AspNetCore.WebUtilities
 
 <PageTitle>Login</PageTitle>
 
+
+
+
 <h1>Login</h1>
+
 
 <!-- Email and Password input fields -->
 <div>
@@ -25,19 +33,24 @@
 {
     <p>@responseMessage</p>
 }
+
+
 @if (loginSuccess)
 {
+
     <p><strong>Login Successful!</strong></p>
     <p>Email: @loginRequest.email</p>
     <p>Password: @loginRequest.password</p>
     <p>JWT: @jwtToken</p>
 }
 
+
 @code {
     private LoginRequest loginRequest = new LoginRequest();
     private string responseMessage = string.Empty;
     private string jwtToken = string.Empty;
     private bool loginSuccess = false;
+
 
     // Method to handle login
     private async Task HandleLogin()
@@ -61,7 +74,11 @@
                 jwtToken = responseContent;  // Assuming the JWT is the response content
                 loginSuccess = true;
 
-                NavigationManager.NavigateTo("/");
+                //store JWT in local storage
+                await LocalStorage.SetItemAsync("jwtToken", jwtToken);
+
+                //navigate to home when email/username and password is correct
+                NavigationManager.NavigateTo("/home");
             }
             else
             {

@@ -1,27 +1,30 @@
 ﻿namespace API.Models
 {
-    public class Question : Common
+    public class Question
     {
-        public string? Title { get; set; } // Fx. Programming
-        public string? Category { get; set; } // Fx. Website
-        public string? UnderCategory{ get; set; } // Fx. Buttons
+        [Key]
+        public int QuestionID { get; set; }
 
-        // ------------------------------------ //
+        // Foreign key to Quiz
+        public int QuizID { get; set; }
+        public virtual Quiz Quiz { get; set; }
 
-        public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public int[] CorrectAnswer { get; set; } // The correct answer
-        public string? Picture { get; set; } // URL for the picture
-        public int Time { get; set; } // The time a user gets to answer the question 
-        public bool QuestionStatus { get; set; } // To make a question active or inactive
-
-        // ------------------------------------ //
-
+        public string Title { get; set; }
+        public string Category { get; set; }
+        public string UnderCategory { get; set; }
+        public int[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
+        public string Picture { get; set; }
+        public int Time { get; set; }
+        public bool QuestionStatus { get; set; }
         public string DifficultyLevel { get; set; }
-        public Difficulty MainDifficulty { get; set; } // To create a relation between questions to difficulty
+        public string MainDifficulty { get; set; }
 
-        // ------------------------------------ //
+        // Foreign key to the creator of the question
+        public int CreatorID { get; set; }
 
-        public int CreatorId { get; set; } // Their ID
+        // Navigation property to relate to Difficulty
+        public virtual Difficulty Difficulty { get; set; }
     }
 
     public class QuestionDTO

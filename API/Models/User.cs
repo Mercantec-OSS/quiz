@@ -2,15 +2,24 @@ using System.Security.AccessControl;
 
 namespace API.Models {
 
-    public class User : Common
+    namespace API.Models
     {
-        public string Email { get; set; }
-        public string Username { get; set; }
-        public string HashedPassword { get; set; }
-        public string Salt { get; set; }
-        public DateTime LastLogin { get; set; }
-        public bool Role { get; set; } = false;
+        public class User
+        {
+            [Key]
+            public int UserID { get; set; }
+            public string Email { get; set; }
+            public string Username { get; set; }
+            public string HashedPassword { get; set; }
+            public string Salt { get; set; }
+            public DateTime LastLogin { get; set; }
+            public bool Role { get; set; } = false;
+
+            // Navigation property to relate to quizzes
+            public virtual ICollection<Quiz> Quizzes { get; set; }
+        }
     }
+
 
     public class UserDTO
     {

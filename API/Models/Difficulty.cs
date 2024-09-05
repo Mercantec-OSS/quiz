@@ -2,10 +2,18 @@
 {
     public class Difficulty
     {
+        [Key]
         public int Id { get; set; }
+
+        // Foreign key to Question
+        public int QuestionID { get; set; }
+        public virtual Question Question { get; set; }
+
         public string DifficultyLevel { get; set; }
         public int Points { get; set; } = 100;
-        public class Levels
+
+        // Static class to store predefined levels
+        public static class Levels
         {
             public const string Unassigned = "Unassigned";
             public const string GF2 = "GF2";

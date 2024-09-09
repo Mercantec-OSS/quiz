@@ -1,3 +1,5 @@
+using API.Models.API.Models;
+
 namespace API.Data
 {
 
@@ -20,7 +22,7 @@ namespace API.Data
             modelBuilder.Entity<Quiz>()
                 .HasOne(q => q.Creator)
                 .WithMany() // Assuming User does not have a collection of Quizs
-                .HasForeignKey(q => q.CreatorId)
+                .HasForeignKey(q => q.CreatorID)
                 .OnDelete(DeleteBehavior.Restrict); // Optional: Set the delete behavior
                                                     // Question to Difficulty relationship
 
@@ -28,8 +30,9 @@ namespace API.Data
             modelBuilder.Entity<Question>()
                 .HasOne(q => q.MainDifficulty)
                 .WithMany() // No navigation property in Difficulty
-                .HasForeignKey("MainDifficultyId") // Foreign key name
-                .IsRequired(false); // Optional relationship if necessary
+                .HasForeignKey(q => q.MainDifficultyId) // Use lambda expression for clarity
+                .IsRequired(false); // Foreign key is optional
+                                    // Optional relationship if necessary
         }
     }
 }

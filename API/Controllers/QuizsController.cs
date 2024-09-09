@@ -33,7 +33,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuiz(int id, Quiz quiz)
         {
-            if (id != quiz.Id)
+            if (id != quiz.QuizID)
             {
                 return BadRequest();
             }
@@ -71,16 +71,16 @@ namespace API.Controllers
                 Category = quizDTO.Category,
                 QuizDate = quizDTO.QuizDate,
                 Timer = quizDTO.Timer,
-                CreatorId = quizDTO.CreatorId,
-                Maindifficulty = quizDTO.Maindifficulty,
-                QuestionAmount = quizDTO.QuestionAmount.ToArray(),
+                CreatorID = quizDTO.CreatorId,
+                MainDifficulty = quizDTO.Maindifficulty,
+                QuestionAmount = quizDTO.QuestionAmount,
                 Questions = quizDTO.Questions // assuming Quiz entity has a collection of Questions
             };
 
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
+            return CreatedAtAction("GetQuiz", new { id = quiz.QuizID }, quiz);
         }
 
         //// POST: api/Quizs
@@ -153,7 +153,7 @@ namespace API.Controllers
 
         private bool QuizExists(int id)
         {
-            return _context.Quizs.Any(e => e.Id == id);
+            return _context.Quizs.Any(e => e.QuizID == id);
         }
     }
 }

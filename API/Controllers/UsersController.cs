@@ -1,4 +1,6 @@
-﻿namespace API.Controllers
+﻿using API.Models.API.Models;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -39,7 +41,7 @@
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
-            if (id != user.Id)
+            if (id != user.UserID)
             {
                 return BadRequest();
             }
@@ -77,9 +79,6 @@
                 Username = userSignUp.Username,
                 HashedPassword = HashedPassword,
                 Salt = HashedPassword.Substring(0, 29),
-
-                CreatedAt = DateTime.UtcNow.AddHours(2),
-                UpdatedAt = DateTime.UtcNow.AddHours(2)
             };
 
             _context.Users.Add(user);
@@ -114,7 +113,7 @@
 
                 new Claim(ClaimTypes.Name, user.Username),
 
-                new Claim(ClaimTypes.SerialNumber, user.Id.ToString())
+                new Claim(ClaimTypes.SerialNumber, user.UserID.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"] ?? Environment.GetEnvironmentVariable("Key")));
@@ -154,7 +153,7 @@
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.UserID == id);
         }
     }
 }

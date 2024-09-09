@@ -1,4 +1,6 @@
-﻿namespace API.Models
+﻿using API.Models.API.Models;
+
+namespace API.Models
 {
     public class Difficulty
     {

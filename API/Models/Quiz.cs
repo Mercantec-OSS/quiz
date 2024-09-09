@@ -19,12 +19,12 @@ namespace API.Models
         public int Timer { get; set; }
         public string MainDifficulty { get; set; }
 
-        // Foreign key to the creator of the quiz
+        public User Creator { get; set; }
         public int CreatorID { get; set; }
 
         // Navigation property for questions
         public virtual ICollection<Question> Questions { get; set; }
-        public int QuestionAmount { get; set; }
+        public int[] QuestionAmount { get; set; }
     }
 
     public class QuizDTO

@@ -116,7 +116,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuestion(int id, Question question)
         {
-            if (id != question.Id)
+            if (id != question.QuestionID)
             {
                 return BadRequest();
             }
@@ -156,15 +156,13 @@ namespace API.Controllers
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
                 Time = questionDTO.Time,
-                CreatorId = questionDTO.CreatorId,
-                CreatedAt = DateTime.UtcNow.AddHours(2),
-                UpdatedAt = DateTime.UtcNow.AddHours(2)
+                CreatorID = questionDTO.CreatorId,
             };
 
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuestion", new { id = question.Id }, question);
+            return CreatedAtAction("GetQuestion", new { id = question.QuestionID }, question);
         }
 
         // DELETE: api/Questions/id
@@ -177,7 +175,7 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            if (question.CreatorId == creatorId)
+            if (question.CreatorID == creatorId)
 
             _context.Questions.Remove(question);
             await _context.SaveChangesAsync();
@@ -187,7 +185,7 @@ namespace API.Controllers
 
         private bool QuestionExists(int id)
         {
-            return _context.Questions.Any(e => e.Id == id);
+            return _context.Questions.Any(e => e.QuestionID == id);
         }
     }
 }

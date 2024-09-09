@@ -1,4 +1,6 @@
-﻿namespace API.Models
+﻿using API.Models.API.Models;
+
+namespace API.Models
 {
     public class Question
     {
@@ -18,7 +20,10 @@
         public int Time { get; set; }
         public bool QuestionStatus { get; set; }
         public string DifficultyLevel { get; set; }
-        public string MainDifficulty { get; set; }
+        public int MainDifficultyId { get; set; } // Foreign key
+
+        // Navigation property to relate to Difficulty
+        public virtual Difficulty MainDifficulty { get; set; }
 
         // Foreign key to the creator of the question
         public int CreatorID { get; set; }
@@ -26,6 +31,7 @@
         // Navigation property to relate to Difficulty
         public virtual Difficulty Difficulty { get; set; }
     }
+
 
     public class QuestionDTO
     {
@@ -35,7 +41,7 @@
 
         // ------------------------------------ //
 
-        public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
+        public int[] PossibleAnswers { get; set; } // a list of the placeholder wrong answers
         public int[] CorrectAnswer { get; set; } // The correct answer
         public string? Picture { get; set; } // URL for the picture
         public int Time { get; set; } // The time a user gets to answer the question 

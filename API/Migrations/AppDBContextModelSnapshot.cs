@@ -18,159 +18,18 @@ namespace API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("API.Models.Difficulty", b =>
+            modelBuilder.Entity("API.Models.API.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Difficulty");
-                });
-
-            modelBuilder.Entity("API.Models.Question", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .HasColumnType("text");
-
-                    b.Property<int[]>("CorrectAnswer")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("MainDifficultyId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Picture")
-                        .HasColumnType("text");
-
-                    b.Property<List<string>>("PossibleAnswers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<bool>("QuestionStatus")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("QuizId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Time")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UnderCategory")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MainDifficultyId");
-
-                    b.HasIndex("QuizId");
-
-                    b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("API.Models.Quiz", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("integer");
-
-                    b.Property<List<string>>("InvitedUsers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("Maindifficulty")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int[]>("QuestionAmount")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
-                    b.Property<int[]>("QuestionId")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
-                    b.Property<DateTime>("QuizDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Timer")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserAnswer")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("Quizs");
-                });
-
-            modelBuilder.Entity("API.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserID"));
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -190,16 +49,163 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserID");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("API.Models.Difficulty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuestionID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionID")
+                        .IsUnique();
+
+                    b.ToTable("Difficulty");
+                });
+
+            modelBuilder.Entity("API.Models.Question", b =>
+                {
+                    b.Property<int>("QuestionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("QuestionID"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int[]>("CorrectAnswer")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<int>("CreatorID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MainDifficultyId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Picture")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int[]>("PossibleAnswers")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<bool>("QuestionStatus")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("QuizID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Time")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UnderCategory")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("QuestionID");
+
+                    b.HasIndex("MainDifficultyId");
+
+                    b.HasIndex("QuizID");
+
+                    b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("API.Models.Quiz", b =>
+                {
+                    b.Property<int>("QuizID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("QuizID"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CreatorID")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("InvitedUsers")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("MainDifficulty")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int[]>("QuestionAmount")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<DateTime>("QuizDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Timer")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int[]>("UserAnswer")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("QuizID");
+
+                    b.HasIndex("CreatorID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Quizs");
+                });
+
+            modelBuilder.Entity("API.Models.Difficulty", b =>
+                {
+                    b.HasOne("API.Models.Question", "Question")
+                        .WithOne("Difficulty")
+                        .HasForeignKey("API.Models.Difficulty", "QuestionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("API.Models.Question", b =>
@@ -208,22 +214,45 @@ namespace API.Migrations
                         .WithMany()
                         .HasForeignKey("MainDifficultyId");
 
-                    b.HasOne("API.Models.Quiz", null)
+                    b.HasOne("API.Models.Quiz", "Quiz")
                         .WithMany("Questions")
-                        .HasForeignKey("QuizId");
+                        .HasForeignKey("QuizID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MainDifficulty");
+
+                    b.Navigation("Quiz");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
-                    b.HasOne("API.Models.User", "Creator")
+                    b.HasOne("API.Models.API.Models.User", "Creator")
                         .WithMany()
-                        .HasForeignKey("CreatorId")
+                        .HasForeignKey("CreatorID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("API.Models.API.Models.User", "User")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Creator");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("API.Models.API.Models.User", b =>
+                {
+                    b.Navigation("Quizzes");
+                });
+
+            modelBuilder.Entity("API.Models.Question", b =>
+                {
+                    b.Navigation("Difficulty")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>

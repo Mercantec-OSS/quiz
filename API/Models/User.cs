@@ -15,9 +15,13 @@ namespace API.Models {
             public string Salt { get; set; }
             public DateTime LastLogin { get; set; }
             public bool Role { get; set; } = false;
+            
+            public List<string> UserAnswer { get; set; }
+            public List<string> QuizAnswer { get; set; }
 
             // Navigation property to relate to quizzes
             public virtual ICollection<Quiz> Quizzes { get; set; }
+
         }
     }
 
@@ -49,6 +53,7 @@ namespace API.Models {
         public int Id { get; set; }
         public Quiz QuizId { get; set; }
         public User UserId { get; set; }
-        public int[] Answer { get; set; }
+        public List<string> UserAnswer { get; set; }
+        public List<string> QuizAnswer { get; set; }
     }
 }

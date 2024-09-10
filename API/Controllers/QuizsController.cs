@@ -126,15 +126,6 @@ namespace API.Controllers
         //    return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
         //}
 
-        //[HttpPost("SaveAnswers")]
-        //public async Task<ActionResult<Quiz>> PostAnswers(QuizDTO quizDTO)
-        //{
-        //    _context.Quizs.Add(quiz);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
-        //}
-
         // DELETE: api/Quizs/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuiz(int id)

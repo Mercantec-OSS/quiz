@@ -135,6 +135,18 @@ namespace API.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        [HttpPost("SaveAnswers")]
+        public async Task<ActionResult<User>> PostAnswers(QuizAnswers quizAnswers)
+        {
+            User user = new()
+            {
+                UserAnswer = quizAnswers.UserAnswer,
+                QuizAnswer = quizAnswers.QuizAnswer
+            };
+
+            return Ok(user);
+        }
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

@@ -24,7 +24,7 @@ namespace API.Models
 
         // Navigation property for questions
         public virtual ICollection<Question> Questions { get; set; }
-        public int[] QuestionAmount { get; set; }
+        public int QuestionAmount { get; set; }
     }
 
     public class QuizDTO
@@ -52,6 +52,6 @@ namespace API.Models
 
         // ------------------------------------ //
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
-        public int[] QuestionAmount { get; set; }
+        public int QuestionAmount { get; set; }
     }
 }

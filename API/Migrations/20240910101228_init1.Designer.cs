@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240909074155_init1")]
+    [Migration("20240910101228_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -45,12 +45,20 @@ namespace API.Migrations
                     b.Property<DateTime>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<List<string>>("QuizAnswer")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<bool>("Role")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<List<string>>("UserAnswer")
+                        .IsRequired()
+                        .HasColumnType("text[]");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -170,9 +178,8 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int[]>("QuestionAmount")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
+                    b.Property<int>("QuestionAmount")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("QuizDate")
                         .HasColumnType("timestamp with time zone");

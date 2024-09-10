@@ -24,7 +24,9 @@ namespace API.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Salt = table.Column<string>(type: "text", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Role = table.Column<bool>(type: "boolean", nullable: false)
+                    Role = table.Column<bool>(type: "boolean", nullable: false),
+                    UserAnswer = table.Column<List<string>>(type: "text[]", nullable: false),
+                    QuizAnswer = table.Column<List<string>>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,7 +48,7 @@ namespace API.Migrations
                     Timer = table.Column<int>(type: "integer", nullable: false),
                     MainDifficulty = table.Column<string>(type: "text", nullable: false),
                     CreatorID = table.Column<int>(type: "integer", nullable: false),
-                    QuestionAmount = table.Column<int[]>(type: "integer[]", nullable: false)
+                    QuestionAmount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

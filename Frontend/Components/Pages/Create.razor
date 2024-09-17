@@ -1,5 +1,7 @@
 ﻿@page "/create"
 @rendermode InteractiveServer
+@using API.Models
+
 
 <PageTitle>Create</PageTitle>
 
@@ -22,6 +24,9 @@
 
                 <input type="radio" name="answer-@question.Id" value="option3" checked="@IsChecked(question.SelectedAnswer, "option3")" @onclick='() => question.SelectedAnswer = "option3"' />
                 <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
+
+                <input type="radio" name="answer-@question.Id" value="option4" checked="@IsChecked(question.SelectedAnswer, "option4")" @onclick='() => question.SelectedAnswer = "option4"'/>
+                <input type="text" placeholder="Enter answer 4" @bind="question.Answer4" />
 
             </div> <br> <br>
 
@@ -46,6 +51,10 @@
                                 {
                                     @SelectedQuestion.Answer3
                                 }
+                                else if (SelectedQuestion.SelectedAnswer == "option4")
+                                {
+                                    @SelectedQuestion.Answer4
+                                }
                                 else
                                 {
                                     <i>No answer selected</i>
@@ -68,6 +77,7 @@
 
 <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
 
+<button class="btn btn-success" @onclick="SaveQuiz">Save Quiz</button>
 
 @if (Questions.Count >= MaxQuestions)
 {
@@ -86,7 +96,19 @@
         public string Answer1 { get; set; }
         public string Answer2 { get; set; }
         public string Answer3 { get; set; }
+        public string Answer4 { get; set; }
         public string SelectedAnswer { get; set; }
+    }
+
+    public class Question
+    {
+        public int QuestionId { get; set; }
+        public string QuestionText { get; set; }
+        public string Answer1 { get; set; }
+        public string Answer2 { get; set; }
+        public string Answer3 { get; set; }
+        public string Answer4 { get; set; }
+        public string CorrectAnswer { get; set; }
     }
 
     private const int MaxQuestions = 25;
@@ -94,7 +116,9 @@
     private List<QuestionModel> Questions = new List<QuestionModel>();
     private QuestionModel SelectedQuestion;
 
+    [Inject] public HttpClient Http { get; set;}
 
+    // mehtod to show the answer card
     private void ToggleAnswerCard(QuestionModel question)
     {
         if (SelectedQuestion == question)
@@ -107,7 +131,7 @@
         }
     }
 
-
+    //method to add new question to the quiz
     private void AddNewQuestion()
     {
         if (Questions.Count < MaxQuestions) 
@@ -116,9 +140,69 @@
         }
     }
 
+    //method to check if an answer is selected
     private bool IsChecked(string selectedAnswer, string option)
     {
         return selectedAnswer == option;
+    }
+
+    //Helper method to map Selected answer
+
+    private int ConvertAnswerToId(String selectedAnswer)
+    {
+        //this is a simple way
+        switch (selectedAnswer)
+        {
+            case "option1": return 1;
+            case "option2": return 2;
+            case "option3": return 3;
+            case "option4": return 4;
+            default: return 0; //No Answer selected 
+        }
+    }
+
+    //method to save the quiz and its questions
+    private async Task SaveQuiz()
+    {
+        var quiz = new QuizDTO
+            {
+                Title = "your Quiz title",
+                Category = "your quiz Category",
+                QuizDate = DateTime.Now,
+                Timer = 60,
+                Maindifficulty = "Medium",
+                CreatorId = 1,
+                Questions = Questions.Select(q => new API.Models.Question
+                {
+                    Title = q.QuestionText,  // Mapping the question text as title
+                    Category = "Category from UI", // Replace with actual category input
+                    UnderCategory = "Subcategory from UI", // Replace with actual subcategory input
+                    PossibleAnswers = new[] { 1, 2, 3 },  // Example: Map to possible answer IDs (this needs to be set dynamically)
+                    CorrectAnswer = new[] { ConvertAnswerToId(q.SelectedAnswer) },  // Correct answer, map the selected answer to ID
+                    Picture = "Picture URL from UI",  // Replace with actual picture URL input
+                    Time = 30,  // Example: set the time limit for each question
+                    DifficultyLevel = "Medium",  // Replace with actual difficulty input
+                    QuestionStatus = true,  // Example: Question is active
+                    CreatorID = 1  // Set this to the actual creator ID
+
+                }).ToList()
+
+            };
+
+        //send a post request to the api to save the quiz
+        var response = await Http.PostAsJsonAsync("api/Setup-Quiz", quiz);
+
+        //Check if the request was successful
+        if(response.IsSuccessStatusCode)
+        {
+            //Handle success (e.g., show a success message, navigate to another page)
+            Console.WriteLine("Quiz Saved successfully");
+        }
+        else
+        {
+            //Handle error (Show error message)
+            Console.WriteLine("Failed to save the quiz");
+        }
     }
 
 }

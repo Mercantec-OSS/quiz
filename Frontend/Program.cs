@@ -1,5 +1,6 @@
 using Frontend.Components;
 using Blazored.LocalStorage;
+using System.Net.Http;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<HttpClient>(sp => new HttpClient 
+{
+    BaseAddress = new Uri ("https://mercantec-quiz.onrender.com")
+});
 
 builder.Services.AddBlazoredLocalStorage();
 

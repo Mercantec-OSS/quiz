@@ -1,10 +1,11 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
-@inject ILocalStorageService LocalStorage
-@using Blazored.LocalStorage
 @inject NavigationManager NavManager
 @using Microsoft.AspNetCore.WebUtilities
+@inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.AspNetCore.Http
 
 <PageTitle>Login</PageTitle>
 
@@ -42,7 +43,10 @@
     <p>Email: @loginRequest.email</p>
     <p>Password: @loginRequest.password</p>
     <p>JWT: @jwtToken</p>
+
+    Console.WriteLine(jwtToken);
 }
+
 
 
 @code {
@@ -74,8 +78,9 @@
                 jwtToken = responseContent;  // Assuming the JWT is the response content
                 loginSuccess = true;
 
-                //store JWT in local storage
-                await LocalStorage.SetItemAsync("jwtToken", jwtToken);
+                //store JWT in session
+                HttpContextAccessor.HttpContext.Session.SetString("jwtToken", jwtToken);
+                
 
                 //navigate to home when email/username and password is correct
                 NavigationManager.NavigateTo("/home");
@@ -94,6 +99,14 @@
         }
     }
 
+
+    // Method to retrieve JWT from session
+    private string GetJwtFromSession()
+    {
+        return HttpContextAccessor.HttpContext.Session.GetString("jwtToken") ?? string.Empty;
+    }
+
+    
     // Model class for login request
     public class LoginRequest
     {

@@ -1,6 +1,7 @@
 using Frontend.Components;
 using Blazored.LocalStorage;
 using System.Net.Http;
+using Frontend;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,9 @@ builder.Services.AddScoped<HttpClient>(sp => new HttpClient
     BaseAddress = new Uri ("https://mercantec-quiz.onrender.com")
 });
 
-builder.Services.AddBlazoredLocalStorage();
+// In Program.cs (for .NET 6.0 and later):
+builder.Services.AddHttpContextAccessor();
+
 
 var app = builder.Build();
 

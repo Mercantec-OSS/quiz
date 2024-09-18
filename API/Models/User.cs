@@ -8,21 +8,19 @@ namespace API.Models {
         public class User
         {
             [Key]
-            public int UserID { get; set; }
+            public int ID { get; set; }
             public string Email { get; set; }
             public string Username { get; set; }
             public string HashedPassword { get; set; }
             public string Salt { get; set; }
             public DateTime LastLogin { get; set; }
-            public bool Role { get; set; } = false;
-            
-            public List<string> UserAnswer { get; set; }
-            public List<string> QuizAnswer { get; set; }
+            public bool Role { get; set; }  // Could represent a boolean flag for admin/user role
 
-            // Navigation property to relate to quizzes
-            public virtual ICollection<Quiz> Quizzes { get; set; }
-
+            // Navigation properties
+            public virtual ICollection<Quiz> CreatedQuizzes { get; set; }  // Quizzes created by the user
+            public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }  // Quizzes completed by the user
         }
+
     }
 
 

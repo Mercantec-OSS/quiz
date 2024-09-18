@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
-            if (id != user.UserID)
+            if (id != user.ID)
             {
                 return BadRequest();
             }
@@ -113,7 +113,7 @@ namespace API.Controllers
 
                 new Claim(ClaimTypes.Name, user.Username),
 
-                new Claim(ClaimTypes.SerialNumber, user.UserID.ToString())
+                new Claim(ClaimTypes.SerialNumber, user.ID.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"] ?? Environment.GetEnvironmentVariable("Key")));
@@ -135,18 +135,6 @@ namespace API.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        [HttpPost("SaveAnswers")]
-        public async Task<ActionResult<User>> PostAnswers(QuizAnswers quizAnswers)
-        {
-            User user = new()
-            {
-                UserAnswer = quizAnswers.UserAnswer,
-                QuizAnswer = quizAnswers.QuizAnswer
-            };
-
-            return Ok(user);
-        }
-
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
@@ -165,7 +153,7 @@ namespace API.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.UserID == id);
+            return _context.Users.Any(e => e.ID == id);
         }
     }
 }

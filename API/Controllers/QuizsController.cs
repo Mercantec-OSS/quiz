@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using API.Models.API.Models;
 
 namespace API.Controllers
 {
@@ -83,48 +84,17 @@ namespace API.Controllers
             return CreatedAtAction("GetQuiz", new { id = quiz.QuizID }, quiz);
         }
 
-        //// POST: api/Quizs
-        //[HttpPost("/Setup-Quiz-Auto-Select")]
-        //public async Task<ActionResult<Quiz>> PostQuizAutoSelect(QuizDTO quizDTO)
-        //{
-        //    List<Question> selectedQuestions = new List<Question>();
+        [HttpPost("SaveAnswers")]
+        public async Task<ActionResult<Quiz>> PostAnswers(QuizAnswers quizAnswers)
+        {
+            Quiz quiz = new()
+            {
+                UserAnswer = quizAnswers.UserAnswer,
+                QuizAnswer = quizAnswers.QuizAnswer
+            };
 
-        //    // Fetch and randomly select questions for each specified difficulty level
-        //    foreach (var entry in quizDTO.Questions)
-        //    {
-        //        string difficulty = entry.DifficultyLevel;
-        //        int amount = entry.QuestionAmount;
-
-        //        var questions = await _context.Questions.Where(q => q.DifficultyLevel == difficulty).ToListAsync();
-
-        //        if (questions.Count < amount)
-        //        {
-        //            return BadRequest($"Not enough questions available for difficulty level {difficulty}.");
-        //        }
-
-        //        var randomQuestions = questions.OrderBy(q => Guid.NewGuid()).Take(amount).ToList();
-        //        selectedQuestions.AddRange(randomQuestions);
-        //    }
-
-        //    // Map the selected questions to the quiz
-        //    Quiz quiz = new()
-        //    {
-        //        InvitedUsers = quizDTO.InvitedUsers,
-        //        Title = quizDTO.Title,
-        //        Category = quizDTO.Category,
-        //        QuizDate = quizDTO.QuizDate,
-        //        Timer = quizDTO.Timer,
-        //        CreatorId = quizDTO.CreatorId,
-        //        Maindifficulty = quizDTO.Maindifficulty,
-        //        QuestionAmount = selectedQuestions.Count,
-        //        Questions = selectedQuestions // assuming Quiz entity has a collection of Questions
-        //    };
-
-        //    _context.Quizs.Add(quiz);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetQuiz", new { id = quiz.Id }, quiz);
-        //}
+            return Ok(quiz);
+        }
 
         // DELETE: api/Quizs/5
         [HttpDelete("{id}")]

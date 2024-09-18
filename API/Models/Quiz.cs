@@ -6,26 +6,39 @@ namespace API.Models
     {
         [Key]
         public int QuizID { get; set; }
-
-        // Foreign key to User
-        public int UserID { get; set; }
-        public virtual User User { get; set; }
-
         public List<string> InvitedUsers { get; set; }
         public string Title { get; set; }
         public string Category { get; set; }
-        public int[] UserAnswer { get; set; }
+        public string MainDifficulty { get; set; }
+        public List<string> UserAnswer { get; set; }
+        public List<string> QuizAnswer { get; set; }
         public DateTime QuizDate { get; set; }
         public int Timer { get; set; }
-        public string MainDifficulty { get; set; }
-
-        public User Creator { get; set; }
-        public int CreatorID { get; set; }
 
         // Navigation property for questions
         public virtual ICollection<Question> Questions { get; set; }
         public int QuestionAmount { get; set; }
+
+        // Compute overall difficulty based on the majority difficulty of the questions
+        public string GetQuizDifficulty()
+        {
+            if (Questions == null || !Questions.Any())
+                return "Unknown";
+
+            var difficulties = Questions.Select(q => q.DifficultyLevel).ToList();
+            return difficulties.GroupBy(d => d)
+                               .OrderByDescending(g => g.Count())
+                               .Select(g => g.Key)
+                               .FirstOrDefault() ?? "Unknown";
+        }
+
+        public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }
+
+        public int CreatorID { get; set; }
+        public virtual User Creator { get; set; }
     }
+
+
 
     public class QuizDTO
     {

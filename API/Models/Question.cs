@@ -6,11 +6,6 @@ namespace API.Models
     {
         [Key]
         public int QuestionID { get; set; }
-
-        // Foreign key to Quiz
-        public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
-
         public string Title { get; set; }
         public string Category { get; set; }
         public string UnderCategory { get; set; }
@@ -19,18 +14,30 @@ namespace API.Models
         public string Picture { get; set; }
         public int Time { get; set; }
         public bool QuestionStatus { get; set; }
-        public string DifficultyLevel { get; set; }
-        public int MainDifficultyId { get; set; } // Foreign key
 
-        // Navigation property to relate to Difficulty
-        public virtual Difficulty MainDifficulty { get; set; }
+        // Direct difficulty levels inside Question
+        public string DifficultyLevel { get; set; } = DifficultyLevels.Unassigned;
+        public int Points { get; set; } = 100;
 
-        // Foreign key to the creator of the question
+        // Static class to store predefined levels (from the old Difficulty model)
+        public static class DifficultyLevels
+        {
+            public const string Unassigned = "Unassigned";
+            public const string GF2 = "GF2";
+            public const string H1 = "H1";
+            public const string H2 = "H2";
+            public const string H3 = "H3";
+            public const string H4 = "H4";
+            public const string H5 = "H5";
+        }
+
         public int CreatorID { get; set; }
+        public virtual User Creator { get; set; }
 
-        // Navigation property to relate to Difficulty
-        public virtual Difficulty Difficulty { get; set; }
+        public int QuizID { get; set; }
+        public virtual Quiz Quiz { get; set; }
     }
+
 
 
     public class QuestionDTO

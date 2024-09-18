@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240910101228_init1")]
+    [Migration("20240918105138_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -28,11 +28,11 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.API.Models.User", b =>
                 {
-                    b.Property<int>("UserID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -45,10 +45,6 @@ namespace API.Migrations
                     b.Property<DateTime>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<List<string>>("QuizAnswer")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<bool>("Role")
                         .HasColumnType("boolean");
 
@@ -56,43 +52,42 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<List<string>>("UserAnswer")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("UserID");
+                    b.HasKey("ID");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("API.Models.Difficulty", b =>
+            modelBuilder.Entity("API.Models.CompletedQuiz", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("Completed")
+                        .HasColumnType("boolean");
 
-                    b.Property<int>("Points")
+                    b.Property<int>("QuizID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("QuestionID")
+                    b.Property<int>("Results")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("QuestionID")
-                        .IsUnique();
+                    b.HasKey("ID");
 
-                    b.ToTable("Difficulty");
+                    b.HasIndex("QuizID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("CompletedQuizs");
                 });
 
             modelBuilder.Entity("API.Models.Question", b =>
@@ -116,14 +111,15 @@ namespace API.Migrations
 
                     b.Property<string>("DifficultyLevel")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MainDifficultyId")
-                        .HasColumnType("integer");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Picture")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
 
                     b.Property<int[]>("PossibleAnswers")
                         .IsRequired()
@@ -148,7 +144,7 @@ namespace API.Migrations
 
                     b.HasKey("QuestionID");
 
-                    b.HasIndex("MainDifficultyId");
+                    b.HasIndex("CreatorID");
 
                     b.HasIndex("QuizID");
 
@@ -181,6 +177,10 @@ namespace API.Migrations
                     b.Property<int>("QuestionAmount")
                         .HasColumnType("integer");
 
+                    b.Property<List<string>>("QuizAnswer")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<DateTime>("QuizDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -191,38 +191,43 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int[]>("UserAnswer")
+                    b.Property<List<string>>("UserAnswer")
                         .IsRequired()
-                        .HasColumnType("integer[]");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
+                        .HasColumnType("text[]");
 
                     b.HasKey("QuizID");
 
                     b.HasIndex("CreatorID");
 
-                    b.HasIndex("UserID");
-
                     b.ToTable("Quizs");
                 });
 
-            modelBuilder.Entity("API.Models.Difficulty", b =>
+            modelBuilder.Entity("API.Models.CompletedQuiz", b =>
                 {
-                    b.HasOne("API.Models.Question", "Question")
-                        .WithOne("Difficulty")
-                        .HasForeignKey("API.Models.Difficulty", "QuestionID")
+                    b.HasOne("API.Models.Quiz", "Quiz")
+                        .WithMany("CompletedQuizzes")
+                        .HasForeignKey("QuizID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Question");
+                    b.HasOne("API.Models.API.Models.User", "User")
+                        .WithMany("CompletedQuizzes")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Models.Question", b =>
                 {
-                    b.HasOne("API.Models.Difficulty", "MainDifficulty")
+                    b.HasOne("API.Models.API.Models.User", "Creator")
                         .WithMany()
-                        .HasForeignKey("MainDifficultyId");
+                        .HasForeignKey("CreatorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("API.Models.Quiz", "Quiz")
                         .WithMany("Questions")
@@ -230,7 +235,7 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("MainDifficulty");
+                    b.Navigation("Creator");
 
                     b.Navigation("Quiz");
                 });
@@ -238,35 +243,25 @@ namespace API.Migrations
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
                     b.HasOne("API.Models.API.Models.User", "Creator")
-                        .WithMany()
+                        .WithMany("CreatedQuizzes")
                         .HasForeignKey("CreatorID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("API.Models.API.Models.User", "User")
-                        .WithMany("Quizzes")
-                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Creator");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Models.API.Models.User", b =>
                 {
-                    b.Navigation("Quizzes");
-                });
+                    b.Navigation("CompletedQuizzes");
 
-            modelBuilder.Entity("API.Models.Question", b =>
-                {
-                    b.Navigation("Difficulty")
-                        .IsRequired();
+                    b.Navigation("CreatedQuizzes");
                 });
 
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
+                    b.Navigation("CompletedQuizzes");
+
                     b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618

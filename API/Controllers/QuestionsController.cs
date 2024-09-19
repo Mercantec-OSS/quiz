@@ -156,7 +156,7 @@ namespace API.Controllers
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
                 Time = questionDTO.Time,
-                CreatorID = questionDTO.CreatorId,
+                UserID = questionDTO.UserID,
             };
 
             _context.Questions.Add(question);
@@ -167,7 +167,7 @@ namespace API.Controllers
 
         // DELETE: api/Questions/id
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteQuestion(int id, int creatorId)
+        public async Task<IActionResult> DeleteQuestion(int id, int userId)
         {
             var question = await _context.Questions.FindAsync(id);
             if (question == null)
@@ -175,7 +175,7 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            if (question.CreatorID == creatorId)
+            if (question.UserID == userId)
 
             _context.Questions.Remove(question);
             await _context.SaveChangesAsync();

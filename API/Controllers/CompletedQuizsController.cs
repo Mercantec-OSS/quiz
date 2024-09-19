@@ -47,7 +47,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCompletedQuiz(int id, CompletedQuiz completedQuiz)
         {
-            if (id != completedQuiz.ID)
+            if (id != completedQuiz.CompletedQuizID)
             {
                 return BadRequest();
             }
@@ -76,12 +76,18 @@ namespace API.Controllers
         // POST: api/CompletedQuizs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CompletedQuiz>> PostCompletedQuiz(CompletedQuiz completedQuiz)
+        public async Task<ActionResult<CompletedQuiz>> PostCompletedQuiz(CompletedQuizDTO completedQuizDTO)
         {
+            CompletedQuiz completedQuiz = new()
+            {
+                Completed = completedQuizDTO.Completed,
+                Results = completedQuizDTO.Results
+            };
+
             _context.CompletedQuizs.Add(completedQuiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCompletedQuiz", new { id = completedQuiz.ID }, completedQuiz);
+            return CreatedAtAction("GetCompletedQuiz", new { id = completedQuiz.CompletedQuizID }, completedQuizDTO);
         }
 
         // DELETE: api/CompletedQuizs/5
@@ -102,7 +108,7 @@ namespace API.Controllers
 
         private bool CompletedQuizExists(int id)
         {
-            return _context.CompletedQuizs.Any(e => e.ID == id);
+            return _context.CompletedQuizs.Any(e => e.CompletedQuizID == id);
         }
     }
 }

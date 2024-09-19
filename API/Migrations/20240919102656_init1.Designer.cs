@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240919084750_init1")]
+    [Migration("20240919102656_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -102,9 +102,9 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int[]>("CorrectAnswer")
+                    b.Property<string[]>("CorrectAnswer")
                         .IsRequired()
-                        .HasColumnType("integer[]");
+                        .HasColumnType("text[]");
 
                     b.Property<int>("CreatorID")
                         .HasColumnType("integer");
@@ -121,9 +121,9 @@ namespace API.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
-                    b.Property<int[]>("PossibleAnswers")
+                    b.Property<string[]>("PossibleAnswers")
                         .IsRequired()
-                        .HasColumnType("integer[]");
+                        .HasColumnType("text[]");
 
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");

@@ -9,8 +9,8 @@ namespace API.Models
         public string Title { get; set; }
         public string Category { get; set; }
         public string UnderCategory { get; set; }
-        public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public List<string> CorrectAnswer { get; set; } // The correct answer
+        public string[] PossibleAnswers { get; set; } // a list of the placeholder wrong answers
+        public string[] CorrectAnswer { get; set; } // The correct answer
         public string Picture { get; set; }
         public int Time { get; set; }
         public bool QuestionStatus { get; set; }
@@ -48,8 +48,8 @@ namespace API.Models
 
         // ------------------------------------ //
 
-        public List<string> PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public List<string> CorrectAnswer { get; set; } // The correct answer
+        public string[] PossibleAnswers { get; set; } // a list of the placeholder wrong answers
+        public string[] CorrectAnswer { get; set; } // The correct answer
         public string? Picture { get; set; } // URL for the picture
         public int Time { get; set; } // The time a user gets to answer the question 
 

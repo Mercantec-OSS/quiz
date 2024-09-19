@@ -5,7 +5,7 @@ namespace API.Models
     public class CompletedQuiz
     {
         [Key]
-        public int ID { get; set; }
+        public int CompletedQuizID { get; set; }
         public bool Completed { get; set; }  // Flag to indicate if the quiz is completed
         public int Results { get; set; }  // Store the result or score of the quiz
 
@@ -18,4 +18,10 @@ namespace API.Models
         public virtual User User { get; set; }
     }
 
+    public class CompletedQuizDTO
+    {
+        public bool Completed { get; set; }  // Flag to indicate if the quiz is completed
+        public int Results { get; set; }  // Store the result or score of the quiz
+
+    }
 }

@@ -31,8 +31,8 @@ namespace API.Models
             public const string H5 = "H5";
         }
 
-        public int CreatorID { get; set; }
-        public virtual User Creator { get; set; }
+        public int UserID { get; set; }
+        public virtual User User { get; set; }
 
         public int QuizID { get; set; }
         public virtual Quiz Quiz { get; set; }
@@ -60,8 +60,6 @@ namespace API.Models
 
         // ------------------------------------ //
 
-        public int CreatorId { get; set; } // Their ID
-
-        public int QuizId { get; set; }
+        public int UserID { get; set; } // Their ID
     }
 }

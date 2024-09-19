@@ -19,27 +19,15 @@ namespace API.Models
         public virtual ICollection<Question> Questions { get; set; }
         public int QuestionAmount { get; set; }
 
-        // Compute overall difficulty based on the majority difficulty of the questions
-        public string GetQuizDifficulty()
-        {
-            if (Questions == null || !Questions.Any())
-                return "Unknown";
-
-            var difficulties = Questions.Select(q => q.DifficultyLevel).ToList();
-            return difficulties.GroupBy(d => d)
-                               .OrderByDescending(g => g.Count())
-                               .Select(g => g.Key)
-                               .FirstOrDefault() ?? "Unknown";
-        }
-
         public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }
 
-        public int CreatorID { get; set; }
-        public virtual User Creator { get; set; }
+        public int UserID { get; set; }
+        public virtual User User { get; set; }
     }
 
     public class QuizDTO
     {
+
         public List<string> InvitedUsers { get; set; } // The students that are allowed to participate in the quiz
         public string? Title { get; set; } // Fx. Website dev
         public string? Category { get; set; } // Fx. Website
@@ -55,11 +43,11 @@ namespace API.Models
 
         // ------------------------------------ //
 
-        public string Maindifficulty { get; set; }
+        public string MainDifficulty { get; set; }
 
         // ------------------------------------ //
 
-        public int CreatorId { get; set; } // Their ID
+        public int UserID { get; set; } // Their ID
 
         // ------------------------------------ //
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question

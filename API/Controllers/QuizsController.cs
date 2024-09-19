@@ -72,8 +72,8 @@ namespace API.Controllers
                 Category = quizDTO.Category,
                 QuizDate = quizDTO.QuizDate,
                 Timer = quizDTO.Timer,
-                CreatorID = quizDTO.CreatorId,
-                MainDifficulty = quizDTO.Maindifficulty,
+                UserID = quizDTO.UserID,
+                MainDifficulty = quizDTO.MainDifficulty,
                 QuestionAmount = quizDTO.QuestionAmount,
                 Questions = quizDTO.Questions // assuming Quiz entity has a collection of Questions
             };
@@ -81,7 +81,7 @@ namespace API.Controllers
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz", new { id = quiz.QuizID }, quiz);
+            return CreatedAtAction("GetQuiz", new { id = quiz.QuizID }, quizDTO);
         }
 
         [HttpPost("SaveAnswers")]

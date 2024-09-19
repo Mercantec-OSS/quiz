@@ -16,7 +16,7 @@ namespace API.Models
         public int Timer { get; set; }
 
         // Navigation property for questions
-        public virtual ICollection<Question> Questions { get; set; }
+        public virtual ICollection<string> Questions { get; set; }
         public int QuestionAmount { get; set; }
 
         public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }
@@ -50,7 +50,7 @@ namespace API.Models
         public int UserID { get; set; } // Their ID
 
         // ------------------------------------ //
-        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
+        public List<string> Questions { get; set; } // To greate a relation between Quiz and question
         
         public int QuestionAmount { get; set; }
     }

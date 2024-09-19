@@ -4,8 +4,7 @@
 @inject NavigationManager NavManager
 @using Microsoft.AspNetCore.WebUtilities
 @inject IJSRuntime JSRuntime
-@inject IHttpContextAccessor HttpContextAccessor
-@using Microsoft.AspNetCore.Http
+@namespace Login
 
 <PageTitle>Login</PageTitle>
 
@@ -28,6 +27,13 @@
 
 <!-- Login button -->
 <button @onclick="HandleLogin">Login</button>
+
+<div class="logout">
+    <NavLink class="nav-link" href="#" @onclick="DeleteJwtCookie">
+        <span class="bi bi-box-arrow-right" aria-hidden="true"></span>DeleteCookies/JwtToken
+    </NavLink>
+</div>
+
 
 <!-- Displaying response status, errors, and success message -->
 @if (!string.IsNullOrEmpty(responseMessage))
@@ -78,9 +84,9 @@
                 jwtToken = responseContent;  // Assuming the JWT is the response content
                 loginSuccess = true;
 
-                //store JWT in session
-                HttpContextAccessor.HttpContext.Session.SetString("jwtToken", jwtToken);
-                
+                //store JWT in Cookies
+                await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
+
 
                 //navigate to home when email/username and password is correct
                 NavigationManager.NavigateTo("/home");
@@ -100,17 +106,33 @@
     }
 
 
-    // Method to retrieve JWT from session
-    private string GetJwtFromSession()
-    {
-        return HttpContextAccessor.HttpContext.Session.GetString("jwtToken") ?? string.Empty;
-    }
 
-    
+
+
     // Model class for login request
     public class LoginRequest
     {
         public string? email { get; set; }
         public string? password { get; set; }
     }
+
+    //Javascripts method for setting cookies
+
+    [JSInvokable("setCookie")]
+    public static void SetCookie(string name, string value, int minutes)
+    {
+        var expires = DateTime.UtcNow.AddMinutes(minutes);
+        var cookie = $"{name}={value}; expires={expires:R}; path=/; secure; httponly;";
+        Console.WriteLine($"Setting Cookie: {cookie}");
+    }
+
+    // Method to delete the JWT cookie
+    private async Task DeleteJwtCookie()
+    {
+        // Invoking JavaScript function to delete the cookie
+        await JSRuntime.InvokeVoidAsync("deleteCookie", "jwt");
+
+    }
+
 }
+

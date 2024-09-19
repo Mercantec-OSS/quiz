@@ -152,7 +152,7 @@ namespace API.Controllers
                 Category = questionDTO.Category,
                 UnderCategory = questionDTO.UnderCategory,
                 PossibleAnswers = questionDTO.PossibleAnswers,
-                CorrectAnswer = questionDTO.CorrectAnswer.ToArray(), // Convert the result to an array
+                CorrectAnswer = questionDTO.CorrectAnswer, // Convert the result to an array
                 Picture = questionDTO.Picture,
                 DifficultyLevel = questionDTO.DifficultyLevel,
                 Time = questionDTO.Time,

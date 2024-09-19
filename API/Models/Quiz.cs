@@ -38,8 +38,6 @@ namespace API.Models
         public virtual User Creator { get; set; }
     }
 
-
-
     public class QuizDTO
     {
         public List<string> InvitedUsers { get; set; } // The students that are allowed to participate in the quiz
@@ -65,6 +63,7 @@ namespace API.Models
 
         // ------------------------------------ //
         public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
+        
         public int QuestionAmount { get; set; }
     }
 }

@@ -93,7 +93,7 @@ namespace API.Controllers
                 QuizAnswer = quizAnswers.QuizAnswer
             };
 
-            return Ok(quiz);
+             return Ok(quiz);
         }
 
         // DELETE: api/Quizs/5

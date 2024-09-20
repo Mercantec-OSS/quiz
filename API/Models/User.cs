@@ -17,12 +17,10 @@ namespace API.Models {
             public bool Role { get; set; }  // Could represent a boolean flag for admin/user role
 
             // Navigation properties
-            public virtual ICollection<Quiz> CreatedQuizzes { get; set; }  // Quizzes created by the user
-            public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }  // Quizzes completed by the user
+            public virtual List<Quiz> CreatedQuizzes { get; set; }  // Quizzes created by the user
+            public virtual List<CompletedQuiz> CompletedQuizzes { get; set; }  // Quizzes completed by the user
         }
-
     }
-
 
     public class UserDTO
     {

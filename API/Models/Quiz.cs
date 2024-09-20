@@ -10,19 +10,16 @@ namespace API.Models
         public string Title { get; set; }
         public string Category { get; set; }
         public string MainDifficulty { get; set; }
-        public List<string> UserAnswer { get; set; }
-        public List<string> QuizAnswer { get; set; }
+        public List<string>? UserAnswer { get; set; }
+        public List<string>? QuizAnswer { get; set; }
         public DateTime QuizDate { get; set; }
         public int Timer { get; set; }
 
         // Navigation property for questions
-        public virtual ICollection<Question> Questions { get; set; }
+        public virtual List<string> Questions { get; set; }
         public int QuestionAmount { get; set; }
 
-        public virtual ICollection<CompletedQuiz> CompletedQuizzes { get; set; }
-
         public int UserID { get; set; }
-        public virtual User User { get; set; }
     }
 
     public class QuizDTO
@@ -31,10 +28,6 @@ namespace API.Models
         public List<string> InvitedUsers { get; set; } // The students that are allowed to participate in the quiz
         public string? Title { get; set; } // Fx. Website dev
         public string? Category { get; set; } // Fx. Website
-
-        // ------------------------------------ //
-
-        public string UserAnswer { get; set; }
 
         // ------------------------------------ //
 
@@ -50,7 +43,7 @@ namespace API.Models
         public int UserID { get; set; } // Their ID
 
         // ------------------------------------ //
-        public List<Question> Questions { get; set; } // To greate a relation between Quiz and question
+        public List<string> Questions { get; set; } // To greate a relation between Quiz and question
         
         public int QuestionAmount { get; set; }
     }

@@ -60,11 +60,11 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.CompletedQuiz", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("CompletedQuizID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CompletedQuizID"));
 
                     b.Property<bool>("Completed")
                         .HasColumnType("boolean");
@@ -78,7 +78,7 @@ namespace API.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("integer");
 
-                    b.HasKey("ID");
+                    b.HasKey("CompletedQuizID");
 
                     b.HasIndex("QuizID");
 
@@ -103,13 +103,9 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int>("CreatorID")
-                        .HasColumnType("integer");
-
                     b.Property<string>("DifficultyLevel")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Picture")
                         .IsRequired()
@@ -125,9 +121,6 @@ namespace API.Migrations
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("QuizID")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Time")
                         .HasColumnType("integer");
 
@@ -139,11 +132,10 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
                     b.HasKey("QuestionID");
-
-                    b.HasIndex("CreatorID");
-
-                    b.HasIndex("QuizID");
 
                     b.ToTable("Questions");
                 });
@@ -160,9 +152,6 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("CreatorID")
-                        .HasColumnType("integer");
-
                     b.Property<List<string>>("InvitedUsers")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -174,8 +163,11 @@ namespace API.Migrations
                     b.Property<int>("QuestionAmount")
                         .HasColumnType("integer");
 
-                    b.Property<List<string>>("QuizAnswer")
+                    b.Property<List<string>>("Questions")
                         .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<List<string>>("QuizAnswer")
                         .HasColumnType("text[]");
 
                     b.Property<DateTime>("QuizDate")
@@ -189,12 +181,14 @@ namespace API.Migrations
                         .HasColumnType("text");
 
                     b.Property<List<string>>("UserAnswer")
-                        .IsRequired()
                         .HasColumnType("text[]");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
 
                     b.HasKey("QuizID");
 
-                    b.HasIndex("CreatorID");
+                    b.HasIndex("UserID");
 
                     b.ToTable("Quizs");
                 });
@@ -202,7 +196,7 @@ namespace API.Migrations
             modelBuilder.Entity("API.Models.CompletedQuiz", b =>
                 {
                     b.HasOne("API.Models.Quiz", "Quiz")
-                        .WithMany("CompletedQuizzes")
+                        .WithMany()
                         .HasForeignKey("QuizID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -218,34 +212,13 @@ namespace API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("API.Models.Question", b =>
-                {
-                    b.HasOne("API.Models.API.Models.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Models.Quiz", "Quiz")
-                        .WithMany("Questions")
-                        .HasForeignKey("QuizID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-
-                    b.Navigation("Quiz");
-                });
-
             modelBuilder.Entity("API.Models.Quiz", b =>
                 {
-                    b.HasOne("API.Models.API.Models.User", "Creator")
+                    b.HasOne("API.Models.API.Models.User", null)
                         .WithMany("CreatedQuizzes")
-                        .HasForeignKey("CreatorID")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("API.Models.API.Models.User", b =>
@@ -253,13 +226,6 @@ namespace API.Migrations
                     b.Navigation("CompletedQuizzes");
 
                     b.Navigation("CreatedQuizzes");
-                });
-
-            modelBuilder.Entity("API.Models.Quiz", b =>
-                {
-                    b.Navigation("CompletedQuizzes");
-
-                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

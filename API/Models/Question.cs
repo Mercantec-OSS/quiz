@@ -1,4 +1,5 @@
 ﻿using API.Models.API.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models
 {
@@ -32,10 +33,6 @@ namespace API.Models
         }
 
         public int UserID { get; set; }
-        public virtual User User { get; set; }
-
-        public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
     }
 
 

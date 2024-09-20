@@ -75,7 +75,7 @@ namespace API.Controllers
                 UserID = quizDTO.UserID,
                 MainDifficulty = quizDTO.MainDifficulty,
                 QuestionAmount = quizDTO.QuestionAmount,
-                Questions = quizDTO.Questions // assuming Quiz entity has a collection of Questions
+                Questions = quizDTO.Questions
             };
 
             _context.Quizs.Add(quiz);

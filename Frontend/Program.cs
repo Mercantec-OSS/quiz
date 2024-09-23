@@ -20,6 +20,7 @@ builder.Services.AddScoped<HttpClient>(sp => new HttpClient
 builder.Services.AddHttpContextAccessor();
 
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,7 +31,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
+//app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
 
 app.UseHttpsRedirection();
 

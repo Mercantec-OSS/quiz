@@ -22,7 +22,7 @@ namespace API.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     Category = table.Column<string>(type: "text", nullable: false),
                     UnderCategory = table.Column<string>(type: "text", nullable: false),
-                    PossibleAnswers = table.Column<int[]>(type: "integer[]", nullable: false),
+                    PossibleAnswers = table.Column<string[]>(type: "text[]", nullable: false),
                     CorrectAnswer = table.Column<int[]>(type: "integer[]", nullable: false),
                     Picture = table.Column<string>(type: "text", nullable: false),
                     Time = table.Column<int>(type: "integer", nullable: false),

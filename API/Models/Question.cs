@@ -23,7 +23,7 @@ namespace API.Models
         // Static class to store predefined levels (from the old Difficulty model)
         public static class DifficultyLevels
         {
-            public const string Unassigned = "Unassigned";
+            public const string Unassigned = "Unassigned"; 
             public const string GF2 = "GF2";
             public const string H1 = "H1";
             public const string H2 = "H2";
@@ -34,8 +34,6 @@ namespace API.Models
 
         public int UserID { get; set; }
     }
-
-
 
     public class QuestionDTO
     {

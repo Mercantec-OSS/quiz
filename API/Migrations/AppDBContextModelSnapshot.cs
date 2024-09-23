@@ -99,9 +99,9 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string[]>("CorrectAnswer")
+                    b.Property<int[]>("CorrectAnswer")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("integer[]");
 
                     b.Property<string>("DifficultyLevel")
                         .IsRequired()
@@ -114,9 +114,9 @@ namespace API.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
-                    b.Property<string[]>("PossibleAnswers")
+                    b.Property<int[]>("PossibleAnswers")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("integer[]");
 
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");
@@ -167,8 +167,8 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<List<string>>("QuizAnswer")
-                        .HasColumnType("text[]");
+                    b.Property<List<int>>("QuizAnswer")
+                        .HasColumnType("integer[]");
 
                     b.Property<DateTime>("QuizDate")
                         .HasColumnType("timestamp with time zone");
@@ -180,8 +180,8 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<List<string>>("UserAnswer")
-                        .HasColumnType("text[]");
+                    b.Property<List<int>>("UserAnswer")
+                        .HasColumnType("integer[]");
 
                     b.Property<int>("UserID")
                         .HasColumnType("integer");

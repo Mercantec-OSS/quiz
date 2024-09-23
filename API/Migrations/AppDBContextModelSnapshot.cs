@@ -114,9 +114,9 @@ namespace API.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
-                    b.Property<int[]>("PossibleAnswers")
+                    b.Property<string[]>("PossibleAnswers")
                         .IsRequired()
-                        .HasColumnType("integer[]");
+                        .HasColumnType("text[]");
 
                     b.Property<bool>("QuestionStatus")
                         .HasColumnType("boolean");

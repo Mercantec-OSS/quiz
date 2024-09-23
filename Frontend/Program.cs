@@ -47,10 +47,10 @@ app.UseCors("AllowAll");
 
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -12,9 +12,46 @@
             <h5>Question @((Questions.IndexOf(question) + 1))</h5>
 
 
-
-
             <input type="text" placeholder="Enter question" @bind="question.QuestionText"> <br> <br>
+
+            @* simple drop down menu, not important *@
+            <div class="drop-menu">
+
+                <table>
+                    <tr>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleDropdown">
+                                    @selectedItem
+                                </button>
+                                <div class="dropdown-menu @dropdownClass">
+                                    @foreach (var item in items)
+                                    {
+                                        <a class="dropdown-item" @onclick="() => SelectItem(item)">@item</a>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dropdown1">
+                                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleDropdown1">
+                                    @selectedItem1
+                                </button>
+                                <div class="dropdown-menu @dropdownClass1">
+                                    @foreach (var item1 in items1)
+                                    {
+                                        <a class="dropdown-item" @onclick="() => SelectItem1(item1)">@item1</a>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            @* end of dropdown menu  *@
+            <br/>
+
+
 
             <div class="answer-option">
                 <input type="radio" name="answer-@question.Id" value="option1" checked="@IsChecked(question.SelectedAnswer, "option1")" @onclick='() =>question.SelectedAnswer = "option1" ' />
@@ -158,7 +195,7 @@
                     Title = question.QuestionText,
                     Category = "Some Category",
                     UnderCategory = "Some UnderCategory",
-                    PossibleAnswers = new[] { 0, 0, 0, 0 }, // Placeholder, replace with actual values
+                    PossibleAnswers = new[] { question.Answer1, question.Answer2, question.Answer3, question.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = new[] { ConvertAnswerToId(question.SelectedAnswer) },
                     Picture = "some_url",
                     Time = 30,
@@ -212,5 +249,59 @@
         }
     }
 
-   
+   //simple drop down menu stuff
+
+    // List of items in the dropdown menu
+    private List<string> items = new List<string>
+    {
+        "Item 1", "Item 2", "Item 3", "Item 4"
+    };
+
+    // Selected item from the dropdown
+    private string selectedItem = "Select an Item";
+
+    // CSS class for dropdown visibility
+    private string dropdownClass = "";
+
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdown()
+    {
+        dropdownClass = dropdownClass == "" ? "show" : "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectItem(string item)
+    {
+        selectedItem = item;
+        dropdownClass = ""; // Hide the dropdown
+    }
+
+
+    //simple drop down menu stuff
+
+    // List of items in the dropdown menu
+    private List<string> items1 = new List<string>
+    {
+        "Item 1", "Item 2", "Item 3", "Item 4"
+    };
+
+    // Selected item from the dropdown
+    private string selectedItem1 = "Select an Item";
+
+    // CSS class for dropdown visibility
+    private string dropdownClass1 = "";
+
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdown1()
+    {
+        dropdownClass1 = dropdownClass1 == "" ? "show" : "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectItem1(string item1)
+    {
+        selectedItem1 = item1;
+        dropdownClass1 = ""; // Hide the dropdown
+    }
+
 }

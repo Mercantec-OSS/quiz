@@ -43,13 +43,4 @@ namespace API.Models {
         public string Password { get; set; }
 
     }
-
-    public class QuizAnswers
-    {
-        public int Id { get; set; }
-        public Quiz QuizId { get; set; }
-        public User UserId { get; set; }
-        public List<string> UserAnswer { get; set; }
-        public List<string> QuizAnswer { get; set; }
-    }
 }

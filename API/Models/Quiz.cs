@@ -10,8 +10,8 @@ namespace API.Models
         public string Title { get; set; }
         public string Category { get; set; }
         public string MainDifficulty { get; set; }
-        public List<string>? UserAnswer { get; set; }
-        public List<string>? QuizAnswer { get; set; }
+        public List<int>? UserAnswer { get; set; }
+        public List<int>? QuizAnswer { get; set; }
         public DateTime QuizDate { get; set; }
         public int Timer { get; set; }
 
@@ -46,5 +46,14 @@ namespace API.Models
         public List<string> Questions { get; set; } // To greate a relation between Quiz and question
         
         public int QuestionAmount { get; set; }
+    }
+
+    public class QuizAnswers
+    {
+        public int Id { get; set; }
+        public Quiz QuizId { get; set; }
+        public User UserId { get; set; }
+        public List<int>? UserAnswer { get; set; }
+        public List<int>? QuizAnswer { get; set; }
     }
 }

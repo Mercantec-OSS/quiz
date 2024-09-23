@@ -54,18 +54,16 @@
 
 
             <div class="answer-option">
-                <input type="radio" name="answer-@question.Id" value="option1" checked="@IsChecked(question.SelectedAnswer, "option1")" @onclick='() =>question.SelectedAnswer = "option1" ' />
+                <input type="checkbox" @bind="question.CorrectAnswers[0]" />
                 <input type="text" placeholder="Enter answer 1" @bind="question.Answer1" />
 
+                <input type="checkbox" @bind="question.CorrectAnswers[1]" />
+                <input type="text" placeholder="Enter answer 2" @bind="question.Answer2" />
 
-                <input type="radio" name="answer-@question.Id" value="option2" checked="@IsChecked(question.SelectedAnswer, "option2")" @onclick='() => question.SelectedAnswer = "option2" ' />
-                <input type="text" placeholder="Enter answer2" @bind="question.Answer2" />
-
-
-                <input type="radio" name="answer-@question.Id" value="option3" checked="@IsChecked(question.SelectedAnswer, "option3")" @onclick='() => question.SelectedAnswer = "option3"' />
+                <input type="checkbox" @bind="question.CorrectAnswers[2]" />
                 <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
 
-                <input type="radio" name="answer-@question.Id" value="option4" checked="@IsChecked(question.SelectedAnswer, "option4")" @onclick='() => question.SelectedAnswer = "option4"'/>
+                <input type="checkbox" @bind="question.CorrectAnswers[3]" />
                 <input type="text" placeholder="Enter answer 4" @bind="question.Answer4" />
 
             </div> <br> <br>
@@ -79,25 +77,21 @@
                         <h5 class="card-body">
                             <h5 class="card-title">@SelectedQuestion.QuestionText</h5>
                             <p class="card-text">
-                                @if (SelectedQuestion.SelectedAnswer == "option1")
+                                @if (SelectedQuestion.CorrectAnswers[0])
                                 {
-                                    @SelectedQuestion.Answer1
+                                <p>@SelectedQuestion.Answer1</p>
                                 }
-                                else if (SelectedQuestion.SelectedAnswer == "option2")
+                                @if (SelectedQuestion.CorrectAnswers[1])
                                 {
-                                    @SelectedQuestion.Answer2
+                                <p>@SelectedQuestion.Answer2</p>
                                 }
-                                else if (SelectedQuestion.SelectedAnswer == "option3")
+                                @if (SelectedQuestion.CorrectAnswers[2])
                                 {
-                                    @SelectedQuestion.Answer3
+                                <p>@SelectedQuestion.Answer3</p>
                                 }
-                                else if (SelectedQuestion.SelectedAnswer == "option4")
+                                @if (SelectedQuestion.CorrectAnswers[3])
                                 {
-                                    @SelectedQuestion.Answer4
-                                }
-                                else
-                                {
-                                    <i>No answer selected</i>
+                                <p>@SelectedQuestion.Answer4</p>
                                 }
                             </p>
                         </h5>
@@ -137,7 +131,7 @@
         public string Answer2 { get; set; }
         public string Answer3 { get; set; }
         public string Answer4 { get; set; }
-        public string SelectedAnswer { get; set; }
+        public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
     }
 
     public class Question
@@ -190,13 +184,19 @@
     {
         foreach (var question in Questions)
         {
+            var correctAnswerIds = question.CorrectAnswers
+            .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
+            .Where(id => id.HasValue)
+            .Select(id => id.Value)
+            .ToArray();
+
             var dto = new QuestionDTO
                 {
                     Title = question.QuestionText,
                     Category = "Some Category",
                     UnderCategory = "Some UnderCategory",
                     PossibleAnswers = new[] { question.Answer1, question.Answer2, question.Answer3, question.Answer4 }, // Placeholder, replace with actual values
-                    CorrectAnswer = new[] { ConvertAnswerToId(question.SelectedAnswer) },
+                    CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",
                     Time = 30,
                     DifficultyLevel = "Unassigned",

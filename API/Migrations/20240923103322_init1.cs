@@ -91,8 +91,8 @@ namespace API.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Completed = table.Column<bool>(type: "boolean", nullable: false),
                     Results = table.Column<int>(type: "integer", nullable: false),
-                    QuizID = table.Column<int>(type: "integer", nullable: false),
-                    UserID = table.Column<int>(type: "integer", nullable: false)
+                    QuizID = table.Column<int>(type: "integer", nullable: true),
+                    UserID = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,14 +101,12 @@ namespace API.Migrations
                         name: "FK_CompletedQuizs_Quizs_QuizID",
                         column: x => x.QuizID,
                         principalTable: "Quizs",
-                        principalColumn: "QuizID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "QuizID");
                     table.ForeignKey(
                         name: "FK_CompletedQuizs_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateIndex(

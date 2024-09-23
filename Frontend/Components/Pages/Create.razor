@@ -11,6 +11,9 @@
         <div>
             <h5>Question @((Questions.IndexOf(question) + 1))</h5>
 
+
+
+
             <input type="text" placeholder="Enter question" @bind="question.QuestionText"> <br> <br>
 
             <div class="answer-option">
@@ -77,7 +80,7 @@
 
 <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
 
-@* <button class="btn btn-success" @onclick="SaveQuiz">Save Quiz</button> *@
+<button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
 
 @if (Questions.Count >= MaxQuestions)
 {
@@ -146,6 +149,30 @@
         return selectedAnswer == option;
     }
 
+    private async Task SaveQuestions()
+    {
+        foreach (var question in Questions)
+        {
+            var dto = new QuestionDTO
+                {
+                    Title = question.QuestionText,
+                    Category = "Some Category",
+                    UnderCategory = "Some UnderCategory",
+                    PossibleAnswers = new[] { 0, 0, 0, 0 }, // Placeholder, replace with actual values
+                    CorrectAnswer = new[] { ConvertAnswerToId(question.SelectedAnswer) },
+                    Picture = "some_url",
+                    Time = 30,
+                    DifficultyLevel = "Unassigned",
+                    QuestionStatus = true,
+                    UserID = 1
+                };
+
+            await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
+        }
+    }
+
+
+
     //Helper method to map Selected answer
 
     private int ConvertAnswerToId(String selectedAnswer)
@@ -160,49 +187,5 @@
             default: return 0; //No Answer selected 
         }
     }
-
-    // //method to save the quiz and its questions
-    // private async Task SaveQuiz()
-    // {
-    //     var quiz = new QuizDTO
-    //         {
-    //             Title = "your Quiz title",
-    //             Category = "your quiz Category",
-    //             QuizDate = DateTime.Now,
-    //             Timer = 60,
-    //             MainDifficulty = "H3",
-    //             UserID = 1,
-    //             Questions = Questions.Select(q => new API.Models.Question
-    //             {
-    //                 Title = q.QuestionText,  // Mapping the question text as title
-    //                 Category = "Category from UI", // Replace with actual category input
-    //                 UnderCategory = "Subcategory from UI", // Replace with actual subcategory input
-    //                 PossibleAnswers = new [] { "1", "2", "3"},  // Example: Map to possible answer IDs (this needs to be set dynamically)
-    //                 CorrectAnswer = new[] { (q.SelectedAnswer) },  // Correct answer, map the selected answer to ID
-    //                 Picture = "Picture URL from UI",  // Replace with actual picture URL input
-    //                 Time = 30,  // Example: set the time limit for each question
-    //                 DifficultyLevel = "H3",  // Replace with actual difficulty input
-    //                 QuestionStatus = true,  // Example: Question is active
-    //                 UserID = 1  // Set this to the actual creator ID
-
-    //             }).ToList()
-
-    //         };
-
-    //     //send a post request to the api to save the quiz
-    //     var response = await Http.PostAsJsonAsync("api/Setup-Quiz", quiz);
-
-    //     //Check if the request was successful
-    //     if(response.IsSuccessStatusCode)
-    //     {
-    //         //Handle success (e.g., show a success message, navigate to another page)
-    //         Console.WriteLine("Quiz Saved successfully");
-    //     }
-    //     else
-    //     {
-    //         //Handle error (Show error message)
-    //         Console.WriteLine("Failed to save the quiz");
-    //     }
-    // }
 
 }

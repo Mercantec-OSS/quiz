@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240923082159_init1")]
+    [Migration("20240923103322_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -72,13 +72,13 @@ namespace API.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("QuizID")
+                    b.Property<int?>("QuizID")
                         .HasColumnType("integer");
 
                     b.Property<int>("Results")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserID")
+                    b.Property<int?>("UserID")
                         .HasColumnType("integer");
 
                     b.HasKey("CompletedQuizID");
@@ -200,15 +200,11 @@ namespace API.Migrations
                 {
                     b.HasOne("API.Models.Quiz", "Quiz")
                         .WithMany()
-                        .HasForeignKey("QuizID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("QuizID");
 
                     b.HasOne("API.Models.API.Models.User", "User")
                         .WithMany("CompletedQuizzes")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserID");
 
                     b.Navigation("Quiz");
 

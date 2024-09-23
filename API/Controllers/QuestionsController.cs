@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Cors;
 
 namespace API.Controllers
 {
-    [EnableCors]
     [Route("api/[controller]")]
     [ApiController]
     public class QuestionsController : ControllerBase
@@ -145,7 +144,6 @@ namespace API.Controllers
         }
 
         // POST: api/Questions
-        [DisableCors]
         [HttpPost]
         public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
         {

@@ -18,6 +18,7 @@ namespace API.Models
 
         // Direct difficulty levels inside Question
         public string DifficultyLevel { get; set; } = DifficultyLevels.Unassigned;
+        //
         public int Points { get; set; } = 100;
 
         // Static class to store predefined levels (from the old Difficulty model)

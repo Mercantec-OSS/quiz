@@ -10,36 +10,41 @@
         <div class="top-row px-4">
             <div class="main-nav"></div>
 
-            <div class="home">
-                <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-                </NavLink>
-            </div>
 
-           <div class="counter">
-            <NavLink class="nav-link" href="create">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create
-            </NavLink>
-            </div>
-            <div class="weather">
-            <NavLink class="nav-link" href="browse">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
-            </NavLink>
-            </div>
+            <div class="dropdown">
+                <button class="dropbtn">More</button>
+                <div class="dropdown-content">
 
-            
-                <div class="login">
+                    
+                        <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                        </NavLink>
+                    
+
+                    
+                        <NavLink class="nav-link" href="create">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create
+                        </NavLink>
+                    
+
+                    
+                        <NavLink class="nav-link" href="browse">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
+                        </NavLink>
+                    
+
+                    <NavLink class="nav-link" href="createCategory">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Create Category
+                    </NavLink>
+
                     <NavLink class="nav-link" href="">
                         <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
-           
-                
-            
-
+            </div>
 
             <div class="about">
-                <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank">About</a>
+                <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
             </div>
 
             
@@ -65,3 +70,46 @@
     
     
 }
+
+<style>
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropbtn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        width: 80px;
+        height: 55px;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+
+    }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+</style>

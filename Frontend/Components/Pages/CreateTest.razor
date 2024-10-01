@@ -1,10 +1,15 @@
-﻿@page "/create"
+﻿@page "/createtest"
 @rendermode InteractiveServer
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using OfficeOpenXml
 
-<PageTitle>Create</PageTitle>
+
+
+<PageTitle>CreateTest</PageTitle>
+
+<h3>CreateTest</h3>
+
 
 <div>
     @foreach (var question in Questions)
@@ -50,9 +55,11 @@
                 </table>
             </div>
             @* end of dropdown menu  *@
-            <br/>
+            <br />
 
+            
 
+            <br />
 
             <div class="answer-option">
                 <input type="checkbox" @bind="question.CorrectAnswers[0]" />
@@ -106,7 +113,7 @@
 </div>
 
 
- <br>
+<br>
 
 
 
@@ -164,7 +171,7 @@
     private List<QuestionModel> Questions = new List<QuestionModel>();
     private QuestionModel SelectedQuestion;
 
-    [Inject] public HttpClient Http { get; set;}
+    [Inject] public HttpClient Http { get; set; }
 
     // mehtod to show the answer card
     private void ToggleAnswerCard(QuestionModel question)
@@ -182,7 +189,7 @@
     //method to add new question to the quiz
     private void AddNewQuestion()
     {
-        if (Questions.Count < MaxQuestions) 
+        if (Questions.Count < MaxQuestions)
         {
             Questions.Add(new QuestionModel { Id = nextQuestionId++ });
         }
@@ -240,7 +247,7 @@
                 // Log any exceptions that occur during the request
                 Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
             }
-            
+
 
 
         }
@@ -259,11 +266,11 @@
             case "option2": return 2;
             case "option3": return 3;
             case "option4": return 4;
-            default: return 0; //No Answer selected 
+            default: return 0; //No Answer selected
         }
     }
 
-   //simple drop down menu stuff
+    //simple drop down menu stuff
 
     // List of items in the dropdown menu
     private List<string> items = new List<string>

@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject IJSRuntime JSRuntime
 @namespace Login
+@using API.Models
 
 <PageTitle>Login</PageTitle>
 
@@ -114,8 +115,8 @@
         public string? password { get; set; }
     }
 
-    //Javascripts method for setting cookies
 
+    //Javascripts method for setting cookies
     [JSInvokable("setCookie")]
     public static void SetCookie(string name, string value, int minutes)
     {

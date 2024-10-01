@@ -34,7 +34,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuiz(int id, Quiz quiz)
         {
-            if (id != quiz.QuizID)
+            if (id != quiz.ID)
             {
                 return BadRequest();
             }
@@ -67,33 +67,19 @@ namespace API.Controllers
 
             Quiz quiz = new()
             {
-                InvitedUsers = quizDTO.InvitedUsers,
+                User = quizDTO.User,
                 Title = quizDTO.Title,
-                Category = quizDTO.Category,
-                QuizDate = quizDTO.QuizDate,
+                Educations = quizDTO.Educations,
+                Categories = quizDTO.Categories,
+                Difficulties = quizDTO.Difficulties,
                 Timer = quizDTO.Timer,
-                UserID = quizDTO.UserID,
-                MainDifficulty = quizDTO.MainDifficulty,
                 QuestionAmount = quizDTO.QuestionAmount,
-                Questions = quizDTO.Questions
             };
 
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz", new { id = quiz.QuizID }, quizDTO);
-        }
-
-        [HttpPost("SaveAnswers")]
-        public async Task<ActionResult<Quiz>> PostAnswers(QuizAnswers quizAnswers)
-        {
-            Quiz quiz = new()
-            {
-                UserAnswer = quizAnswers.UserAnswer,
-                QuizAnswer = quizAnswers.QuizAnswer
-            };
-
-             return Ok(quiz);
+            return CreatedAtAction("GetQuiz", new { id = quiz.ID }, quizDTO);
         }
 
         // DELETE: api/Quizs/5
@@ -114,7 +100,7 @@ namespace API.Controllers
 
         private bool QuizExists(int id)
         {
-            return _context.Quizs.Any(e => e.QuizID == id);
+            return _context.Quizs.Any(e => e.ID == id);
         }
     }
 }

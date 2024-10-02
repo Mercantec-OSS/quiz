@@ -204,42 +204,42 @@
             .Select(id => id.Value)
             .ToArray();
 
-            var dto = new QuestionDTO
-                {
-                    Title = question.QuestionText,
-                    Category = "Some Category",
-                    UnderCategory = "Some UnderCategory",
-                    PossibleAnswers = new[] { question.Answer1, question.Answer2, question.Answer3, question.Answer4 }, // Placeholder, replace with actual values
-                    CorrectAnswer = correctAnswerIds,
-                    Picture = "some_url",
-                    Time = 30,
-                    DifficultyLevel = "Unassigned",
-                    QuestionStatus = true,
-                    UserID = 1
-                };
+            // var dto = new QuestionDTO
+            //     {
+            //         Title = question.QuestionText,
+            //         Category = "Some Category",
+            //         UnderCategory = "Some UnderCategory",
+            //         PossibleAnswers = new[] { question.Answer1, question.Answer2, question.Answer3, question.Answer4 }, // Placeholder, replace with actual values
+            //         CorrectAnswer = correctAnswerIds,
+            //         Picture = "some_url",
+            //         Time = 30,
+            //         DifficultyLevel = "Unassigned",
+            //         QuestionStatus = true,
+            //         UserID = 1
+            //     };
 
 
-            try
-            {
-                // Send the POST request
-                var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
+            // try
+            // {
+            //     // Send the POST request
+            //     var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
 
-                // Check if the request was successful
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Question '{dto.Title}' saved successfully.");
-                }
-                else
-                {
-                    // Log the status code and reason phrase in case of failure
-                    Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log any exceptions that occur during the request
-                Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
-            }
+            //     // Check if the request was successful
+            //     if (response.IsSuccessStatusCode)
+            //     {
+            //         Console.WriteLine($"Question '{dto.Title}' saved successfully.");
+            //     }
+            //     else
+            //     {
+            //         // Log the status code and reason phrase in case of failure
+            //         Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
+            //     }
+            // }
+            // catch (Exception ex)
+            // {
+            //     // Log any exceptions that occur during the request
+            //     Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
+            // }
             
 
 

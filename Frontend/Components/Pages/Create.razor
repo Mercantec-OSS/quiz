@@ -201,7 +201,8 @@
             .Select(id => id.Value)
             .ToArray();
 
-            QuestionDTO dto = new()
+
+            var dto = new QuestionDTO
                 {
                     Title = question.QuestionText,
                     Category = "Some Category",
@@ -214,6 +215,7 @@
                     QuestionStatus = true,
                     UserID = 1
                 };
+
 
 
             try

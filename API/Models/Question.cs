@@ -6,56 +6,58 @@ namespace API.Models
     public class Question
     {
         [Key]
-        public int QuestionID { get; set; }
+
+        // The ID of the Question
+        public int ID { get; set; }
+
+        public int CreatorID { get; set; }
+        public virtual User User { get; set; }
+
+        // These are used to identify the question
         public string Title { get; set; }
-        public string Category { get; set; }
-        public string UnderCategory { get; set; }
-        public string[] PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public int[] CorrectAnswer { get; set; } // The correct answer
+        public int CategoryID { get; set; } // Fx. Website
+        public virtual Categories Categories { get; set; }
+        public int UnderCategoryID { get; set; }
+        public virtual UnderCategories UnderCategories { get; set; }
+        public int DifficultyID { get; set; } // Fx. H3
+        public virtual Difficulties Difficulties { get; set; }
+
+        // These two are used for wrong answers and the correcr answers for the question
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
+        
+        // This is used for a pictures URL 
         public string Picture { get; set; }
+
+        // This is the amount of time there is to complete the quiz in total
         public int Time { get; set; }
+
+        // This is for enabeling/disabeling outdated or for another reason Questions
         public bool QuestionStatus { get; set; }
-
-        // Direct difficulty levels inside Question
-        public string DifficultyLevel { get; set; } = DifficultyLevels.Unassigned;
-        public int Points { get; set; } = 100;
-
-        // Static class to store predefined levels (from the old Difficulty model)
-        public static class DifficultyLevels
-        {
-            public const string Unassigned = "Unassigned"; 
-            public const string GF2 = "GF2";
-            public const string H1 = "H1";
-            public const string H2 = "H2";
-            public const string H3 = "H3";
-            public const string H4 = "H4";
-            public const string H5 = "H5";
-        }
-
-        public int UserID { get; set; }
     }
 
 
     public class QuestionDTO
     {
-        public string? Title { get; set; } // Fx. Website dev
-        public string? Category { get; set; } // Fx. Programming
-        public string? UnderCategory { get; set; } // Fx. Buttons
+        public virtual User User { get; set; }
 
-        // ------------------------------------ //
+        // These are used to identify the question
+        public string Title { get; set; }
+        public virtual Categories Categories { get; set; }
+        public virtual UnderCategories UnderCategories { get; set; }
+        public virtual Difficulties Difficulties { get; set; }
 
-        public string[] PossibleAnswers { get; set; } // a list of the placeholder wrong answers
-        public int[] CorrectAnswer { get; set; } // The correct answer
-        public string? Picture { get; set; } // URL for the picture
-        public int Time { get; set; } // The time a user gets to answer the question 
+        // These two are used for wrong answers and the correcr answers for the question
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
 
-        // ------------------------------------ //
+        // This is used for a pictures URL 
+        public string Picture { get; set; }
 
-        public string DifficultyLevel { get; set; }
-        public bool QuestionStatus { get; set; } // To make a question active or inactive
+        // This is the amount of time there is to complete the quiz in total
+        public int Time { get; set; }
 
-        // ------------------------------------ //
-
-        public int UserID { get; set; } // Their ID
+        // This is for enabeling/disabeling outdated or for another reason Questions
+        public bool QuestionStatus { get; set; }
     }
 }

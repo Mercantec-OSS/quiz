@@ -193,7 +193,7 @@
 
     private async Task SaveQuestions()
     {
-        foreach (var question in Questions)
+        foreach (QuestionModel question in Questions)
         {
             var correctAnswerIds = question.CorrectAnswers
             .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
@@ -201,7 +201,7 @@
             .Select(id => id.Value)
             .ToArray();
 
-            var dto = new QuestionDTO
+            QuestionDTO dto = new()
                 {
                     Title = question.QuestionText,
                     Category = "Some Category",

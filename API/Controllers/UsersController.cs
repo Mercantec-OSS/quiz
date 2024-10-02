@@ -1,4 +1,4 @@
-﻿using API.Models.API.Models;
+﻿using API.Models;
 
 namespace API.Controllers
 {

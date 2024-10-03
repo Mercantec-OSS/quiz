@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models
 {
@@ -7,9 +8,12 @@ namespace API.Models
         [Key]
 
         public int Id { get; set; }
+
+        [ForeignKey("Quiz")]
         public int QuizID { get; set; }
         public virtual Quiz Quiz { get; set; }
 
+        [ForeignKey("Question")]
         public int QuestionID { get; set; }
         public virtual Question Question { get; set; }
     }

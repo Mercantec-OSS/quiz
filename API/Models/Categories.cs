@@ -1,4 +1,6 @@
-﻿namespace API.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace API.Models
 {
     public class Categories
     {
@@ -6,6 +8,7 @@
         public int ID { get; set; }
         public string Category { get; set; }
 
+        [ForeignKey("Education")]
         public int EducationID { get; set; }
         public virtual Educations Educations { get; set; }
     }

@@ -1,7 +1,4 @@
-﻿using API.Models;
-using Microsoft.AspNetCore.Cors;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

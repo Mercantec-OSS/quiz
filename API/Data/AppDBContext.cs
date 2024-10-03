@@ -1,7 +1,4 @@
-﻿using API.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace API.Data
+﻿namespace API.Data
 {
 
     public class AppDBContext : DbContext

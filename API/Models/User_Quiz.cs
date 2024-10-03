@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models
 {
@@ -9,11 +10,11 @@ namespace API.Models
         // The ID of CompletedQuiz
         public int ID { get; set; }
 
-        // Foreign key to Quiz
+        [ForeignKey("Quiz")]
         public int QuizID { get; set; }
         public virtual Quiz Quiz { get; set; }
 
-        // Foreign key to User
+        [ForeignKey("User")]
         public int UserID { get; set; }
         public virtual User User { get; set; }
 

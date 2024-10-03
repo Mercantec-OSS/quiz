@@ -1,5 +1,4 @@
-﻿using API.Models;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models
 {
@@ -15,10 +14,16 @@ namespace API.Models
 
         // These are used to identify the question
         public string Title { get; set; }
+
+        [ForeignKey("Category")]
         public int CategoryID { get; set; } // Fx. Website
         public virtual Categories Categories { get; set; }
+        
+        [ForeignKey("UnderCategory")]
         public int UnderCategoryID { get; set; }
         public virtual UnderCategories UnderCategories { get; set; }
+
+        [ForeignKey("Difficulty")]
         public int DifficultyID { get; set; } // Fx. H3
         public virtual Difficulties Difficulties { get; set; }
 

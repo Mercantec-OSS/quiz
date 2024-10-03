@@ -86,6 +86,8 @@
 
             <button class="btn btn-secondary" @onclick="() => ToggleAnswerCard(question.questionModel)"> Show question & Answer</button>
 
+            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Delete Question</button>
+
             @if (SelectedQuestion != null && SelectedQuestion.Id == question.questionModel.Id)
             {
                 <div class="card" style="width: 18rem;">
@@ -121,24 +123,29 @@
 </div>
 
 
-<br>
+
+<div>
 
 
+    @if (Questions.Count >= MaxQuestions)
+    {
+        <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
+    }
 
-<button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
 
-<button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
+    <button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
+
+</div>
+
+<br />
 
 <div>
     <h3>Upload Questions from Excel</h3>
     <InputFile OnChange="UploadExcel" />
-    <br /><br />
 </div>
 
-@if (Questions.Count >= MaxQuestions)
-{
-    <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
-}
+
 
 
 @code {
@@ -197,7 +204,7 @@
     private List<API.Models.API.Models.User> user = new();
 
     private const int MaxQuestions = 25;
-    private int nextQuestionId = 1;
+    // private int nextQuestionId = 1;
     private List<QuestionHandling> Questions = new();
     private QuestionModel? SelectedQuestion;
 
@@ -248,7 +255,7 @@
                 {
                     questionModel = new()
                     {
-                        Id = nextQuestionId++
+                        // Id = nextQuestionId++
                     }
                 });
         }
@@ -399,6 +406,12 @@
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
 
+    //delete button
+    private void DeleteQuestion(QuestionHandling questionHandling)
+    {
+        Questions.Remove(questionHandling);
+    }
+
 
     //uploading the excel file to the database
     private async Task UploadExcel(InputFileChangeEventArgs e)
@@ -426,12 +439,12 @@
                         {
                             var question = new QuestionModel
                                 {
-                                    Id = nextQuestionId++,
-                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString(),
-                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString(),
-                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString(),
-                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString(),
-                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString()
+                                    // Id = nextQuestionId++,
+                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
                                 };
 
                             // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
@@ -453,9 +466,9 @@
                             }
 
                             // Set additional properties from the Excel columns
-                            question.Categories = worksheet.Cells[row, 2].Value?.ToString();
-                            question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString();
-                            question.Picture = worksheet.Cells[row, 9].Value?.ToString();
+                            question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                            question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+                            question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
                             question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
                             question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
                             question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";

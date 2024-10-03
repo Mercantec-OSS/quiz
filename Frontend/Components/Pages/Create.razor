@@ -24,12 +24,12 @@
                         <td>
                             <div class="dropdown-categories">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
-                                    @(question.selectedCategory == null ? "Choose Category" : question.selectedCategory)
+                                    @(question.selectedCategory == null ? "Choose Category" : question.selectedCategory.Category)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownCategory">
                                     @foreach (Categories category in categories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category</a>
+                                        <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
                                     }
                                 </div>
                             </div>
@@ -38,12 +38,12 @@
 
                             <div class="dropdown-underCategories">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
-                                    @(question.selectedUnderCategory == null ? "Choose Under Category" : question.selectedUnderCategory)
+                                    @(question.selectedUnderCategory == null ? "Choose Under Category" : question.selectedUnderCategory.UnderCategory)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownUnderCategory">
                                     @foreach (UnderCategories underCategory in underCategories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory</a>
+                                        <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
                                     }
                                 </div>
                             </div>
@@ -51,12 +51,12 @@
                         <td>
                             <div class="dropdown-difficulties">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
-                                    @(question.selectedDifficulty == null ? "Choose difficulty" : question.selectedDifficulty)
+                                    @(question.selectedDifficulty == null ? "Choose difficulty" : question.selectedDifficulty.Difficulty)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownDifficulty">
                                     @foreach (Difficulties difficulty in difficulties)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty</a>
+                                        <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
                                     }
                                 </div>
                             </div>
@@ -201,7 +201,7 @@
     private List<Difficulties> difficulties = new();
     private List<Categories> categories = new();
     private List<UnderCategories> underCategories = new();
-    private List<API.Models.API.Models.User> user = new();
+    private List<API.Models.User> user = new();
 
     private const int MaxQuestions = 25;
     // private int nextQuestionId = 1;
@@ -300,15 +300,15 @@
             var dto = new QuestionDTO
                 {
                     Title = question.questionModel.QuestionText,
-                    Categories = question.selectedCategory,
-                    UnderCategories = question.selectedUnderCategory,
+                    CategoryID = question.selectedCategory.ID,
+                    UnderCategoryID = question.selectedUnderCategory.ID,
                     PossibleAnswers = new[] { question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",
                     Time = 30,
-                    Difficulties = question.selectedDifficulty,
+                    DifficultyID = question.selectedDifficulty.ID,
                     QuestionStatus = true,
-                    User = new(),
+                    CreatorID = new(),
                 };
 
 

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using OfficeOpenXml
 
+
 <PageTitle>Create</PageTitle>
 
 <div>
@@ -13,7 +14,7 @@
             <h5>Question @((Questions.IndexOf(question) + 1))</h5>
 
 
-            <input type="text" placeholder="Enter question" @bind="question.QuestionText"> <br> <br>
+            <input type="text" placeholder="Enter question" @bind="question.questionModel.QuestionText"> <br> <br>
 
             @* simple drop down menu, not important *@
             <div class="drop-menu">
@@ -21,27 +22,41 @@
                 <table>
                     <tr>
                         <td>
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleDropdown">
-                                    @selectedItem
+                            <div class="dropdown-categories">
+                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
+                                    @(question.selectedCategory == null ? "Choose Category" : question.selectedCategory)
                                 </button>
-                                <div class="dropdown-menu @dropdownClass">
-                                    @foreach (var item in items)
+                                <div class="dropdown-menu @question.dropdownCategory">
+                                    @foreach (Categories category in categories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectItem(item)">@item</a>
+                                        <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category</a>
                                     }
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="dropdown1">
-                                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleDropdown1">
-                                    @selectedItem1
+
+                            <div class="dropdown-underCategories">
+                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
+                                    @(question.selectedUnderCategory == null ? "Choose Under Category" : question.selectedUnderCategory)
                                 </button>
-                                <div class="dropdown-menu @dropdownClass1">
-                                    @foreach (var item1 in items1)
+                                <div class="dropdown-menu @question.dropdownUnderCategory">
+                                    @foreach (UnderCategories underCategory in underCategories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectItem1(item1)">@item1</a>
+                                        <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory</a>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dropdown-difficulties">
+                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
+                                    @(question.selectedDifficulty == null ? "Choose difficulty" : question.selectedDifficulty)
+                                </button>
+                                <div class="dropdown-menu @question.dropdownDifficulty">
+                                    @foreach (Difficulties difficulty in difficulties)
+                                    {
+                                        <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty</a>
                                     }
                                 </div>
                             </div>
@@ -50,28 +65,30 @@
                 </table>
             </div>
             @* end of dropdown menu  *@
-            <br/>
+            <br />
 
 
 
             <div class="answer-option">
-                <input type="checkbox" @bind="question.CorrectAnswers[0]" />
-                <input type="text" placeholder="Enter answer 1" @bind="question.Answer1" />
+                <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
+                <input type="text" placeholder="Enter answer 1" @bind="question.questionModel.Answer1" />
 
-                <input type="checkbox" @bind="question.CorrectAnswers[1]" />
-                <input type="text" placeholder="Enter answer 2" @bind="question.Answer2" />
+                <input type="checkbox" @bind="question.questionModel.CorrectAnswers[1]" />
+                <input type="text" placeholder="Enter answer 2" @bind="question.questionModel.Answer2" />
 
-                <input type="checkbox" @bind="question.CorrectAnswers[2]" />
-                <input type="text" placeholder="Enter answer 3" @bind="question.Answer3" />
+                <input type="checkbox" @bind="question.questionModel.CorrectAnswers[2]" />
+                <input type="text" placeholder="Enter answer 3" @bind="question.questionModel.Answer3" />
 
-                <input type="checkbox" @bind="question.CorrectAnswers[3]" />
-                <input type="text" placeholder="Enter answer 4" @bind="question.Answer4" />
+                <input type="checkbox" @bind="question.questionModel.CorrectAnswers[3]" />
+                <input type="text" placeholder="Enter answer 4" @bind="question.questionModel.Answer4" />
 
             </div> <br> <br>
 
-            <button class="btn btn-secondary" @onclick="() => ToggleAnswerCard(question)"> Show question & Answer</button>
+            <button class="btn btn-secondary" @onclick="() => ToggleAnswerCard(question.questionModel)"> Show question & Answer</button>
 
-            @if (SelectedQuestion != null && SelectedQuestion.Id == question.Id)
+            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Delete Question</button>
+
+            @if (SelectedQuestion != null && SelectedQuestion.Id == question.questionModel.Id)
             {
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
@@ -106,25 +123,27 @@
 </div>
 
 
- <br>
+
+<div>
 
 
+    @if (Questions.Count >= MaxQuestions)
+    {
+        <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
+    }
 
-<button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
 
-<button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
+    <button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
+
+</div>
+
+<br />
 
 <div>
     <h3>Upload Questions from Excel</h3>
     <InputFile OnChange="UploadExcel" />
-    <br /><br />
 </div>
-
-@if (Questions.Count >= MaxQuestions)
-{
-    <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
-}
-
 
 
 
@@ -134,37 +153,85 @@
     {
         public int Id { get; set; }
         public string QuestionText { get; set; }
-        public string Category { get; set; }
-        public string UnderCategory { get; set; }
+        public string Categories { get; set; }
+        public string UnderCategories { get; set; }
         public string Answer1 { get; set; }
         public string Answer2 { get; set; }
         public string Answer3 { get; set; }
         public string Answer4 { get; set; }
         public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
-        public string DifficultyLevel { get; set; }
+        public string Difficulties { get; set; }
         public bool QuestionStatus { get; set; }
         public int Time { get; set; }
-        public int UserID { get; set; }
+        public int User { get; set; }
         public string Picture { get; set; }
     }
 
     public class Question
     {
         public int QuestionId { get; set; }
-        public string QuestionText { get; set; }
-        public string Answer1 { get; set; }
-        public string Answer2 { get; set; }
-        public string Answer3 { get; set; }
-        public string Answer4 { get; set; }
-        public string CorrectAnswer { get; set; }
+        public string QuestionText { get; set; } = "";
+        public string Answer1 { get; set; } = "";
+        public string Answer2 { get; set; } = "";
+        public string Answer3 { get; set; } = "";
+        public string Answer4 { get; set; } = "";
+        public string CorrectAnswer { get; set; } = "";
     }
 
-    private const int MaxQuestions = 25;
-    private int nextQuestionId = 1;
-    private List<QuestionModel> Questions = new List<QuestionModel>();
-    private QuestionModel SelectedQuestion;
+    private class QuestionHandling
+    {
+        public QuestionModel? questionModel;
 
-    [Inject] public HttpClient Http { get; set;}
+        //public category dropdown
+        public Categories? selectedCategory;
+        public string dropdownCategory = "";
+
+        //Public undercategory dropdown
+        public UnderCategories? selectedUnderCategory;
+        public string dropdownUnderCategory = "";
+
+        //Public difficulty dropdown
+        public Difficulties? selectedDifficulty;
+        public string dropdownDifficulty = "";
+    }
+
+    private readonly HttpClient _httpClient = new();
+
+
+    private List<Difficulties> difficulties = new();
+    private List<Categories> categories = new();
+    private List<UnderCategories> underCategories = new();
+    private List<API.Models.API.Models.User> user = new();
+
+    private const int MaxQuestions = 25;
+    // private int nextQuestionId = 1;
+    private List<QuestionHandling> Questions = new();
+    private QuestionModel? SelectedQuestion;
+
+    [Inject] public HttpClient? Http { get; set; }
+
+    //getting info from API/DB
+    protected override async Task OnInitializedAsync()
+    {
+        var getDifficulties = await _httpClient.GetFromJsonAsync<List<Difficulties>>($"https://mercantec-quiz.onrender.com/api/Difficulties");
+        if (getDifficulties != null)
+        {
+            difficulties.AddRange(getDifficulties);
+        }
+
+        var getCategories = await _httpClient.GetFromJsonAsync<List<Categories>>($"https://mercantec-quiz.onrender.com/api/Categories");
+        if (getCategories != null)
+        {
+            categories.AddRange(getCategories);
+        }
+
+        var getUnderCategories = await _httpClient.GetFromJsonAsync<List<UnderCategories>>($"https://mercantec-quiz.onrender.com/api/UnderCategories");
+        if (getUnderCategories != null)
+        {
+            underCategories.AddRange(getUnderCategories);
+        }
+    }
+
 
     // mehtod to show the answer card
     private void ToggleAnswerCard(QuestionModel question)
@@ -182,9 +249,15 @@
     //method to add new question to the quiz
     private void AddNewQuestion()
     {
-        if (Questions.Count < MaxQuestions) 
+        if (Questions.Count < MaxQuestions)
         {
-            Questions.Add(new QuestionModel { Id = nextQuestionId++ });
+            Questions.Add(new QuestionHandling
+                {
+                    questionModel = new()
+                    {
+                        // Id = nextQuestionId++
+                    }
+                });
         }
     }
 
@@ -196,51 +269,71 @@
 
     private async Task SaveQuestions()
     {
-        foreach (var question in Questions)
+        foreach (QuestionHandling question in Questions)
         {
-            var correctAnswerIds = question.CorrectAnswers
+            //error handeling
+            if (question.selectedDifficulty == null)
+            {
+                //@ error message
+                return;
+            }
+
+            if (question.selectedCategory == null)
+            {
+                //@ error message
+                return;
+            }
+
+            if (question.selectedUnderCategory == null)
+            {
+                //@ error message
+                return;
+            }
+
+
+            var correctAnswerIds = question.questionModel?.CorrectAnswers
             .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
             .Where(id => id.HasValue)
             .Select(id => id.Value)
             .ToArray();
 
-            // var dto = new QuestionDTO
-            //     {
-            //         Title = question.QuestionText,
-            //         Category = "Some Category",
-            //         UnderCategory = "Some UnderCategory",
-            //         PossibleAnswers = new[] { question.Answer1, question.Answer2, question.Answer3, question.Answer4 }, // Placeholder, replace with actual values
-            //         CorrectAnswer = correctAnswerIds,
-            //         Picture = "some_url",
-            //         Time = 30,
-            //         DifficultyLevel = "Unassigned",
-            //         QuestionStatus = true,
-            //         UserID = 1
-            //     };
+            var dto = new QuestionDTO
+                {
+                    Title = question.questionModel.QuestionText,
+                    Categories = question.selectedCategory,
+                    UnderCategories = question.selectedUnderCategory,
+                    PossibleAnswers = new[] { question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
+                    CorrectAnswer = correctAnswerIds,
+                    Picture = "some_url",
+                    Time = 30,
+                    Difficulties = question.selectedDifficulty,
+                    QuestionStatus = true,
+                    User = new(),
+                };
 
 
-            // try
-            // {
-            //     // Send the POST request
-            //     var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
+            try
+            {
+                // Send the POST request
+                var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
 
-            //     // Check if the request was successful
-            //     if (response.IsSuccessStatusCode)
-            //     {
-            //         Console.WriteLine($"Question '{dto.Title}' saved successfully.");
-            //     }
-            //     else
-            //     {
-            //         // Log the status code and reason phrase in case of failure
-            //         Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
-            //     }
-            // }
-            // catch (Exception ex)
-            // {
-            //     // Log any exceptions that occur during the request
-            //     Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
-            // }
-            
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Question '{dto.Title}' saved successfully.");
+                }
+                else
+                {
+                    // Log the status code and reason phrase in case of failure
+                    Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the request
+                Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
+            }
+
 
 
         }
@@ -249,7 +342,6 @@
 
 
     //Helper method to map Selected answer
-
     private int ConvertAnswerToId(String selectedAnswer)
     {
         //this is a simple way
@@ -259,64 +351,67 @@
             case "option2": return 2;
             case "option3": return 3;
             case "option4": return 4;
-            default: return 0; //No Answer selected 
+            default: return 0; //No Answer selected
         }
     }
 
-   //simple drop down menu stuff
-
-    // List of items in the dropdown menu
-    private List<string> items = new List<string>
-    {
-        "Item 1", "Item 2", "Item 3", "Item 4"
-    };
-
-    // Selected item from the dropdown
-    private string selectedItem = "Select an Item";
-
-    // CSS class for dropdown visibility
-    private string dropdownClass = "";
-
+    //simple drop down menu category
     // Toggle the visibility of the dropdown menu
-    private void ToggleDropdown()
+    private void ToggleDropdownCategory(QuestionHandling categoryHandling)
     {
-        dropdownClass = dropdownClass == "" ? "show" : "";
+        categoryHandling.dropdownCategory = categoryHandling.dropdownCategory == "" ? "show" : "";
+        categoryHandling.dropdownUnderCategory = "";
+        categoryHandling.dropdownDifficulty = "";
     }
 
     // Set the selected item and close the dropdown
-    private void SelectItem(string item)
+    private void SelectCategory(Categories item, QuestionHandling questionHandling)
     {
-        selectedItem = item;
-        dropdownClass = ""; // Hide the dropdown
+        questionHandling.selectedCategory = item;
+        questionHandling.dropdownCategory = ""; // Hide the dropdown
     }
 
 
-    //simple drop down menu stuff
-
-    // List of items in the dropdown menu
-    private List<string> items1 = new List<string>
-    {
-        "Item 1", "Item 2", "Item 3", "Item 4"
-    };
-
-    // Selected item from the dropdown
-    private string selectedItem1 = "Select an Item";
-
-    // CSS class for dropdown visibility
-    private string dropdownClass1 = "";
-
+    //simple drop down menu for undercategory
     // Toggle the visibility of the dropdown menu
-    private void ToggleDropdown1()
+    private void ToggleDropdownUnderCategory(QuestionHandling questionHandling)
     {
-        dropdownClass1 = dropdownClass1 == "" ? "show" : "";
+        questionHandling.dropdownUnderCategory = questionHandling.dropdownUnderCategory == "" ? "show" : "";
+        questionHandling.dropdownCategory = "";
+        questionHandling.dropdownDifficulty = "";
     }
 
     // Set the selected item and close the dropdown
-    private void SelectItem1(string item1)
+    private void SelectUnderCategory(UnderCategories item1, QuestionHandling underCategoryHandling)
     {
-        selectedItem1 = item1;
-        dropdownClass1 = ""; // Hide the dropdown
+        underCategoryHandling.selectedUnderCategory = item1;
+        underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
     }
+
+
+
+    //simple drop down menu for difficulties
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownDifficulties(QuestionHandling difficultyHandling)
+    {
+        difficultyHandling.dropdownDifficulty = difficultyHandling.dropdownDifficulty == "" ? "show" : "";
+        difficultyHandling.dropdownCategory = "";
+        difficultyHandling.dropdownUnderCategory = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectDifficulties(Difficulties difficulties, QuestionHandling difficultyHandling)
+    {
+        difficultyHandling.selectedDifficulty = difficulties;
+        difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
+    }
+
+    //delete button
+    private void DeleteQuestion(QuestionHandling questionHandling)
+    {
+        Questions.Remove(questionHandling);
+    }
+
 
     //uploading the excel file to the database
     private async Task UploadExcel(InputFileChangeEventArgs e)
@@ -344,12 +439,12 @@
                         {
                             var question = new QuestionModel
                                 {
-                                    Id = nextQuestionId++,
-                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString(),
-                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString(),
-                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString(),
-                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString(),
-                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString()
+                                    // Id = nextQuestionId++,
+                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
                                 };
 
                             // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
@@ -371,16 +466,19 @@
                             }
 
                             // Set additional properties from the Excel columns
-                            question.Category = worksheet.Cells[row, 2].Value?.ToString();
-                            question.UnderCategory = worksheet.Cells[row, 3].Value?.ToString();
-                            question.Picture = worksheet.Cells[row, 9].Value?.ToString();
+                            question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                            question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+                            question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
                             question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
-                            question.DifficultyLevel = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
+                            question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
                             question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
-                            question.UserID = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
+                            question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
 
 
-                            Questions.Add(question);
+                            Questions.Add(new()
+                                {
+                                    questionModel = question
+                                });
                         }
                     }
                 }

@@ -47,7 +47,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuiz_Question(int id, Quiz_Question quiz_Question)
         {
-            if (id != quiz_Question.QuizID)
+            if (id != quiz_Question.ID)
             {
                 return BadRequest();
             }
@@ -78,16 +78,28 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Quiz_Question>> PostQuiz_Question(Quiz_QuestionDTO quiz_QuestionDTO)
         {
+            var quiz = await _context.Quizs.FindAsync(quiz_QuestionDTO.QuizID);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            var question = await _context.Questions.FindAsync(quiz_QuestionDTO.QuestionID);
+            if (question == null)
+            {
+                return NotFound();
+            }
+
             Quiz_Question quiz_Question = new()
             {
-                QuizID = quiz_QuestionDTO.QuizID,
-                QuestionID = quiz_QuestionDTO.QuestionID,
+                Quizs = quiz,
+                Questions = question,
             };
 
             _context.Quiz_Question.Add(quiz_Question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz_Question", new { id = quiz_Question.QuizID }, quiz_Question);
+            return CreatedAtAction("GetQuiz_Question", new { id = quiz_Question.ID }, quiz_Question);
         }
 
         // DELETE: api/Quiz_Question/5
@@ -108,7 +120,7 @@ namespace API.Controllers
 
         private bool Quiz_QuestionExists(int id)
         {
-            return _context.Quiz_Question.Any(e => e.QuizID == id);
+            return _context.Quiz_Question.Any(e => e.ID == id);
         }
     }
 }

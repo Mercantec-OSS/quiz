@@ -1,4 +1,6 @@
-﻿namespace API.Controllers
+﻿using API.Models;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -68,10 +70,22 @@
         [HttpPost]
         public async Task<ActionResult<User_Quiz>> PostUser_Quiz(User_QuizDTO user_QuizDTO)
         {
+            var quiz = await _context.Quizs.FindAsync(user_QuizDTO.QuizID);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+            
+            var user = await _context.Users.FindAsync(user_QuizDTO.UserID);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
             User_Quiz user_Quiz = new()
             {
-                QuizID = user_QuizDTO.QuizID,
-                UserID = user_QuizDTO.UserID,
+                Quiz = quiz,
+                User = user,
             };
 
             _context.User_Quiz.Add(user_Quiz);

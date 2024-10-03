@@ -7,15 +7,13 @@ namespace API.Models
     {
         [Key]
 
-        public int Id { get; set; }
+        public int ID { get; set; }
 
         [ForeignKey("Quiz")]
-        public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quiz Quizs { get; set; }
 
         [ForeignKey("Question")]
-        public int QuestionID { get; set; }
-        public virtual Question Question { get; set; }
+        public virtual Question Questions { get; set; }
     }
 
     public class Quiz_QuestionDTO

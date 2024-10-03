@@ -78,10 +78,16 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Categories>> PostCategories(CategoriesDTO categoriesDTO)
         {
+            var education = await _context.Educations.FindAsync(categoriesDTO.EducationID);
+            if (education == null)
+            {
+                return NotFound();
+            }
+
             Categories categories = new()
             {
                 Category = categoriesDTO.Category,
-                EducationID = categoriesDTO.EducationID,
+                Educations = education,
             };
 
             _context.Categories.Add(categories);

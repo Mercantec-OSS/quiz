@@ -10,7 +10,6 @@ namespace API.Models
         public string UnderCategory { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryID { get; set; }
         public virtual Categories Categories { get; set; }
     }
 
@@ -18,6 +17,6 @@ namespace API.Models
     {
         public string UnderCategory { get; set; }
 
-        public int Category { get; set; }
+        public int CategoryID { get; set; }
     }
 }

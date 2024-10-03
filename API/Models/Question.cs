@@ -16,15 +16,12 @@ namespace API.Models
         public string Title { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryID { get; set; } // Fx. Website
         public virtual Categories Categories { get; set; }
         
         [ForeignKey("UnderCategory")]
-        public int UnderCategoryID { get; set; }
         public virtual UnderCategories UnderCategories { get; set; }
 
         [ForeignKey("Difficulty")]
-        public int DifficultyID { get; set; } // Fx. H3
         public virtual Difficulties Difficulties { get; set; }
 
         // These two are used for wrong answers and the correcr answers for the question

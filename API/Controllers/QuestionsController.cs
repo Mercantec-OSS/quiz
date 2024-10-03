@@ -1,4 +1,7 @@
-﻿namespace API.Controllers
+﻿using API.Models;
+using Microsoft.AspNetCore.Cors;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -66,13 +69,31 @@
         [HttpPost]
         public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
         {
+            var category = await _context.Categories.FindAsync(questionDTO.CategoryID);
+            if (category == null) 
+            {
+                return NotFound();
+            }
+
+            var underCategory = await _context.UnderCategories.FindAsync(questionDTO.UnderCategoryID);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var difficulties = await _context.Difficulties.FindAsync(questionDTO.DifficultyID);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             Question question = new()
             {
-                CreatorID = questionDTO.CategoryID,
+                CreatorID = questionDTO.CreatorID,
                 Title = questionDTO.Title,
-                CategoryID = questionDTO.CategoryID,
-                UnderCategoryID = questionDTO.UnderCategoryID,
-                DifficultyID = questionDTO.DifficultyID,
+                Categories = category,
+                UnderCategories = underCategory,
+                Difficulties = difficulties,
                 PossibleAnswers = questionDTO.PossibleAnswers,
                 CorrectAnswer = questionDTO.CorrectAnswer, // Convert the result to an array
                 Picture = questionDTO.Picture,

@@ -78,9 +78,16 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesDTO underCategoriesDTO)
         {
+            var category = await _context.Categories.FindAsync(underCategoriesDTO.CategoryID);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             UnderCategories underCategories = new()
             {
                 UnderCategory = underCategoriesDTO.UnderCategory,
+                Categories = category
             };
 
             _context.UnderCategories.Add(underCategories);

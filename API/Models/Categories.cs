@@ -9,7 +9,6 @@ namespace API.Models
         public string Category { get; set; }
 
         [ForeignKey("Education")]
-        public int EducationID { get; set; }
         public virtual Educations Educations { get; set; }
     }
 

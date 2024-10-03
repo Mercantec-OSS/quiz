@@ -30,10 +30,10 @@ namespace API.Models
     public class User_QuizDTO
     {
         // This is used to flag indicate if the quiz is completed
-        public bool Completed { get; set; }
+        public bool Completed { get; set; } = false;
 
         // This is used to check the results of the quiz's
-        public int Results { get; set; }
+        public int Results { get; set; } = 0;
 
         // The ID of the Quiz
         public int QuizID { get; set; }

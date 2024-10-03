@@ -1,7 +1,7 @@
 using API.Models;
 using System.Security.AccessControl;
 
-namespace API.Models 
+namespace API.Models
 {
     public class User
     {
@@ -13,7 +13,6 @@ namespace API.Models
         // This is the sign up/ login requirements
         public string Email { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
 
         // This is used for security
         public string HashedPassword { get; set; }
@@ -26,7 +25,7 @@ namespace API.Models
         public int RolesID { get; set; }
         public virtual Roles Role { get; set; }
     }
-}
+
 
     public class UserDTO
     {
@@ -34,6 +33,7 @@ namespace API.Models
         public string Username { get; set; }
         public Roles Role { get; set; }
     }
+
 
     public class LoginRequest
     {

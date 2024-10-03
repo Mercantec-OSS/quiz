@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241002063406_init1")]
+    [Migration("20241003085447_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -25,47 +25,6 @@ namespace API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("API.Models.API.Models.User", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastLogin")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("RolesID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Salt")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("RolesID");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("API.Models.Categories", b =>
                 {
                     b.Property<int>("ID")
@@ -74,8 +33,9 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("EducationID")
                         .HasColumnType("integer");
@@ -98,8 +58,9 @@ namespace API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("integer");
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -247,23 +208,23 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Quiz_Question", b =>
                 {
-                    b.Property<int>("QuizID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("QuizID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("QuestionID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("QuizID1")
+                    b.Property<int>("QuizID")
                         .HasColumnType("integer");
 
-                    b.HasKey("QuizID");
+                    b.HasKey("Id");
 
                     b.HasIndex("QuestionID");
 
-                    b.HasIndex("QuizID1");
+                    b.HasIndex("QuizID");
 
                     b.ToTable("Quiz_Question");
                 });
@@ -299,14 +260,52 @@ namespace API.Migrations
                     b.Property<int>("CategoryID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UnderCategory")
-                        .HasColumnType("integer");
+                    b.Property<string>("UnderCategory")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
                     b.HasIndex("CategoriesID");
 
                     b.ToTable("UnderCategories");
+                });
+
+            modelBuilder.Entity("API.Models.User", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HashedPassword")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastLogin")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RolesID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RolesID");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("API.Models.User_Quiz", b =>
@@ -341,17 +340,6 @@ namespace API.Migrations
                     b.ToTable("User_Quiz");
                 });
 
-            modelBuilder.Entity("API.Models.API.Models.User", b =>
-                {
-                    b.HasOne("API.Models.Roles", "Role")
-                        .WithMany()
-                        .HasForeignKey("RolesID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("API.Models.Categories", b =>
                 {
                     b.HasOne("API.Models.Educations", "Educations")
@@ -383,7 +371,7 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.API.Models.User", "User")
+                    b.HasOne("API.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -418,7 +406,7 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.API.Models.User", "User")
+                    b.HasOne("API.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -443,7 +431,7 @@ namespace API.Migrations
 
                     b.HasOne("API.Models.Quiz", "Quiz")
                         .WithMany()
-                        .HasForeignKey("QuizID1")
+                        .HasForeignKey("QuizID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -463,6 +451,17 @@ namespace API.Migrations
                     b.Navigation("Categories");
                 });
 
+            modelBuilder.Entity("API.Models.User", b =>
+                {
+                    b.HasOne("API.Models.Roles", "Role")
+                        .WithMany()
+                        .HasForeignKey("RolesID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("API.Models.User_Quiz", b =>
                 {
                     b.HasOne("API.Models.Quiz", "Quiz")
@@ -471,7 +470,7 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Models.API.Models.User", "User")
+                    b.HasOne("API.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -76,8 +76,13 @@ namespace API.Controllers
         // POST: api/Roles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Roles>> PostRoles(Roles roles)
+        public async Task<ActionResult<Roles>> PostRoles(RolesDTO rolesDTO)
         {
+            Roles roles = new()
+            {
+                Role = rolesDTO.Role,
+            };
+
             _context.Roles.Add(roles);
             await _context.SaveChangesAsync();
 

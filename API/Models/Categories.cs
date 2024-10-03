@@ -4,9 +4,16 @@
     {
         [Key]
         public int ID { get; set; }
-        public int Category { get; set; }
+        public string Category { get; set; }
 
         public int EducationID { get; set; }
         public virtual Educations Educations { get; set; }
+    }
+
+    public class CategoriesDTO
+    {
+        public string Category { get; set; }
+
+        public int EducationID { get; set; }
     }
 }

@@ -4,6 +4,11 @@
     {
         [Key]
         public int ID { get; set; }
-        public int Difficulty { get; set; }
+        public string Difficulty { get; set; }
+    }
+
+    public class DifficultiesDTO
+    {
+        public string Difficulty { get; set; }
     }
 }

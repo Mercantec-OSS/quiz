@@ -71,11 +71,11 @@ namespace API.Controllers
         {
             Question question = new()
             {
-                User = questionDTO.User,
+                CreatorID = questionDTO.CategoryID,
                 Title = questionDTO.Title,
-                Categories = questionDTO.Categories,
-                UnderCategories = questionDTO.UnderCategories,
-                Difficulties = questionDTO.Difficulties,
+                CategoryID = questionDTO.CategoryID,
+                UnderCategoryID = questionDTO.UnderCategoryID,
+                DifficultyID = questionDTO.DifficultyID,
                 PossibleAnswers = questionDTO.PossibleAnswers,
                 CorrectAnswer = questionDTO.CorrectAnswer, // Convert the result to an array
                 Picture = questionDTO.Picture,

@@ -76,8 +76,13 @@ namespace API.Controllers
         // POST: api/Educations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Educations>> PostEducations(Educations educations)
+        public async Task<ActionResult<Educations>> PostEducations(EducationsDTO educationsDTO)
         {
+            Educations educations = new()
+            {
+                Education = educationsDTO.Education,
+            };
+
             _context.Educations.Add(educations);
             await _context.SaveChangesAsync();
 

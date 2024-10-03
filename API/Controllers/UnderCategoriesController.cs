@@ -76,8 +76,13 @@ namespace API.Controllers
         // POST: api/UnderCategories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategories underCategories)
+        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesDTO underCategoriesDTO)
         {
+            UnderCategories underCategories = new()
+            {
+                UnderCategory = underCategoriesDTO.UnderCategory,
+            };
+
             _context.UnderCategories.Add(underCategories);
             await _context.SaveChangesAsync();
 

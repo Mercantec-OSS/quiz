@@ -78,6 +78,7 @@ namespace API.Controllers
                 Email = userSignUp.Email,
                 Username = userSignUp.Username,
                 HashedPassword = HashedPassword,
+                RolesID = 1,
                 Salt = HashedPassword.Substring(0, 29),
             };
 

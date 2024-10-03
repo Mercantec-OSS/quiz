@@ -76,8 +76,14 @@ namespace API.Controllers
         // POST: api/User_Quiz
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User_Quiz>> PostUser_Quiz(User_Quiz user_Quiz)
+        public async Task<ActionResult<User_Quiz>> PostUser_Quiz(User_QuizDTO user_QuizDTO)
         {
+            User_Quiz user_Quiz = new()
+            {
+                QuizID = user_QuizDTO.QuizID,
+                UserID = user_QuizDTO.UserID,
+            };
+
             _context.User_Quiz.Add(user_Quiz);
             await _context.SaveChangesAsync();
 

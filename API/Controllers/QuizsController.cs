@@ -66,11 +66,11 @@ namespace API.Controllers
 
             Quiz quiz = new()
             {
-                User = quizDTO.User,
+                CreatorID = quizDTO.CreatorID,
                 Title = quizDTO.Title,
-                Educations = quizDTO.Educations,
-                Categories = quizDTO.Categories,
-                Difficulties = quizDTO.Difficulties,
+                EducationID = quizDTO.EducationID,
+                CategoryID = quizDTO.CategoryID,
+                DifficultyID = quizDTO.DifficultyID,
                 Timer = quizDTO.Timer,
                 QuestionAmount = quizDTO.QuestionAmount,
             };

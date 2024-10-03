@@ -76,8 +76,13 @@ namespace API.Controllers
         // POST: api/Difficulties
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Difficulties>> PostDifficulties(Difficulties difficulties)
+        public async Task<ActionResult<Difficulties>> PostDifficulties(DifficultiesDTO difficultiesDTO)
         {
+            Difficulties difficulties = new()
+            {
+                Difficulty = difficultiesDTO.Difficulty,
+            };
+
             _context.Difficulties.Add(difficulties);
             await _context.SaveChangesAsync();
 

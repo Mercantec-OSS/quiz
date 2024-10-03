@@ -29,13 +29,13 @@ namespace API.Models
 
     public class QuizDTO
     {
-        public virtual User User { get; set; }
+        public int CreatorID { get; set; }
 
         // These are used to identify the quiz
         public string Title { get; set; } // Fx. Website dev
-        public virtual Educations Educations { get; set; }
-        public virtual Categories Categories { get; set; }
-        public virtual Difficulties Difficulties { get; set; }
+        public int EducationID { get; set; } // Fx. Buttons
+        public int CategoryID { get; set; } // Fx. Website
+        public int DifficultyID { get; set; } // Fx. H3
 
         // This is the amount of time there is to complete the quiz in total
         public int Timer { get; set; }

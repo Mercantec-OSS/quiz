@@ -60,7 +60,7 @@ namespace API.Controllers
         }
 
         // POST: api/Quizs
-        [HttpPost("/Setup-Quiz")]
+        [HttpPost("Setup-Quiz")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);

@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-
-namespace API.UnitTest
+﻿namespace API.UnitTest
 {
     public static class UnitTestHelper
     {

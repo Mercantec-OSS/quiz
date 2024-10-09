@@ -1,6 +1,3 @@
-using API.Models;
-using System.Security.AccessControl;
-
 namespace API.Models
 {
     public class User

@@ -8,10 +8,10 @@
         public int ID { get; set; }
 
         [ForeignKey("Quiz")]
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quiz Quizs { get; set; }
 
         [ForeignKey("User")]
-        public virtual User User { get; set; }
+        public virtual User Users { get; set; }
 
         // This is used to flag indicate if the quiz is completed
         public bool Completed { get; set; }

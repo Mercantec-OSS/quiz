@@ -6,8 +6,9 @@
 
         // The ID of the Quiz
         public int ID { get; set; }
-        public int CreatorID { get; set; }
-        public virtual User User { get; set; }
+
+        [ForeignKey("Creator")]
+        public virtual User CreatorID { get; set; }
 
         // These are used to identify the quiz
         public string Title { get; set; } // Fx. Website dev

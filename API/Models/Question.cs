@@ -7,8 +7,8 @@
         // The ID of the Question
         public int ID { get; set; }
 
-        public int CreatorID { get; set; }
-        public virtual User User { get; set; }
+        [ForeignKey("Creator")]
+        public virtual User CreatorID { get; set; }
 
         // These are used to identify the question
         public string Title { get; set; }

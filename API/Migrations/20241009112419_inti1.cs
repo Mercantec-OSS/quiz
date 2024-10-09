@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class init1 : Migration
+    public partial class inti1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -82,14 +82,14 @@ namespace API.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Salt = table.Column<string>(type: "text", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RolesID = table.Column<int>(type: "integer", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Users_Roles_RolesID",
-                        column: x => x.RolesID,
+                        name: "FK_Users_Roles_Role",
+                        column: x => x.Role,
                         principalTable: "Roles",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -121,15 +121,11 @@ namespace API.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CreatorID = table.Column<int>(type: "integer", nullable: false),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    Creator = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
-                    EducationID = table.Column<int>(type: "integer", nullable: false),
-                    EducationsID = table.Column<int>(type: "integer", nullable: false),
-                    CategoryID = table.Column<int>(type: "integer", nullable: false),
-                    CategoriesID = table.Column<int>(type: "integer", nullable: false),
-                    DifficultyID = table.Column<int>(type: "integer", nullable: false),
-                    DifficultiesID = table.Column<int>(type: "integer", nullable: false),
+                    Education = table.Column<int>(type: "integer", nullable: false),
+                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Difficulty = table.Column<int>(type: "integer", nullable: false),
                     Timer = table.Column<int>(type: "integer", nullable: false),
                     QuestionAmount = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -137,26 +133,26 @@ namespace API.Migrations
                 {
                     table.PrimaryKey("PK_Quizs", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Quizs_Categories_CategoriesID",
-                        column: x => x.CategoriesID,
+                        name: "FK_Quizs_Categories_Category",
+                        column: x => x.Category,
                         principalTable: "Categories",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Quizs_Difficulties_DifficultiesID",
-                        column: x => x.DifficultiesID,
+                        name: "FK_Quizs_Difficulties_Difficulty",
+                        column: x => x.Difficulty,
                         principalTable: "Difficulties",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Quizs_Educations_EducationsID",
-                        column: x => x.EducationsID,
+                        name: "FK_Quizs_Educations_Education",
+                        column: x => x.Education,
                         principalTable: "Educations",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Quizs_Users_UserID",
-                        column: x => x.UserID,
+                        name: "FK_Quizs_Users_Creator",
+                        column: x => x.Creator,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -168,8 +164,7 @@ namespace API.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CreatorID = table.Column<int>(type: "integer", nullable: false),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    Creator = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Category = table.Column<int>(type: "integer", nullable: false),
                     UnderCategory = table.Column<int>(type: "integer", nullable: false),
@@ -202,8 +197,8 @@ namespace API.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Questions_Users_UserID",
-                        column: x => x.UserID,
+                        name: "FK_Questions_Users_Creator",
+                        column: x => x.Creator,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -215,8 +210,8 @@ namespace API.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    QuizID = table.Column<int>(type: "integer", nullable: false),
-                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    Quiz = table.Column<int>(type: "integer", nullable: false),
+                    User = table.Column<int>(type: "integer", nullable: false),
                     Completed = table.Column<bool>(type: "boolean", nullable: false),
                     Results = table.Column<int>(type: "integer", nullable: false),
                     QuizEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -225,14 +220,14 @@ namespace API.Migrations
                 {
                     table.PrimaryKey("PK_User_Quiz", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_User_Quiz_Quizs_QuizID",
-                        column: x => x.QuizID,
+                        name: "FK_User_Quiz_Quizs_Quiz",
+                        column: x => x.Quiz,
                         principalTable: "Quizs",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_User_Quiz_Users_UserID",
-                        column: x => x.UserID,
+                        name: "FK_User_Quiz_Users_User",
+                        column: x => x.User,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -275,6 +270,11 @@ namespace API.Migrations
                 column: "Category");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Questions_Creator",
+                table: "Questions",
+                column: "Creator");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Questions_Difficulty",
                 table: "Questions",
                 column: "Difficulty");
@@ -283,11 +283,6 @@ namespace API.Migrations
                 name: "IX_Questions_UnderCategory",
                 table: "Questions",
                 column: "UnderCategory");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Questions_UserID",
-                table: "Questions",
-                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quiz_Question_Question",
@@ -300,24 +295,24 @@ namespace API.Migrations
                 column: "Quiz");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quizs_CategoriesID",
+                name: "IX_Quizs_Category",
                 table: "Quizs",
-                column: "CategoriesID");
+                column: "Category");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quizs_DifficultiesID",
+                name: "IX_Quizs_Creator",
                 table: "Quizs",
-                column: "DifficultiesID");
+                column: "Creator");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quizs_EducationsID",
+                name: "IX_Quizs_Difficulty",
                 table: "Quizs",
-                column: "EducationsID");
+                column: "Difficulty");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quizs_UserID",
+                name: "IX_Quizs_Education",
                 table: "Quizs",
-                column: "UserID");
+                column: "Education");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UnderCategories_Category",
@@ -325,19 +320,19 @@ namespace API.Migrations
                 column: "Category");
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_Quiz_QuizID",
+                name: "IX_User_Quiz_Quiz",
                 table: "User_Quiz",
-                column: "QuizID");
+                column: "Quiz");
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_Quiz_UserID",
+                name: "IX_User_Quiz_User",
                 table: "User_Quiz",
-                column: "UserID");
+                column: "User");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_RolesID",
+                name: "IX_Users_Role",
                 table: "Users",
-                column: "RolesID");
+                column: "Role");
         }
 
         /// <inheritdoc />

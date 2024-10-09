@@ -76,14 +76,20 @@ namespace API.Controllers
             }
 
             var difficulties = await _context.Difficulties.FindAsync(quizDTO.DifficultyID);
-            if (category == null)
+            if (difficulties == null)
+            {
+                return NotFound();
+            }
+
+            var creator = await _context.Users.FindAsync(quizDTO.CreatorID);
+            if (creator == null)
             {
                 return NotFound();
             }
 
             Quiz quiz = new()
             {
-                CreatorID = quizDTO.CreatorID,
+                CreatorID = creator,
                 Title = quizDTO.Title,
                 Educations = education,
                 Categories = category,

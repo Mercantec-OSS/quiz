@@ -87,9 +87,15 @@ namespace API.Controllers
                 return NotFound();
             }
 
+            var creator = await _context.Users.FindAsync(questionDTO.CreatorID);
+            if (creator == null)
+            {
+                return NotFound();
+            }
+
             Question question = new()
             {
-                CreatorID = questionDTO.CreatorID,
+                CreatorID = creator,
                 Title = questionDTO.Title,
                 Categories = category,
                 UnderCategories = underCategory,

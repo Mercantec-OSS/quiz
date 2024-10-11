@@ -3,6 +3,7 @@
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using OfficeOpenXml
+@inject NavigationManager NavigationManager
 
 
 <PageTitle>Create</PageTitle>
@@ -309,7 +310,7 @@
                     Time = 30,
                     DifficultyID = question.selectedDifficulty.ID,
                     QuestionStatus = true,
-                    CreatorID = new(),
+                    CreatorID = 1,
                 };
 
 
@@ -322,6 +323,7 @@
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"Question '{dto.Title}' saved successfully.");
+                    NavigationManager.NavigateTo("/home");
                 }
                 else
                 {

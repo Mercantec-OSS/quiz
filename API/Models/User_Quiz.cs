@@ -1,17 +1,13 @@
 ﻿namespace API.Models
 {
+    [Keyless]
     public class User_Quiz
     {
-        [Key]
-
-        // The ID of CompletedQuiz
-        public int ID { get; set; }
-
         [ForeignKey("Quiz")]
-        public virtual Quiz Quizs { get; set; }
+        public virtual Quiz quiz { get; set; }
 
         [ForeignKey("User")]
-        public virtual User Users { get; set; }
+        public virtual User user { get; set; }
 
         // This is used to flag indicate if the quiz is completed
         public bool Completed { get; set; }
@@ -25,6 +21,8 @@
 
     public class User_QuizDTO
     {
+        public DateTime QuizEndDate { get; set; }
+
         // This is used to flag indicate if the quiz is completed
         public bool Completed { get; set; } = false;
 

@@ -1,16 +1,13 @@
 ﻿namespace API.Models
 {
+    [Keyless]
     public class Quiz_Question
     {
-        [Key]
-
-        public int ID { get; set; }
-
         [ForeignKey("Quiz")]
-        public virtual Quiz Quizs { get; set; }
+        public virtual Quiz quiz { get; set; }
 
         [ForeignKey("Question")]
-        public virtual Question Questions { get; set; }
+        public virtual Question question { get; set; }
     }
 
     public class Quiz_QuestionDTO

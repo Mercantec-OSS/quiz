@@ -19,32 +19,41 @@ namespace API.Models
         public DateTime LastLogin { get; set; }
 
         // This is used to check the users
-        [ForeignKey("Role")]
-        public virtual Roles Roles { get; set; }
+        [ForeignKey("Roles"), Column("Role")]
+        public virtual Roles Role { get; set; }
     }
 
 
     public class UserDTO
     {
-        public string Email { get; set; }
-        public string Username { get; set; }
-        public Roles Roles { get; set; }
+        public string email { get; set; }
+        public string username { get; set; }
+        public string role { get; set; }
     }
 
 
     public class LoginRequest
     {
         // This is the login requirements
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string email { get; set; }
+        public string password { get; set; }
     }
 
     public class SignUpRequest
     {
         // This is the sign up requirements
-        public string Email { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string email { get; set; }
+        public string username { get; set; }
+        public string password { get; set; }
 
+    }
+
+    public class UpdateUserDTO
+    {
+        public int ID { get; set; }
+        public string email { get; set; }
+        public string username { get; set; }
+        public string password { get; set; }
+        public int role { get; set; }
     }
 }

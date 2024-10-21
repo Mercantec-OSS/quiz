@@ -31,12 +31,18 @@ namespace API.Controllers
 
         // PUT: api/Quizs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuiz(int id, Quiz quiz)
+        public async Task<IActionResult> PutQuiz(int id, QuizDTO quizDTO)
         {
-            if (id != quiz.ID)
+            var quiz = await _context.Quizs.FindAsync(id);
+            
+            if(quiz == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            quiz.Title = quizDTO.Title;
+            quiz.Timer = quizDTO.Timer;
+            quiz.QuestionAmount = quizDTO.QuestionAmount;
 
             _context.Entry(quiz).State = EntityState.Modified;
 
@@ -46,14 +52,7 @@ namespace API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!QuizExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Unauthorized("Something went wrong");
             }
 
             return NoContent();

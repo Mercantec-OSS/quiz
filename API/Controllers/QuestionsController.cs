@@ -85,27 +85,27 @@ namespace API.Controllers
 
         // POST: api/Questions
         [HttpPost]
-        public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
+        public async Task<ActionResult<QuestionDTO>> PostQuestion(QuestionCreateDTO questionDTO)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Category == questionDTO.Category);
+            var category = await _context.Categories.FindAsync(questionDTO.Category);
             if (category == null)
             {
                 return NotFound();
             }
 
-            var underCategory = await _context.UnderCategories.FirstOrDefaultAsync(u => u.UnderCategory == questionDTO.UnderCategory);
+            var underCategory = await _context.UnderCategories.FindAsync(questionDTO.UnderCategory);
             if (underCategory == null)
             {
                 return NotFound();
             }
 
-            var difficulties = await _context.Difficulties.FirstOrDefaultAsync(d => d.Difficulty == questionDTO.Difficulty); ;
+            var difficulties = await _context.Difficulties.FindAsync(questionDTO.Difficulty);
             if (difficulties == null)
             {
                 return NotFound();
             }
 
-            var creator = await _context.Users.FirstOrDefaultAsync(u => u.Username == questionDTO.Creator);
+            var creator = await _context.Users.FindAsync(questionDTO.Creator);
             if (creator == null)
             {
                 return NotFound();
@@ -128,7 +128,21 @@ namespace API.Controllers
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuestion", new { id = question.ID }, question);
+            QuestionDTO questionGetDTO = new()
+            {
+                Category = category.Category,
+                CorrectAnswer = question.CorrectAnswer,
+                Picture = question.Picture,
+                Time = question.Time,
+                QuestionStatus = question.QuestionStatus,
+                PossibleAnswers = question.PossibleAnswers,
+                UnderCategory = underCategory.UnderCategory,
+                Difficulty = difficulties.Difficulty,
+                Creator = creator.Username,
+                Title = question.Title,
+            };
+
+            return CreatedAtAction("GetQuestion", new { id = question.ID }, questionDTO);
         }
 
         // DELETE: api/Questions/id

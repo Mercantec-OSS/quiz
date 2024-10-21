@@ -14,13 +14,13 @@
         public string Title { get; set; } // Fx. Website dev
 
         [ForeignKey("Education")]
-        public virtual Educations Educations { get; set; }    
+        public virtual Educations education { get; set; }    
 
         [ForeignKey("Category")]
-        public virtual Categories Categories { get; set; }
+        public virtual Categories category { get; set; }
 
         [ForeignKey("Difficulty")]
-        public virtual Difficulties Difficulties { get; set; }
+        public virtual Difficulties difficulty { get; set; }
 
         // This is the amount of time there is to complete the quiz in total
         public int Timer { get; set; }

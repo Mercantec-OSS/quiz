@@ -7,7 +7,7 @@
         public string Category { get; set; }
 
         [ForeignKey("Education")]
-        public virtual Educations Educations { get; set; }
+        public virtual Educations education { get; set; }
     }
 
     public class CategoriesDTO

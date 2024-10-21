@@ -19,8 +19,8 @@ namespace API.Models
         public DateTime LastLogin { get; set; }
 
         // This is used to check the users
-        [ForeignKey("Roles"), Column("Role")]
-        public virtual Roles Role { get; set; }
+        [ForeignKey("Role")]
+        public virtual Roles role { get; set; }
     }
 
 
@@ -29,6 +29,7 @@ namespace API.Models
         public string email { get; set; }
         public string username { get; set; }
         public string role { get; set; }
+        public string? token { get; set; }
     }
 
 

@@ -7,7 +7,7 @@
         public string UnderCategory { get; set; }
 
         [ForeignKey("Category")]
-        public virtual Categories Categories { get; set; }
+        public virtual Categories category { get; set; }
     }
 
     public class UnderCategoriesDTO

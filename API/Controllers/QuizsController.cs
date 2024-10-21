@@ -90,9 +90,9 @@ namespace API.Controllers
             {
                 CreatorID = creator,
                 Title = quizDTO.Title,
-                Educations = education,
-                Categories = category,
-                Difficulties = difficulties,
+                education = education,
+                category = category,
+                difficulty = difficulties,
                 Timer = quizDTO.Timer,
                 QuestionAmount = quizDTO.QuestionAmount,
             };

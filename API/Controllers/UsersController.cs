@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using NuGet.Common;
 
 namespace API.Controllers
 {
@@ -20,11 +21,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            return (await _context.Users.ToListAsync()).Select(u => new UserDTO()
+            return (await _context.Users.Include(u => u.role).ToListAsync()).Select(u => new UserDTO()
             {
                 username = u.Username,
                 email = u.Email,
-                role = u.Role.Role,
+                role = u.role.Role,
             }).ToList();
         }
 
@@ -43,7 +44,7 @@ namespace API.Controllers
             {
                 username = user.Username,
                 email = user.Email,
-                role = user.Role.Role,
+                role = user.role.Role,
             };
 
             return userDTO;
@@ -69,7 +70,7 @@ namespace API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return StatusCode(500, "Could not save changes"); 
+                return StatusCode(500, "Could not save changes");
             }
 
             return StatusCode(201, "Sucess");
@@ -77,7 +78,7 @@ namespace API.Controllers
 
         // POST: api/Users
         [HttpPost("signUp")]
-        public async Task<ActionResult<Dictionary<string,UserDTO>>> PostUser(SignUpRequest userSignUp)
+        public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.password);
 
@@ -92,53 +93,41 @@ namespace API.Controllers
                 Email = userSignUp.email,
                 Username = userSignUp.username,
                 HashedPassword = HashedPassword,
-                Role = Roles,
+                role = Roles,
                 Salt = HashedPassword.Substring(0, 29),
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            var token = GenerateJwtToken(user);
-            Dictionary<string,UserDTO> newUser = new()
+            var Token = GenerateJwtToken(user);
+            return Ok(new UserDTO()
             {
-                {
-                    token,
-                    new()
-                    {
-                        email = user.Email,
-                        username = user.Username,
-                        role = user.Role.Role,
-                    }
-                }
-            };
-            return Ok(newUser);
+                email = user.Email,
+                username = user.Username,
+                role = user.role.Role,
+                token = Token
+            });
         }
 
         // POST: api/Users
         [HttpPost("login")]
-        public async Task<ActionResult<Dictionary<string,UserDTO>>> LoginUser(LoginRequest login)
+        public async Task<ActionResult<UserDTO>> LoginUser(LoginRequest login)
         {
             User? userFinder = await _context.Users.FirstOrDefaultAsync(item => item.Email == login.email);
-            
+
             if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.password, userFinder.HashedPassword))
             {
                 return BadRequest("Incorrect username or password");
             }
 
-            var token = GenerateJwtToken(userFinder);
-            Dictionary<string, UserDTO> newUser = new()
+            var Token = GenerateJwtToken(userFinder);
+            return Ok(new UserDTO()
             {
-                {
-                    token,
-                    new()
-                    {
-                        email = userFinder.Email,
-                        username = userFinder.Username,
-                        role = userFinder.Role.Role,
-                    }
-                }
-            };
-            return Ok(newUser);
+                email = userFinder.Email,
+                username = userFinder.Username,
+                role = userFinder.role.Role,
+                token = Token
+            });
         }
 
 

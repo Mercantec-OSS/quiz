@@ -87,7 +87,7 @@ namespace API.Controllers
             Categories categories = new()
             {
                 Category = categoriesDTO.Category,
-                Educations = education,
+                education = education,
             };
 
             _context.Categories.Add(categories);

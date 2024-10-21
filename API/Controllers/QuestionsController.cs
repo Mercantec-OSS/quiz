@@ -16,9 +16,27 @@ namespace API.Controllers
 
         // GET: api/Questions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Question>>> GetQuestions()
+        public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestions()
         {
-            return await _context.Questions.ToListAsync();
+            return (await _context.Questions.
+                Include(q => q.CreatorID).
+                Include(q => q.category).
+                Include(q => q.underCategory).
+                Include(q => q.difficulty).
+                ToListAsync()).Select(q => new QuestionDTO()
+                {
+                    ID = q.ID,
+                    Creator = q.CreatorID.Username,
+                    Category = q.category.Category,
+                    CorrectAnswer = q.CorrectAnswer,
+                    Difficulty = q.difficulty.Difficulty,
+                    Picture = q.Picture,
+                    PossibleAnswers = q.PossibleAnswers,
+                    QuestionStatus = q.QuestionStatus,
+                    Time = q.Time,
+                    Title = q.Title,
+                    UnderCategory = q.underCategory.UnderCategory,
+                }).ToList();
         }
 
         // GET: api/Questions/id
@@ -69,25 +87,25 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Question>> PostQuestion(QuestionDTO questionDTO)
         {
-            var category = await _context.Categories.FindAsync(questionDTO.CategoryID);
-            if (category == null) 
-            {
-                return NotFound();
-            }
-
-            var underCategory = await _context.UnderCategories.FindAsync(questionDTO.UnderCategoryID);
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Category == questionDTO.Category);
             if (category == null)
             {
                 return NotFound();
             }
 
-            var difficulties = await _context.Difficulties.FindAsync(questionDTO.DifficultyID);
-            if (category == null)
+            var underCategory = await _context.UnderCategories.FirstOrDefaultAsync(u => u.UnderCategory == questionDTO.UnderCategory);
+            if (underCategory == null)
             {
                 return NotFound();
             }
 
-            var creator = await _context.Users.FindAsync(questionDTO.CreatorID);
+            var difficulties = await _context.Difficulties.FirstOrDefaultAsync(d => d.Difficulty == questionDTO.Difficulty); ;
+            if (difficulties == null)
+            {
+                return NotFound();
+            }
+
+            var creator = await _context.Users.FirstOrDefaultAsync(u => u.Username == questionDTO.Creator);
             if (creator == null)
             {
                 return NotFound();
@@ -97,9 +115,9 @@ namespace API.Controllers
             {
                 CreatorID = creator,
                 Title = questionDTO.Title,
-                Categories = category,
-                UnderCategories = underCategory,
-                Difficulties = difficulties,
+                category = category,
+                underCategory = underCategory,
+                difficulty = difficulties,
                 PossibleAnswers = questionDTO.PossibleAnswers,
                 CorrectAnswer = questionDTO.CorrectAnswer, // Convert the result to an array
                 Picture = questionDTO.Picture,
@@ -117,18 +135,22 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id, int userId)
         {
-            var question = await _context.Questions.FindAsync(id);
+            var question = await _context.Questions.Include(q => q.CreatorID).FirstOrDefaultAsync(q => q.ID == id); ;
             if (question == null)
             {
                 return NotFound();
             }
 
-            if (question.ID == userId)
+            if (question.CreatorID.ID != userId)
+            {
+                return Unauthorized("only the creator can delete the question");
+            }
 
             _context.Questions.Remove(question);
             await _context.SaveChangesAsync();
 
             return NoContent();
+
         }
 
         private bool QuestionExists(int id)

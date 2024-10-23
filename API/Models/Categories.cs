@@ -7,7 +7,7 @@
         public string Category { get; set; }
 
         [ForeignKey("Education")]
-        public virtual Educations Educations { get; set; }
+        public virtual Educations education { get; set; }
     }
 
     public class CategoriesDTO
@@ -15,5 +15,12 @@
         public string Category { get; set; }
 
         public int EducationID { get; set; }
+    }
+
+    public class CategoryCreateDTO
+    {
+        public string Category { get; set; }
+        public int EducationID { get; set; }
+        public string[]? UnderCategories { get; set; }
     }
 }

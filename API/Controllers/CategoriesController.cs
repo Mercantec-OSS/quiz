@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -76,24 +66,40 @@ namespace API.Controllers
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Categories>> PostCategories(CategoriesDTO categoriesDTO)
+        public async Task<ActionResult<Categories>> PostCategories(CategoryCreateDTO categoriesDTO)
         {
             var education = await _context.Educations.FindAsync(categoriesDTO.EducationID);
             if (education == null)
             {
-                return NotFound();
+                return NotFound("Education");
             }
 
             Categories categories = new()
             {
                 Category = categoriesDTO.Category,
-                Educations = education,
+                education = education,
             };
 
             _context.Categories.Add(categories);
+
+            foreach (var underCategory in categoriesDTO.UnderCategories)
+            {
+                UnderCategories underCategories = new()
+                {
+                    category = categories,
+                    UnderCategory = underCategory
+                };
+                _context.UnderCategories.Add(underCategories);
+            }
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategories", new { id = categories.ID }, categories);
+            var response = new
+            {
+                Message = $"1 Category and {categoriesDTO.UnderCategories.Length} under Categories successfully created.", // Custom message
+                CreatedCount = categoriesDTO.UnderCategories.Length + 1  // Number of created categories
+            };
+
+            return CreatedAtAction("GetCategories", new { count = categoriesDTO.UnderCategories.Length }, response);
         }
 
         // DELETE: api/Categories/5

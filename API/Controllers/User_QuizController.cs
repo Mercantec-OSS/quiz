@@ -15,34 +15,55 @@ namespace API.Controllers
 
         // GET: api/User_Quiz
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User_Quiz>>> GetUser_Quiz()
+        public async Task<ActionResult<IEnumerable<User_QuizDTO>>> GetUser_Quiz()
         {
-            return await _context.User_Quiz.ToListAsync();
+            return (await _context.User_Quiz.ToListAsync()).Select(uq => new User_QuizDTO()
+            {
+                Completed = uq.Completed,
+                QuizID = uq.quiz.ID,
+                Results = uq.Results,
+                UserID = uq.user.ID,
+            }).ToList();
         }
 
-        // GET: api/User_Quiz/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User_Quiz>> GetUser_Quiz(int id)
+        // GET: api/User_Quiz/5/2
+        [HttpGet("{quizId}/{userId}")]
+        public async Task<ActionResult<User_QuizDTO>> GetUser_Quiz(int quizId, int userId)
         {
-            var user_Quiz = await _context.User_Quiz.FindAsync(id);
+            var user_Quiz = await _context.User_Quiz.
+                FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
+            
+            if (user_Quiz == null)
+            {
+                return NotFound();
+            }
+
+            return new User_QuizDTO
+            {
+                QuizID = user_Quiz.quiz.ID,
+                Results = user_Quiz.Results,
+                Completed = user_Quiz.Completed,
+                UserID = user_Quiz.user.ID,
+            };
+        }
+
+        // PUT: api/User_Quiz/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public async Task<IActionResult> PutUser_Quiz(User_QuizDTO user_QuizDTO)
+        {
+            var user_Quiz = await _context.User_Quiz.
+                FirstOrDefaultAsync(uq => uq.quiz.ID == user_QuizDTO.QuizID
+                && uq.user.ID == user_QuizDTO.UserID);
 
             if (user_Quiz == null)
             {
                 return NotFound();
             }
 
-            return user_Quiz;
-        }
-
-        // PUT: api/User_Quiz/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser_Quiz(int id, User_Quiz user_Quiz)
-        {
-            if (id != user_Quiz.ID)
-            {
-                return BadRequest();
-            }
+            user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate;
+            user_Quiz.Results = user_QuizDTO.Results;
+            user_Quiz.Completed = user_QuizDTO.Completed;
 
             _context.Entry(user_Quiz).State = EntityState.Modified;
 
@@ -52,14 +73,7 @@ namespace API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!User_QuizExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest("Something went wrong");
             }
 
             return NoContent();
@@ -75,7 +89,7 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-            
+
             var user = await _context.Users.FindAsync(user_QuizDTO.UserID);
             if (user == null)
             {
@@ -84,21 +98,23 @@ namespace API.Controllers
 
             User_Quiz user_Quiz = new()
             {
-                Quizs = quiz,
-                Users = user,
+                quiz = quiz,
+                user = user,
             };
 
             _context.User_Quiz.Add(user_Quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser_Quiz", new { id = user_Quiz.ID }, user_Quiz);
+            return CreatedAtAction("GetUser_Quiz", user_Quiz);
         }
 
-        // DELETE: api/User_Quiz/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser_Quiz(int id)
+        // DELETE: api/User_Quiz/5/2
+        [HttpDelete("{quizId}/{userId}")]
+        public async Task<IActionResult> DeleteUser_Quiz(int quizId, int userId)
         {
-            var user_Quiz = await _context.User_Quiz.FindAsync(id);
+            var user_Quiz = await _context.User_Quiz.
+                 FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
+
             if (user_Quiz == null)
             {
                 return NotFound();
@@ -108,11 +124,6 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool User_QuizExists(int id)
-        {
-            return _context.User_Quiz.Any(e => e.ID == id);
         }
     }
 }

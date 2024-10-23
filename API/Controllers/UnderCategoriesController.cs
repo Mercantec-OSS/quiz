@@ -87,7 +87,7 @@ namespace API.Controllers
             UnderCategories underCategories = new()
             {
                 UnderCategory = underCategoriesDTO.UnderCategory,
-                Categories = category
+                category = category
             };
 
             _context.UnderCategories.Add(underCategories);

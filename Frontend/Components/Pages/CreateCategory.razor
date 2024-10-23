@@ -123,8 +123,9 @@
     private void CloseEditModal() => UnderCategoryEditModelOpen = false;
     private void CloseDeleteConfirmModal() => confirmDeletionOfUnderCategoryModelOpen = false;
 
-    private void SaveToDB()
+    private async void SaveToDB()
     {
+        var response = await (new HttpClient()).PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
 
     }
 

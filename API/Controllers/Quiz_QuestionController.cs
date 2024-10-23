@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Models;
 using Microsoft.AspNetCore.Http;
 namespace API.Controllers
 {
@@ -18,54 +19,36 @@ namespace API.Controllers
 
         // GET: api/Quiz_Question
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz_Question>>> GetQuiz_Question()
+        public async Task<ActionResult<IEnumerable<Quiz_QuestionDTO>>> GetQuiz_Question()
         {
-            return await _context.Quiz_Question.ToListAsync();
+            return (await _context.Quiz_Question.ToListAsync()).Select(qq => new Quiz_QuestionDTO()
+            {
+                QuestionID = qq.question.ID,
+                QuizID = qq.quiz.ID,
+            }).ToList();
         }
 
         // GET: api/Quiz_Question/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Quiz_Question>> GetQuiz_Question(int id)
+        [HttpGet("{quizId}/{questionId}")]
+        public async Task<ActionResult<Quiz_Question>> GetQuiz_Question(int quizId, int questionId)
         {
-            var quiz_Question = await _context.Quiz_Question.FindAsync(id);
+            var quiz_Question = await _context.Quiz_Question.
+                FirstOrDefaultAsync(qq => qq.quiz.ID == quizId && qq.question.ID == questionId); ;
 
             if (quiz_Question == null)
             {
                 return NotFound();
             }
 
-            return quiz_Question;
+            return Ok(quiz_Question);
         }
 
         // PUT: api/Quiz_Question/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuiz_Question(int id, Quiz_Question quiz_Question)
+        [HttpPut]
+        public ActionResult PutQuiz_Question(Quiz_QuestionDTO quiz_Question)
         {
-            if (id != quiz_Question.ID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(quiz_Question).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!Quiz_QuestionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Unauthorized("Literly no reason to change this, as it can break stoff.");
         }
 
         // POST: api/Quiz_Question
@@ -73,35 +56,37 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Quiz_Question>> PostQuiz_Question(Quiz_QuestionDTO quiz_QuestionDTO)
         {
-            var quiz = await _context.Quizs.FindAsync(quiz_QuestionDTO.QuizID);
-            if (quiz == null)
+            var newQuiz = await _context.Quizs.FindAsync(quiz_QuestionDTO.QuizID);
+            if (newQuiz == null)
             {
                 return NotFound();
             }
 
-            var question = await _context.Questions.FindAsync(quiz_QuestionDTO.QuestionID);
-            if (question == null)
+            var newQuestion = await _context.Questions.FindAsync(quiz_QuestionDTO.QuestionID);
+            if (newQuestion == null)
             {
                 return NotFound();
             }
 
             Quiz_Question quiz_Question = new()
             {
-                Quizs = quiz,
-                Questions = question,
+                quiz = newQuiz,
+                question = newQuestion
             };
 
             _context.Quiz_Question.Add(quiz_Question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz_Question", new { id = quiz_Question.ID }, quiz_Question);
+            return CreatedAtAction("GetQuiz_Question", quiz_Question);
         }
 
         // DELETE: api/Quiz_Question/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteQuiz_Question(int id)
+        [HttpDelete("{quizId}/{questionId}")]
+        public async Task<IActionResult> DeleteQuiz_Question(int quizId, int questionId)
         {
-            var quiz_Question = await _context.Quiz_Question.FindAsync(id);
+            var quiz_Question = await _context.Quiz_Question.
+                FirstOrDefaultAsync(qq => qq.quiz.ID == quizId && qq.question.ID == questionId); ;
+
             if (quiz_Question == null)
             {
                 return NotFound();
@@ -111,11 +96,6 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool Quiz_QuestionExists(int id)
-        {
-            return _context.Quiz_Question.Any(e => e.ID == id);
         }
     }
 }

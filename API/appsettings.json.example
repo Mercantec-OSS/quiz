@@ -1,0 +1,19 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": ""
+  },
+
+  "JwtSettings": {
+    "Issuer": "",
+    "Audience": "",
+    "Key": ""
+  },
+
+  "AllowedHosts": ""
+}

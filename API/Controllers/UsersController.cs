@@ -113,7 +113,9 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> LoginUser(LoginRequest login)
         {
-            User? userFinder = await _context.Users.FirstOrDefaultAsync(item => item.Email == login.email);
+            User? userFinder = await _context.Users.
+                Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Email == login.email);
 
             if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.password, userFinder.HashedPassword))
             {

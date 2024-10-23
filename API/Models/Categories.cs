@@ -16,4 +16,11 @@
 
         public int EducationID { get; set; }
     }
+
+    public class CategoryCreateDTO
+    {
+        public string Category { get; set; }
+        public int EducationID { get; set; }
+        public string[]? UnderCategories { get; set; }
+    }
 }

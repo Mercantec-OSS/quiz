@@ -84,8 +84,8 @@ namespace API.Controllers
 
             User_Quiz user_Quiz = new()
             {
-                Quiz = quiz,
-                User = user,
+                Quizs = quiz,
+                Users = user,
             };
 
             _context.User_Quiz.Add(user_Quiz);

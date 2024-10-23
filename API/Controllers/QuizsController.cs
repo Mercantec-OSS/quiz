@@ -60,7 +60,7 @@ namespace API.Controllers
         }
 
         // POST: api/Quizs
-        [HttpPost("/Setup-Quiz")]
+        [HttpPost("Setup-Quiz")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
@@ -76,14 +76,20 @@ namespace API.Controllers
             }
 
             var difficulties = await _context.Difficulties.FindAsync(quizDTO.DifficultyID);
-            if (category == null)
+            if (difficulties == null)
+            {
+                return NotFound();
+            }
+
+            var creator = await _context.Users.FindAsync(quizDTO.CreatorID);
+            if (creator == null)
             {
                 return NotFound();
             }
 
             Quiz quiz = new()
             {
-                CreatorID = quizDTO.CreatorID,
+                CreatorID = creator,
                 Title = quizDTO.Title,
                 Educations = education,
                 Categories = category,

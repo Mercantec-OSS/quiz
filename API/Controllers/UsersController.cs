@@ -1,6 +1,4 @@
-﻿using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -73,12 +71,18 @@ namespace API.Controllers
         {
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.Password);
 
+            var Roles = await _context.Roles.FindAsync(1);
+            if (Roles == null)
+            {
+                return NotFound();
+            }
+
             User user = new()
             {
                 Email = userSignUp.Email,
                 Username = userSignUp.Username,
                 HashedPassword = HashedPassword,
-                RolesID = 1,
+                Roles = Roles,
                 Salt = HashedPassword.Substring(0, 29),
             };
 

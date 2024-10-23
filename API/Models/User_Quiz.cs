@@ -1,7 +1,4 @@
-﻿using API.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace API.Models
+﻿namespace API.Models
 {
     public class User_Quiz
     {
@@ -11,12 +8,10 @@ namespace API.Models
         public int ID { get; set; }
 
         [ForeignKey("Quiz")]
-        public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quiz Quizs { get; set; }
 
         [ForeignKey("User")]
-        public int UserID { get; set; }
-        public virtual User User { get; set; }
+        public virtual User Users { get; set; }
 
         // This is used to flag indicate if the quiz is completed
         public bool Completed { get; set; }

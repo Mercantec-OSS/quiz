@@ -1,6 +1,3 @@
-using API.Models;
-using System.Security.AccessControl;
-
 namespace API.Models
 {
     public class User
@@ -22,8 +19,8 @@ namespace API.Models
         public DateTime LastLogin { get; set; }
 
         // This is used to check the users
-        public int RolesID { get; set; }
-        public virtual Roles Role { get; set; }
+        [ForeignKey("Role")]
+        public virtual Roles Roles { get; set; }
     }
 
 
@@ -31,7 +28,7 @@ namespace API.Models
     {
         public string Email { get; set; }
         public string Username { get; set; }
-        public Roles Role { get; set; }
+        public Roles Roles { get; set; }
     }
 
 

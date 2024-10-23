@@ -299,18 +299,19 @@
             .Select(id => id.Value)
             .ToArray();
 
-            var dto = new QuestionDTO
+            var dto = new QuestionCreateDTO
                 {
                     Title = question.questionModel.QuestionText,
-                    CategoryID = question.selectedCategory.ID,
-                    UnderCategoryID = question.selectedUnderCategory.ID,
-                    PossibleAnswers = new[] { question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
+                    Category = question.selectedCategory.ID,
+                    UnderCategory = question.selectedUnderCategory.ID,
+                    PossibleAnswers = new[] { 
+                     question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",
                     Time = 30,
-                    DifficultyID = question.selectedDifficulty.ID,
+                    Difficulty = question.selectedDifficulty.ID,
                     QuestionStatus = true,
-                    CreatorID = 1,
+                    Creator = 1,
                 };
 
 

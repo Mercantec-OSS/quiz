@@ -10,28 +10,61 @@ namespace API.Controllers
 
         // GET: api/Quizs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizs()
+        public async Task<ActionResult<IEnumerable<QuizDTO>>> GetQuizs()
         {
-            return await _context.Quizs.ToListAsync();
+            return (await _context.Quizs.
+                Include(q => q.creator).
+                Include(q => q.category).
+                Include(q => q.difficulty).
+                Include(q => q.creator).
+                Include(q => q.education).
+                ToListAsync()).Select(q => new QuizDTO()
+                {
+                    ID = q.ID,
+                    Category = q.category.Category,
+                    Creator = q.creator.Username,
+                    Difficulty = q.difficulty.Difficulty,
+                    Education = q.education.Education,
+                    QuestionAmount = q.QuestionAmount,
+                    Timer = q.Timer,
+                    Title = q.Title,
+                }).ToList();
         }
 
         // GET: api/Quizs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Quiz>> GetQuiz(int id)
+        public async Task<ActionResult<QuizDTO>> GetQuiz(int id)
         {
-            var quiz = await _context.Quizs.FindAsync(id);
+            var quiz = await _context.Quizs.
+                Include(q => q.creator).
+                Include(q => q.category).
+                Include(q => q.difficulty).
+                Include(q => q.creator).
+                Include(q => q.education).
+                FirstOrDefaultAsync(q => q.ID == id);
 
             if (quiz == null)
             {
                 return NotFound();
             }
 
-            return quiz;
+            QuizDTO quizDTO = new QuizDTO()
+            {
+                ID = quiz.ID,
+                Category = quiz.category.Category,
+                Creator = quiz.creator.Username,
+                Difficulty = quiz.difficulty.Difficulty,
+                Education = quiz.education.Education,
+                QuestionAmount = quiz.QuestionAmount,
+                Timer = quiz.Timer,
+                Title = quiz.Title,
+            };
+            return quizDTO;
         }
 
         // PUT: api/Quizs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuiz(int id, QuizDTO quizDTO)
+        public async Task<IActionResult> PutQuiz(int id, QuizCreateDTO quizDTO)
         {
             var quiz = await _context.Quizs.FindAsync(id);
             
@@ -60,7 +93,7 @@ namespace API.Controllers
 
         // POST: api/Quizs
         [HttpPost("Setup-Quiz")]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizDTO quizDTO)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
             if (education == null)
@@ -88,7 +121,7 @@ namespace API.Controllers
 
             Quiz quiz = new()
             {
-                CreatorID = creator,
+                creator = creator,
                 Title = quizDTO.Title,
                 education = education,
                 category = category,

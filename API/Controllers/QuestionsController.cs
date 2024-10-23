@@ -41,16 +41,36 @@ namespace API.Controllers
 
         // GET: api/Questions/id
         [HttpGet("{id}")]
-        public async Task<ActionResult<Question>> GetQuestion(int id)
+        public async Task<ActionResult<QuestionDTO>> GetQuestion(int id)
         {
-            var question = await _context.Questions.FindAsync(id);
+            var question = await _context.Questions.
+                Include(q => q.CreatorID).
+                Include(q => q.category).
+                Include(q => q.underCategory).
+                Include(q => q.difficulty).
+                FirstOrDefaultAsync(q => q.ID == id);
 
             if (question == null)
             {
                 return NotFound();
             }
 
-            return question;
+            QuestionDTO questionDTO = new QuestionDTO()
+            {
+                Category = question.category.Category,
+                CorrectAnswer = question.CorrectAnswer,
+                Difficulty = question.difficulty.Difficulty,
+                Picture = question.Picture,
+                PossibleAnswers = question.PossibleAnswers,
+                QuestionStatus = question.QuestionStatus,
+                Time = question.Time,
+                Title = question.Title,
+                Creator = question.CreatorID.Username,
+                ID = question.ID,
+                UnderCategory = question.underCategory.UnderCategory,
+            };
+
+            return questionDTO;
         }
 
         // PUT: api/Questions/id

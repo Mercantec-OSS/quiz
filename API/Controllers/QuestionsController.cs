@@ -110,25 +110,25 @@ namespace API.Controllers
             var category = await _context.Categories.FindAsync(questionDTO.Category);
             if (category == null)
             {
-                return NotFound();
+                return NotFound("Category");
             }
 
             var underCategory = await _context.UnderCategories.FindAsync(questionDTO.UnderCategory);
             if (underCategory == null)
             {
-                return NotFound();
+                return NotFound("UnderCategory");
             }
 
             var difficulties = await _context.Difficulties.FindAsync(questionDTO.Difficulty);
             if (difficulties == null)
             {
-                return NotFound();
+                return NotFound("Difficulty");
             }
 
             var creator = await _context.Users.FindAsync(questionDTO.Creator);
             if (creator == null)
             {
-                return NotFound();
+                return NotFound("Creator");
             }
 
             Question question = new()

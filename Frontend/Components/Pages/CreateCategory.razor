@@ -1,20 +1,196 @@
 ﻿@page "/createCategory"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using API.Models
+@using System.Net
 
+<PageTitle>Create Category</PageTitle>
 
-<h1>CreateCategory</h1>
+<h1>Create Category</h1>
 
-<input type="text"placeholder="Add Category">
-<button class= "btn btn-primary">Add Category</button>
+<div class="m-1">
+    <input type="text" placeholder="Main Category" @bind="mainCategory" id="mainCategory" />
+</div>
 
-<input type="text" placeholder="Add Undercategory"/>
-<button class="btn btn-primary">Add Undercategory</button>
+<div class="m-1">
+    <input type="text" placeholder="Add Under Category" @bind="currentUnderCategory" id="currentUnderCategory" />
+    <button class="btn-primary btn" @onclick="CreateUnderCategory">Add Under Category</button>
+</div>
 
+<div class="m-1">
+    <button class="btn-success btn" @onclick="SaveToDB">Save</button>
+</div>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Main categories</th>
+            <th>Under categories</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var valuePair in Categories)
+        {
+            @foreach (var item in valuePair.Value)
+            {
+                <tr>
+                    <td>@item.MainCategory</td>
+                    <td>@item.Category</td>
+                    <td><button class="btn-primary btn" @onclick="() => Edit(item)">Edit</button></td>
+                    <td><button class="btn-danger btn" @onclick="() => Delete(item)">Delete</button></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
 
-
-@code
+@if (UnderCategoryEditModelOpen)
 {
+    <div class="model custom-modal">
+        <h4>Edit Under Category</h4>
+        <div class="m-1">
+            <input @bind="underCategoryBeenEditInModel" placeholder="Enter text here" />
+        </div>
+        <div class="m-1">
+            <button class="btn-primary btn" @onclick="SaveEdit">Save</button>
+            <button class="btn" @onclick="CloseEditModal">Cancel</button>
+        </div>
+    </div>
 
-
-
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="CloseEditModal" class="modal-overlay"></div>
 }
+
+@if (confirmDeletionOfUnderCategoryModelOpen)
+{
+    <div class="model custom-modal">
+        <h4>Are you sure that you want to delete this under category?</h4>
+        <div class="m-1">
+            <button class="btn-danger btn" @onclick="DeleteConfirmed">Delete</button>
+            <button class="btn" @onclick="CloseDeleteConfirmModal">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="CloseDeleteConfirmModal" class="modal-overlay"></div>
+}
+
+@if (informAboutNotSavedModalOpen)
+{
+    <div class="model custom-modal">
+        <h4>Couldn't save same or all of your categories</h4>
+        <p>Here is the list that couldn't save:</p>
+        @foreach (string item in categoriesNotSaved)
+        {
+            <p>@item</p>
+        }
+        <div class="m-1">
+            <button class="btn" @onclick="CloseInformNotSave">Ok</button>
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="CloseInformNotSave" class="modal-overlay"></div>
+}
+
+@code {
+    [Inject] public HttpClient? Http { get; set; }
+
+    private string mainCategory = string.Empty;
+    private string currentUnderCategory = string.Empty;
+    private Dictionary<string, List<UnderCategory>> Categories = new();
+
+    private bool UnderCategoryEditModelOpen = false;
+    private UnderCategory? underCategoryBeenEdit;
+    private string underCategoryBeenEditInModel = string.Empty;
+
+    private bool confirmDeletionOfUnderCategoryModelOpen = false;
+    private UnderCategory? underCategoryNeededToBeConfirmed;
+
+    private bool informAboutNotSavedModalOpen = false;
+    private List<string> categoriesNotSaved = new();
+
+    private void CreateUnderCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(currentUnderCategory))
+        {
+            _ = Categories.TryAdd(mainCategory, new());
+            Categories[mainCategory].Add(new(currentUnderCategory, mainCategory));
+            currentUnderCategory = string.Empty;
+        }
+    }
+
+    private void Edit(UnderCategory underCategory)
+    {
+        underCategoryBeenEdit = underCategory;
+        underCategoryBeenEditInModel = underCategory.Category;
+        UnderCategoryEditModelOpen = true;
+    }
+
+    private void SaveEdit()
+    {
+        if (underCategoryBeenEdit == null) return;
+        underCategoryBeenEdit.Category = underCategoryBeenEditInModel;
+        CloseEditModal();
+    }
+
+    private void Delete(UnderCategory underCategory)
+    {
+        confirmDeletionOfUnderCategoryModelOpen = true;
+        underCategoryNeededToBeConfirmed = underCategory;
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (underCategoryNeededToBeConfirmed == null) return;
+        Categories[underCategoryNeededToBeConfirmed.MainCategory]
+            .Remove(underCategoryNeededToBeConfirmed);
+        CloseDeleteConfirmModal();
+    }
+
+    private void CloseEditModal() => UnderCategoryEditModelOpen = false;
+    private void CloseDeleteConfirmModal() => confirmDeletionOfUnderCategoryModelOpen = false;
+    private void CloseInformNotSave()
+    {
+        categoriesNotSaved.Clear();
+        informAboutNotSavedModalOpen = false;
+    }
+
+    private async void SaveToDB()
+    {
+        foreach (KeyValuePair<string, List<UnderCategory>> item in Categories)
+        {
+            CategoryCreateDTO dTO = new()
+                {
+                    Category = item.Key.Trim(),
+                    EducationID = 1,
+                    UnderCategories = item.Value.Select(i => i.Category.Trim()).ToArray()
+                };
+
+            if (Http != null)
+            {
+                (HttpStatusCode statusCode, string response) =
+                    await HttpHandler.PostAsync("/api/Categories", dTO, Http);
+
+                if (statusCode != HttpStatusCode.Created)
+                {
+                    categoriesNotSaved.Add(item.Key);
+                    informAboutNotSavedModalOpen = true;
+                }
+            }
+        }
+        if (!informAboutNotSavedModalOpen)
+        {
+            NavigationManager.NavigateTo("/home");
+        }
+    }
+
+    public class UnderCategory(string category, string main)
+    {
+        public string MainCategory { get; set; } = main;
+        public string Category { get; set; } = category;
+    }
+}
+

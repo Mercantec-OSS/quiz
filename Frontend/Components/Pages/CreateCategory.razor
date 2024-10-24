@@ -1,6 +1,6 @@
 ﻿@page "/createCategory"
 @rendermode InteractiveServer
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
 @using API.Models
 @using System.Net
 
@@ -180,6 +180,10 @@
                     informAboutNotSavedModalOpen = true;
                 }
             }
+        }
+        if (!informAboutNotSavedModalOpen)
+        {
+            NavigationManager.NavigateTo("/home");
         }
     }
 

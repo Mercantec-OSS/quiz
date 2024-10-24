@@ -1,6 +1,8 @@
 ﻿@page "/createCategory"
 @rendermode InteractiveServer
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@using API.Models
+@using System.Net
 
 <PageTitle>Create Category</PageTitle>
 
@@ -16,7 +18,7 @@
 </div>
 
 <div class="m-1">
-    <button class="btn-primary btn" @onclick="SaveToDB">Add Under Category</button>
+    <button class="btn-success btn" @onclick="SaveToDB">Save</button>
 </div>
 
 <table class="table">
@@ -29,14 +31,17 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (UnderCategory item in underCategories)
+        @foreach (var valuePair in Categories)
         {
-            <tr>
-                <td>@item.MainCategory</td>
-                <td>@item.Category</td>
-                <td><button class="btn-primary btn" @onclick="() => Edit(item)">Edit</button></td>
-                <td><button class="btn-danger btn" @onclick="() => Delete(item)">Delete</button></td>
-            </tr>
+            @foreach (var item in valuePair.Value)
+            {
+                <tr>
+                    <td>@item.MainCategory</td>
+                    <td>@item.Category</td>
+                    <td><button class="btn-primary btn" @onclick="() => Edit(item)">Edit</button></td>
+                    <td><button class="btn-danger btn" @onclick="() => Delete(item)">Delete</button></td>
+                </tr>
+            }
         }
     </tbody>
 </table>
@@ -72,10 +77,30 @@
     <div @onclick="CloseDeleteConfirmModal" class="modal-overlay"></div>
 }
 
+@if (informAboutNotSavedModalOpen)
+{
+    <div class="model custom-modal">
+        <h4>Couldn't save same or all of your categories</h4>
+        <p>Here is the list that couldn't save:</p>
+        @foreach (string item in categoriesNotSaved)
+        {
+            <p>@item</p>
+        }
+        <div class="m-1">
+            <button class="btn" @onclick="CloseInformNotSave">Ok</button>
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="CloseInformNotSave" class="modal-overlay"></div>
+}
+
 @code {
+    [Inject] public HttpClient? Http { get; set; }
+
     private string mainCategory = string.Empty;
     private string currentUnderCategory = string.Empty;
-    private List<UnderCategory> underCategories = new();
+    private Dictionary<string, List<UnderCategory>> Categories = new();
 
     private bool UnderCategoryEditModelOpen = false;
     private UnderCategory? underCategoryBeenEdit;
@@ -84,11 +109,15 @@
     private bool confirmDeletionOfUnderCategoryModelOpen = false;
     private UnderCategory? underCategoryNeededToBeConfirmed;
 
+    private bool informAboutNotSavedModalOpen = false;
+    private List<string> categoriesNotSaved = new();
+
     private void CreateUnderCategory()
     {
         if (!string.IsNullOrWhiteSpace(currentUnderCategory))
         {
-            underCategories.Add(new(currentUnderCategory, mainCategory));
+            _ = Categories.TryAdd(mainCategory, new());
+            Categories[mainCategory].Add(new(currentUnderCategory, mainCategory));
             currentUnderCategory = string.Empty;
         }
     }
@@ -116,17 +145,42 @@
     private void DeleteConfirmed()
     {
         if (underCategoryNeededToBeConfirmed == null) return;
-        underCategories.Remove(underCategoryNeededToBeConfirmed);
+        Categories[underCategoryNeededToBeConfirmed.MainCategory]
+            .Remove(underCategoryNeededToBeConfirmed);
         CloseDeleteConfirmModal();
     }
 
     private void CloseEditModal() => UnderCategoryEditModelOpen = false;
     private void CloseDeleteConfirmModal() => confirmDeletionOfUnderCategoryModelOpen = false;
+    private void CloseInformNotSave()
+    {
+        categoriesNotSaved.Clear();
+        informAboutNotSavedModalOpen = false;
+    }
 
     private async void SaveToDB()
     {
-        var response = await (new HttpClient()).PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
+        foreach (KeyValuePair<string, List<UnderCategory>> item in Categories)
+        {
+            CategoryCreateDTO dTO = new()
+                {
+                    Category = item.Key.Trim(),
+                    EducationID = 1,
+                    UnderCategories = item.Value.Select(i => i.Category.Trim()).ToArray()
+                };
 
+            if (Http != null)
+            {
+                (HttpStatusCode statusCode, string response) =
+                    await HttpHandler.PostAsync("/api/Categories", dTO, Http);
+
+                if (statusCode != HttpStatusCode.Created)
+                {
+                    categoriesNotSaved.Add(item.Key);
+                    informAboutNotSavedModalOpen = true;
+                }
+            }
+        }
     }
 
     public class UnderCategory(string category, string main)

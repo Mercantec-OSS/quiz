@@ -42,6 +42,26 @@ namespace API.Controllers
             return underCategories;
         }
 
+        [HttpGet("CategoryID/{id}")]
+        public async Task<ActionResult<IEnumerable<UnderCategoriesGetDTO>>> GetUnderCategoriesByCategoryID(int id)
+        {
+            var underCategories = await _context.UnderCategories
+                .Include(u => u.category)
+                .Where(u => u.category.ID == id)
+                .Select(u => new UnderCategoriesGetDTO
+                {
+                    ID = u.ID,
+                    UnderCategory = u.UnderCategory,
+                })
+                .ToListAsync();
+            if (underCategories == null)
+            {
+                return NotFound();
+            }
+
+            return underCategories;
+        }
+
         // PUT: api/UnderCategories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

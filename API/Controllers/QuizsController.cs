@@ -25,7 +25,6 @@ namespace API.Controllers
                     Creator = q.creator.Username,
                     Difficulty = q.difficulty.Difficulty,
                     Education = q.education.Education,
-                    QuestionAmount = q.QuestionAmount,
                     Timer = q.Timer,
                     Title = q.Title,
                 }).ToList();
@@ -55,7 +54,6 @@ namespace API.Controllers
                 Creator = quiz.creator.Username,
                 Difficulty = quiz.difficulty.Difficulty,
                 Education = quiz.education.Education,
-                QuestionAmount = quiz.QuestionAmount,
                 Timer = quiz.Timer,
                 Title = quiz.Title,
             };
@@ -64,7 +62,7 @@ namespace API.Controllers
 
         // PUT: api/Quizs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuiz(int id, QuizCreateDTO quizDTO)
+        public async Task<IActionResult> PutQuiz(int id, QuizCreateRandomDTO quizDTO)
         {
             var quiz = await _context.Quizs.FindAsync(id);
             
@@ -75,7 +73,6 @@ namespace API.Controllers
 
             quiz.Title = quizDTO.Title;
             quiz.Timer = quizDTO.Timer;
-            quiz.QuestionAmount = quizDTO.QuestionAmount;
 
             _context.Entry(quiz).State = EntityState.Modified;
 
@@ -93,30 +90,30 @@ namespace API.Controllers
 
         // POST: api/Quizs
         [HttpPost("Setup-Quiz")]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateDTO quizDTO)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateRandomDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
             if (education == null)
             {
-                return NotFound();
+                return NotFound("Education not found");
             }
 
             var category = await _context.Categories.FindAsync(quizDTO.CategoryID);
             if (category == null)
             {
-                return NotFound();
+                return NotFound("Category not found");
             }
 
             var difficulties = await _context.Difficulties.FindAsync(quizDTO.DifficultyID);
             if (difficulties == null)
             {
-                return NotFound();
+                return NotFound("Difficulty not found");
             }
 
             var creator = await _context.Users.FindAsync(quizDTO.CreatorID);
             if (creator == null)
             {
-                return NotFound();
+                return NotFound("User not found");
             }
 
             Quiz quiz = new()
@@ -127,7 +124,6 @@ namespace API.Controllers
                 category = category,
                 difficulty = difficulties,
                 Timer = quizDTO.Timer,
-                QuestionAmount = quizDTO.QuestionAmount,
             };
 
             _context.Quizs.Add(quiz);

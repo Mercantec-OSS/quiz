@@ -123,7 +123,7 @@
 
 
         QuizCreateRandomDTO quizCreate = new QuizCreateRandomDTO
-            {
+        {
                 CreatorID = 1,
                 Title = "my quiz",
                 CategoryID = categoryID,
@@ -140,16 +140,16 @@
                         Amount = 10
                     }
                 }
-            };
-        var response = await Http.PostAsJsonAsync("/api/Quiz/CreateRandom", quizCreate);
-        if (response.IsSuccessStatusCode)
-        {
-            Questions = await response.Content.ReadFromJsonAsync<List<Question>>() ?? new List<Question>();
-        }
-        else
-        {
-            Console.WriteLine("ERROR FETCHING QUESTIONS");
-        }
+        };
+            var response = await Http.PostAsJsonAsync("/api/Quiz/CreateRandom", quizCreate);
+            if (response.IsSuccessStatusCode)
+            {
+                Questions = await response.Content.ReadFromJsonAsync<List<Question>>() ?? new List<Question>();
+            }
+            else
+            {
+                Console.WriteLine("Error fetching questions: Unsuccessful response from API.");
+            }
 
     }
 

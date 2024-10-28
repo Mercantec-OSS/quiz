@@ -1,0 +1,196 @@
+﻿@page "/quiz"
+@rendermode InteractiveServer
+@using API.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Frontend.Components
+
+<h3>Quiz</h3>
+
+<div>
+    @foreach (var question in Categories)
+    {
+        @* simple drop down menu, very important *@
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
+                                @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownCategory">
+                                @foreach (Categories category in categories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+
+                        <div class="dropdown-underCategories">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
+                                @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownUnderCategory">
+                                @foreach (UnderCategories underCategory in underCategories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown-difficulties">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
+                                @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownDifficulty">
+                                @foreach (Difficulties difficulty in difficulties)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        @* end of dropdown menu  *@
+    }
+</div>
+
+<button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(Categories.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
+
+
+
+
+@code
+{
+
+    private class CategoryHandlingQuiz
+    {
+        public string Categories { get; set; }
+        public string UnderCategories { get; set; }
+        public string Difficulties { get; set; }
+
+        //public category dropdown
+        public Categories? selectedCategory;
+        public string dropdownCategory = "";
+
+        //Public undercategory dropdown
+        public UnderCategories? selectedUnderCategory;
+        public string dropdownUnderCategory = "";
+
+        //Public difficulty dropdown
+        public Difficulties? selectedDifficulty;
+        public string dropdownDifficulty = "";
+    }
+
+
+
+    private List<Difficulties> difficulties = new();
+    private List<Categories> categories = new();
+    private List<UnderCategories> underCategories = new();
+    private List<API.Models.User> user = new();
+
+    private const int MaxQuestions = 25;
+    // private int nextQuestionId = 1;
+    private List<CategoryHandlingQuiz> Categories = new();
+
+
+    [Inject] public HttpClient? Http { get; set; }
+
+    //getting info from API/DB
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http == null)
+            return;
+
+
+        var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
+        if (getDifficulties != null)
+        {
+            difficulties.AddRange(getDifficulties);
+        }
+
+        var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
+        if (getCategories != null)
+        {
+            categories.AddRange(getCategories);
+        }
+
+        var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
+        if (getUnderCategories != null)
+        {
+            underCategories.AddRange(getUnderCategories);
+        }
+
+        AddNewCategory();
+    }
+
+    private void DeleteQuestionSet(CategoryHandlingQuiz categoryHandling)
+    {
+        Categories.Remove(categoryHandling);
+    }
+
+
+    private void AddNewCategory()
+    {
+        Categories.Add(new CategoryHandlingQuiz());
+    }
+
+    //simple drop down menu category
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownCategory(CategoryHandlingQuiz categoryHandling)
+    {
+        categoryHandling.dropdownCategory = categoryHandling.dropdownCategory == "" ? "show" : "";
+        categoryHandling.dropdownUnderCategory = "";
+        categoryHandling.dropdownDifficulty = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectCategory(Categories item, CategoryHandlingQuiz questionHandling)
+    {
+        questionHandling.selectedCategory = item;
+        questionHandling.dropdownCategory = ""; // Hide the dropdown
+    }
+
+
+    //simple drop down menu for undercategory
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownUnderCategory(CategoryHandlingQuiz questionHandling)
+    {
+        questionHandling.dropdownUnderCategory = questionHandling.dropdownUnderCategory == "" ? "show" : "";
+        questionHandling.dropdownCategory = "";
+        questionHandling.dropdownDifficulty = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectUnderCategory(UnderCategories item1, CategoryHandlingQuiz underCategoryHandling)
+    {
+        underCategoryHandling.selectedUnderCategory = item1;
+        underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
+    }
+
+
+
+    //simple drop down menu for difficulties
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownDifficulties(CategoryHandlingQuiz difficultyHandling)
+    {
+        difficultyHandling.dropdownDifficulty = difficultyHandling.dropdownDifficulty == "" ? "show" : "";
+        difficultyHandling.dropdownCategory = "";
+        difficultyHandling.dropdownUnderCategory = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectDifficulties(Difficulties difficulties, CategoryHandlingQuiz difficultyHandling)
+    {
+        difficultyHandling.selectedDifficulty = difficulties;
+        difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
+    }
+}

@@ -79,27 +79,42 @@
                 Category = categoriesDTO.Category,
                 education = education,
             };
-
-            _context.Categories.Add(categories);
-
-            foreach (var underCategory in categoriesDTO.UnderCategories)
+            var response = new
             {
-                UnderCategories underCategories = new()
+                Message = "",
+                CreatedCount = 1
+
+            };
+            _context.Categories.Add(categories);
+            if (categoriesDTO.UnderCategories != null && categoriesDTO.UnderCategories.Length > 0)
+            {
+                foreach (var underCategory in categoriesDTO.UnderCategories)
                 {
-                    category = categories,
-                    UnderCategory = underCategory
+                    UnderCategories underCategories = new()
+                    {
+                        category = categories,
+                        UnderCategory = underCategory
+                    };
+                    _context.UnderCategories.Add(underCategories);
+                }
+                response = new
+                {
+                    Message = $"1 Category and {categoriesDTO.UnderCategories.Length} under Categories successfully created.", // Custom message
+                    CreatedCount = categoriesDTO.UnderCategories.Length + 1  // Number of created categories
                 };
-                _context.UnderCategories.Add(underCategories);
+            }
+            else
+            {
+                response = new
+                {
+                    Message = $"1 Category successfully created.", // Custom message
+                    CreatedCount = 1
+                };
             }
             await _context.SaveChangesAsync();
 
-            var response = new
-            {
-                Message = $"1 Category and {categoriesDTO.UnderCategories.Length} under Categories successfully created.", // Custom message
-                CreatedCount = categoriesDTO.UnderCategories.Length + 1  // Number of created categories
-            };
 
-            return CreatedAtAction("GetCategories", new { count = categoriesDTO.UnderCategories.Length }, response);
+            return CreatedAtAction("GetCategories", new { count = categoriesDTO }, response);
         }
 
         // DELETE: api/Categories/5

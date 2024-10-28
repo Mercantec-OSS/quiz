@@ -53,6 +53,9 @@
                             </div>
                         </div>
                     </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -61,6 +64,9 @@
 </div>
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(Categories.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
+
+
+
 
 @code
 {
@@ -125,6 +131,12 @@
 
         AddNewCategory();
     }
+
+    private void DeleteQuestionSet(CategoryHandlingQuiz categoryHandling)
+    {
+        Categories.Remove(categoryHandling);
+    }
+
 
     private void AddNewCategory()
     {

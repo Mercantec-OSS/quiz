@@ -81,7 +81,7 @@
 {
     <div class="model custom-modal">
         <h4>Couldn't save same or all of your categories</h4>
-        <p>Here is the list that couldn't save:</p>
+        <p>Here is the list that couldn't be saved:</p>
         @foreach (string item in categoriesNotSaved)
         {
             <p>@item</p>
@@ -171,7 +171,7 @@
 
             if (Http != null)
             {
-                (HttpStatusCode statusCode, string response) =
+                (HttpStatusCode statusCode, string? _) = 
                     await HttpHandler.PostAsync("/api/Categories", dTO, Http);
 
                 if (statusCode != HttpStatusCode.Created)

@@ -1,0 +1,37 @@
+﻿@page "/ChooseCategoryListOrCreate"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mt-2">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">View all</h5>
+                    <p class="card-text">See the full list of categories and sub categories.</p>
+                    <button class="btn btn-primary" @onclick="OpenList">View</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-2">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Create new</h5>
+                    <p class="card-text">Categories and sub categories.</p>
+                    <button class="btn btn-primary" @onclick="OpenCreate">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void OpenCreate()
+    {
+        NavigationManager.NavigateTo("/createCategory");
+    }
+    private void OpenList()
+    {
+        NavigationManager.NavigateTo("/CategoryList");
+    }
+}

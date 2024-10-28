@@ -12,7 +12,7 @@ namespace API.Models
         public string Username { get; set; }
 
         // This is used for security
-        public string HashedPassword { get; set; }
+        public string? HashedPassword { get; set; }
         public string Salt { get; set; }
 
         // This is used to check whenever the user was last loged in

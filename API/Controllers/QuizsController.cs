@@ -65,8 +65,8 @@ namespace API.Controllers
         public async Task<IActionResult> PutQuiz(int id, QuizCreateRandomDTO quizDTO)
         {
             var quiz = await _context.Quizs.FindAsync(id);
-            
-            if(quiz == null)
+
+            if (quiz == null)
             {
                 return NotFound();
             }
@@ -89,7 +89,7 @@ namespace API.Controllers
         }
 
         // POST: api/Quizs
-        [HttpPost("Setup-Quiz")]
+        [HttpPost("Setup-Quiz/Random")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateRandomDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
@@ -116,6 +116,49 @@ namespace API.Controllers
                 return NotFound("User not found");
             }
 
+            foreach (QuestionAmount questionAmount in quizDTO.questions)
+            {
+                int questions;
+                if (questionAmount.UnderCategoryID != null)
+                {
+                    questions = await _context.Questions
+                        .Include(q => q.underCategory)
+                        .Include(q => q.difficulty)
+                        .Where(q => q.underCategory.ID == questionAmount.UnderCategoryID)
+                        .Where(q => q.difficulty.ID == questionAmount.DifficultyID)
+                        .CountAsync();
+                    if (questions < questionAmount.Amount)
+                    {
+                        var categoryName = await _context.UnderCategories
+                            .FindAsync(questionAmount.CategoryID);
+                        if (categoryName == null)
+                        {
+                            return NotFound("1 or more UnderCategories does not exist");
+                        }
+                        return NotFound($"Not enough questions of type: {categoryName.UnderCategory} on that difficulty");
+                    }
+                }
+                else
+                {
+                    questions = await _context.Questions
+                        .Include(q => q.category)
+                        .Include(q => q.difficulty)
+                        .Where(q => q.category.ID == questionAmount.CategoryID)
+                        .Where(q => q.difficulty.ID == questionAmount.DifficultyID)
+                        .CountAsync();
+                    if (questions < questionAmount.Amount)
+                    {
+                        var categoryName = await _context.Categories
+                            .FindAsync(questionAmount.CategoryID);
+                        if (categoryName == null)
+                        {
+                            return NotFound("1 or more categories does not exist");
+                        }
+                        return NotFound($"Not enough questions of type: {categoryName.Category} on that difficulty");
+                    }
+                }
+            }
+
             Quiz quiz = new()
             {
                 creator = creator,
@@ -128,6 +171,46 @@ namespace API.Controllers
 
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
+            List<Quiz_QuestionDTO> allQuestions = new List<Quiz_QuestionDTO>();
+            foreach (QuestionAmount questionAmount in quizDTO.questions)
+            {
+                List<Quiz_QuestionDTO> questions = new();
+                if (questionAmount.UnderCategoryID != null)
+                {
+                    questions.AddRange((await _context.Questions
+                        .Include(q => q.underCategory)
+                        .Include(q => q.difficulty)
+                        .Where(q => q.underCategory.ID == questionAmount.UnderCategoryID)
+                        .Where(q => q.difficulty.ID == questionAmount.DifficultyID)
+                        .ToListAsync()).Select(q => new Quiz_QuestionDTO()
+                        {
+                            QuestionID = q.ID,
+                            QuizID = quiz.ID
+                        }));
+
+                }
+                else
+                {
+                    questions.AddRange((await _context.Questions
+                        .Include(q => q.category)
+                        .Include(q => q.difficulty)
+                        .Where(q => q.category.ID == questionAmount.CategoryID)
+                        .Where(q => q.difficulty.ID == questionAmount.DifficultyID)
+                        .ToListAsync()).Select(q => new Quiz_QuestionDTO()
+                        {
+                            QuestionID = q.ID,
+                            QuizID = quiz.ID
+                        }));
+                }
+                questions = questions.OrderBy(_ => Random.Shared.Next()).ToList();
+                var selectedQuestions = questions.Take(questionAmount.Amount).ToList();
+                allQuestions.AddRange(selectedQuestions);
+            }
+            Quiz_QuestionController quiz_QuestionController = new(_context);
+            foreach (var question in allQuestions)
+            {
+                await quiz_QuestionController.PostQuiz_Question(question);
+            }
 
             return CreatedAtAction("GetQuiz", new { id = quiz.ID }, quizDTO);
         }

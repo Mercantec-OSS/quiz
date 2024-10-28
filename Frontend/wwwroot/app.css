@@ -66,6 +66,15 @@ h1:focus {
     border-radius: 8px;
 }
 
+.MyPageCustomBox {
+    border: 1px solid black;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;

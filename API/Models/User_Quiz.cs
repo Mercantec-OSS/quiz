@@ -1,8 +1,10 @@
 ﻿namespace API.Models
 {
-    [Keyless]
     public class User_Quiz
     {
+        [Key]
+        public int Id { get; set; }
+
         [ForeignKey("Quiz")]
         public virtual Quiz quiz { get; set; }
 
@@ -17,6 +19,8 @@
 
         // This is the date and time that the quiz is available
         public DateTime QuizEndDate { get; set; }
+        
+        public int? TimeUsed { get; set; }
     }
 
     public class User_QuizDTO

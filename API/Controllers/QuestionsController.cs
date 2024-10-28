@@ -39,6 +39,32 @@ namespace API.Controllers
                 }).ToList();
         }
 
+        [HttpGet("ByQuizID/{id}")]
+        public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByQuizID(int id)
+        {
+            return (await _context.Quiz_Question.
+                Include(q => q.question).
+                Include(q => q.question.CreatorID).
+                Include(q => q.question.category).
+                Include(q => q.question.underCategory).
+                Include(q => q.question.difficulty).
+                Where(q => q.quiz.ID == id).
+                ToListAsync()).Select(q => new QuestionDTO()
+                {
+                    ID = q.question.ID,
+                    Creator = q.question.CreatorID.Username,
+                    Category = q.question.category.Category,
+                    CorrectAnswer = q.question.CorrectAnswer,
+                    Difficulty = q.question.difficulty.Difficulty,
+                    Picture = q.question.Picture,
+                    PossibleAnswers = q.question.PossibleAnswers,
+                    QuestionStatus = q.question.QuestionStatus,
+                    Time = q.question.Time,
+                    Title = q.question.Title,
+                    UnderCategory = q.question.underCategory.UnderCategory,
+                }).ToList();
+        }
+
         // GET: api/Questions/id
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestionDTO>> GetQuestion(int id)

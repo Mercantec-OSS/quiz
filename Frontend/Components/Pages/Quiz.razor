@@ -138,8 +138,8 @@ else
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
-        public string[] PossibleAnswers { get; set;}
-        public int[] CorrectAnswer { get; set;}
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
 
     }
 
@@ -168,7 +168,9 @@ else
 
         if (statusCode == HttpStatusCode.OK)
         {
-            Questions = questions ?? new();
+            Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
+            q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
             Console.WriteLine("Good job fuck face");
         }
         else

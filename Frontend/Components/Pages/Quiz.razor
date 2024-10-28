@@ -3,6 +3,7 @@
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Frontend.Components
+@using System.Net
 
 <h3>Quiz</h3>
 
@@ -121,35 +122,19 @@
         int underCategoryID = questionHandling.selectedUnderCategory.ID;
         int difficultyID = questionHandling.selectedDifficulty.ID;
 
+        string url = $"/api/Questions";
 
-        QuizCreateRandomDTO quizCreate = new QuizCreateRandomDTO
+        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, Http);
+
+        if (statusCode == HttpStatusCode.OK)
         {
-                CreatorID = 1,
-                Title = "my quiz",
-                CategoryID = categoryID,
-                DifficultyID = difficultyID,
-                Timer = 300,
-
-                questions = new QuestionAmount[]
-                {
-                    new QuestionAmount
-                    {
-                        CategoryID = categoryID,
-                        UnderCategoryID = underCategoryID,
-                        DifficultyID = difficultyID,
-                        Amount = 10
-                    }
-                }
-        };
-            var response = await Http.PostAsJsonAsync("/api/Quiz/CreateRandom", quizCreate);
-            if (response.IsSuccessStatusCode)
-            {
-                Questions = await response.Content.ReadFromJsonAsync<List<Question>>() ?? new List<Question>();
-            }
-            else
-            {
-                Console.WriteLine("Error fetching questions: Unsuccessful response from API.");
-            }
+            Questions = questions ?? new();
+            Console.WriteLine("Good job fuck face");
+        }
+        else
+        {
+            Console.WriteLine("FUCK YOU");
+        }
 
     }
 

@@ -77,7 +77,7 @@ namespace API.Controllers
             _context.Quiz_Question.Add(quiz_Question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz_Question", $"quiz:{quiz_QuestionDTO.QuizID} Question: {quiz_QuestionDTO.QuestionID}" );
+            return CreatedAtAction("GetQuiz_Question", quiz_Question );
         }
 
         // DELETE: api/Quiz_Question/5

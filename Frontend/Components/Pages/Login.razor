@@ -6,13 +6,12 @@
 @inject IJSRuntime JSRuntime
 @namespace Login
 @using API.Models
-
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@using Frontend.Components.Layout
 
 <PageTitle>Login</PageTitle>
 
-
 <h1>Login</h1>
-
 
 <!-- Email and Password input fields -->
 <div>
@@ -30,7 +29,7 @@
 
 <div class="logout">
     <NavLink class="nav-link" href="#" @onclick="DeleteJwtCookie">
-        <span class="bi bi-box-arrow-right" aria-hidden="true"></span>DeleteCookies/JwtToken
+        <span class="bi bi-box-arrow-right" aria-hidden="true"></span>Log ud
     </NavLink>
 </div>
 
@@ -86,8 +85,9 @@
                 loginSuccess = true;
 
                 //store JWT in Cookies
-                await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
-
+                // await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
+                await sessionStorage.SetItemAsync("jwt", jwtToken);
+                MainLayout.jwtToken = jwtToken;
 
                 //navigate to home when email/username and password is correct
                 NavigationManager.NavigateTo("/home");
@@ -106,7 +106,6 @@
         }
     }
 
-
     // Model class for login request
     public class LoginRequest
     {
@@ -115,21 +114,13 @@
     }
 
 
-    //Javascripts method for setting cookies
-    [JSInvokable("setCookie")]
-    public static void SetCookie(string name, string value, int minutes)
-    {
-        var expires = DateTime.UtcNow.AddMinutes(minutes);
-        var cookie = $"{name}={value}; expires={expires:R}; path=/; secure; httponly;";
-        Console.WriteLine($"Setting Cookie: {cookie}");
-    }
 
-    // Method to delete the JWT cookie
+    // // Method to delete the JWT "session"
     private async Task DeleteJwtCookie()
     {
-        // Invoking JavaScript function to delete the cookie
-        await JSRuntime.InvokeVoidAsync("deleteCookie", "jwt");
-
+        // Invoking function to delete the cookie
+        await sessionStorage.RemoveItemAsync("jwt");
+        MainLayout.jwtToken = string.Empty;
     }
 
 }

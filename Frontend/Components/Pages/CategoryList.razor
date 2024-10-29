@@ -1,0 +1,83 @@
+﻿@page "/CategoryList"
+@rendermode InteractiveServer
+@using System.Net;
+
+@using API.Models
+
+<h3>CategoryList</h3>
+<ul class="list-group">
+    @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
+    {
+        <li class="list-group-item @(i % 2 == 1 ? "list-group-item-dark" : "list-group-item-light")"
+            @onclick="() => categoryShowingUnderCategories != category ?
+                GetSubCategories(category) : ClearSubCategories()">
+            <div>
+                <h4>
+                    @category.Category
+                </h4>
+                @if (categoryShowingUnderCategories == category)
+                {
+                    if (underCategories.Count <= 0)
+                    {
+                        <p style="border-top: 1px solid gray; padding-top: 10px;">
+                            Loading...
+                        </p>
+                    }
+                    else
+                    {
+                        foreach (var (item, x) in underCategories.Select((category, index) => (category, index)))
+                        {
+                            <p style="border-top: 1px solid gray; padding-top: 10px;">
+                                @item.UnderCategory
+                            </p>
+                        }
+                    }
+                }
+            </div>
+        </li>
+    }
+</ul>
+
+@code {
+    [Inject] public HttpClient? Http { get; set; }
+    private List<Categories> categories = new();
+    private Categories? categoryShowingUnderCategories;
+    private List<UnderCategories> underCategories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http == null) return;
+
+        (HttpStatusCode statusCode, List<Categories>? response) =
+            await HttpHandler.GetAsync<List<Categories>>("api/Categories", Http);
+        if (statusCode == HttpStatusCode.OK)
+        {
+            categories = response ?? new();
+        }
+    }
+
+    private Task ClearSubCategories()
+    {
+        underCategories.Clear();
+        categoryShowingUnderCategories = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task GetSubCategories(Categories category)
+    {
+        await ClearSubCategories();
+        categoryShowingUnderCategories = category;
+
+        if (Http == null) return;
+
+        (HttpStatusCode statusCode, List<UnderCategories>? response) =
+            await HttpHandler.GetAsync<List<UnderCategories>>("api/UnderCategories/CategoryID/" + category.ID,
+            Http);
+
+        if (statusCode == HttpStatusCode.OK)
+        {
+            underCategories = response ?? new();
+        }
+        return;
+    }
+}

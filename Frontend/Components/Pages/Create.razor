@@ -3,6 +3,8 @@
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using OfficeOpenXml
+@inject NavigationManager NavigationManager
+
 
 
 <PageTitle>Create</PageTitle>
@@ -11,12 +13,12 @@
     @foreach (var question in Questions)
     {
         <div>
-            <h5>Question @((Questions.IndexOf(question) + 1))</h5>
+            <h5>Spørgsmål @((Questions.IndexOf(question) + 1))</h5>
 
 
             <input type="text" placeholder="Enter question" @bind="question.questionModel.QuestionText"> <br> <br>
 
-            @* simple drop down menu, not important *@
+            @* simple drop down menu, very  important *@
             <div class="drop-menu">
 
                 <table>
@@ -24,7 +26,7 @@
                         <td>
                             <div class="dropdown-categories">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
-                                    @(question.selectedCategory == null ? "Choose Category" : question.selectedCategory.Category)
+                                    @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownCategory">
                                     @foreach (Categories category in categories)
@@ -38,7 +40,7 @@
 
                             <div class="dropdown-underCategories">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
-                                    @(question.selectedUnderCategory == null ? "Choose Under Category" : question.selectedUnderCategory.UnderCategory)
+                                    @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownUnderCategory">
                                     @foreach (UnderCategories underCategory in underCategories)
@@ -51,7 +53,7 @@
                         <td>
                             <div class="dropdown-difficulties">
                                 <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
-                                    @(question.selectedDifficulty == null ? "Choose difficulty" : question.selectedDifficulty.Difficulty)
+                                    @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownDifficulty">
                                     @foreach (Difficulties difficulty in difficulties)
@@ -84,9 +86,8 @@
 
             </div> <br> <br>
 
-            <button class="btn btn-secondary" @onclick="() => ToggleAnswerCard(question.questionModel)"> Show question & Answer</button>
 
-            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Delete Question</button>
+            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Slet Spørgsmål</button>
 
             @if (SelectedQuestion != null && SelectedQuestion.Id == question.questionModel.Id)
             {
@@ -129,19 +130,19 @@
 
     @if (Questions.Count >= MaxQuestions)
     {
-        <p style="color:red"> Max Questions Reached! (@MaxQuestions)</p>
+        <p style="color:red"> MAXIMUM ANTAL SPØRGSMÅL NÅET!!! (@MaxQuestions)</p>
     }
 
-    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Add New Question</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Tilføj spørgsmål</button>
 
-    <button class="btn btn-success" @onclick="SaveQuestions">Save Questions</button>
+    <button class="btn btn-success" @onclick="SaveQuestions">Gem spørgsmål</button>
 
 </div>
 
 <br />
 
 <div>
-    <h3>Upload Questions from Excel</h3>
+    <h3>Upload spørgsmål fra Excel</h3>
     <InputFile OnChange="UploadExcel" />
 </div>
 
@@ -175,7 +176,6 @@
         public string Answer2 { get; set; } = "";
         public string Answer3 { get; set; } = "";
         public string Answer4 { get; set; } = "";
-        public string CorrectAnswer { get; set; } = "";
     }
 
     private class QuestionHandling
@@ -233,19 +233,6 @@
     }
 
 
-    // mehtod to show the answer card
-    private void ToggleAnswerCard(QuestionModel question)
-    {
-        if (SelectedQuestion == question)
-        {
-            SelectedQuestion = null;
-        }
-        else
-        {
-            SelectedQuestion = question;
-        }
-    }
-
     //method to add new question to the quiz
     private void AddNewQuestion()
     {
@@ -298,18 +285,19 @@
             .Select(id => id.Value)
             .ToArray();
 
-            var dto = new QuestionDTO
+            var dto = new QuestionCreateDTO
                 {
                     Title = question.questionModel.QuestionText,
-                    CategoryID = question.selectedCategory.ID,
-                    UnderCategoryID = question.selectedUnderCategory.ID,
-                    PossibleAnswers = new[] { question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
+                    Category = question.selectedCategory.ID,
+                    UnderCategory = question.selectedUnderCategory.ID,
+                    PossibleAnswers = new[] { 
+                     question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",
                     Time = 30,
-                    DifficultyID = question.selectedDifficulty.ID,
+                    Difficulty = question.selectedDifficulty.ID,
                     QuestionStatus = true,
-                    CreatorID = new(),
+                    Creator = 1,
                 };
 
 
@@ -322,6 +310,7 @@
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"Question '{dto.Title}' saved successfully.");
+                    NavigationManager.NavigateTo("/home");
                 }
                 else
                 {

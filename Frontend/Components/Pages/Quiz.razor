@@ -1,0 +1,271 @@
+﻿@page "/quiz"
+@rendermode InteractiveServer
+@using API.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Frontend.Components
+@using System.Net
+@using System.Linq
+
+<h3>Quiz</h3>
+
+<div>
+    @foreach (var question in Categories)
+    {
+        @* simple drop down menu, very important *@
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
+                                @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownCategory">
+                                @foreach (Categories category in categories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+
+                        <div class="dropdown-underCategories">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
+                                @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownUnderCategory">
+                                @foreach (UnderCategories underCategory in underCategories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown-difficulties">
+                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
+                                @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
+                            </button>
+                            <div class="dropdown-menu @question.dropdownDifficulty">
+                                @foreach (Difficulties difficulty in difficulties)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Hent spørgsmål</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        @* end of dropdown menu  *@
+    }
+</div>
+
+<button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(Categories.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
+
+@if (Questions != null && Questions.Count > 0)
+{
+    Console.WriteLine($"Questions Count: {Questions.Count}");
+
+    <h4>Spørgsmål:</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Category</th>
+                <th>UnderCategory</th>
+                <th>Difficulty</th>
+                <th>Mulige svar</th>
+                <th>Rigtige svar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var question in Questions)
+            {
+                <tr>
+                    <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
+                    <td>@question.Category</td>
+                    <td>@question.UnderCategory</td>
+                    <td>@question.Difficulty</td>
+                    <td>@string.Join(",", question.PossibleAnswers)</td>
+                    <td>@string.Join(",", question.CorrectAnswer)</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+else
+{
+    <p>No questions found</p>
+}
+
+@code
+{
+
+    private class CategoryHandlingQuiz
+    {
+        public string Title { get; set; }
+        public string Categories { get; set; }
+        public string UnderCategories { get; set; }
+        public string Difficulties { get; set; }
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
+
+        //public category dropdown
+        public Categories? selectedCategory;
+        public string dropdownCategory = "";
+
+        //Public undercategory dropdown
+        public UnderCategories? selectedUnderCategory;
+        public string dropdownUnderCategory = "";
+
+        //Public difficulty dropdown
+        public Difficulties? selectedDifficulty;
+        public string dropdownDifficulty = "";
+    }
+
+    public class Question
+    {
+        public string Title { get; set; }
+        public string Category { get; set; }
+        public string UnderCategory { get; set; }
+        public string Difficulty { get; set; }
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
+
+    }
+
+    [Inject] public HttpClient? Http { get; set; }
+    private List<Difficulties> difficulties = new();
+    private List<Categories> categories = new();
+    private List<UnderCategories> underCategories = new();
+    private List<CategoryHandlingQuiz> Categories = new();
+    private List<Question> Questions { get; set; } = new List<Question>();
+    private List<API.Models.User> user = new();
+
+    private const int MaxQuestions = 25;
+
+
+    private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
+    {
+        if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
+
+        int categoryID = questionHandling.selectedCategory.ID;
+        int underCategoryID = questionHandling.selectedUnderCategory.ID;
+        int difficultyID = questionHandling.selectedDifficulty.ID;
+
+        string url = $"/api/Questions";
+
+        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, Http);
+
+        if (statusCode == HttpStatusCode.OK)
+        {
+            Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
+            q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
+            Console.WriteLine("Good job fuck face");
+        }
+        else
+        {
+            Console.WriteLine("FUCK YOU");
+        }
+
+    }
+
+    //getting info from API/DB
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http == null) return;
+
+        var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
+        if (getDifficulties != null)
+        {
+            difficulties.AddRange(getDifficulties);
+        }
+
+        var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
+        if (getCategories != null)
+        {
+            categories.AddRange(getCategories);
+        }
+
+        var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
+        if (getUnderCategories != null)
+        {
+            underCategories.AddRange(getUnderCategories);
+        }
+
+        AddNewCategory();
+    }
+
+    //delete button
+    private void DeleteQuestionSet(CategoryHandlingQuiz categoryHandling)
+    {
+        Categories.Remove(categoryHandling);
+    }
+
+
+    private void AddNewCategory()
+    {
+        Categories.Add(new CategoryHandlingQuiz());
+    }
+
+    //simple drop down menu category
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownCategory(CategoryHandlingQuiz categoryHandling)
+    {
+        categoryHandling.dropdownCategory = categoryHandling.dropdownCategory == "" ? "show" : "";
+        categoryHandling.dropdownUnderCategory = "";
+        categoryHandling.dropdownDifficulty = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectCategory(Categories item, CategoryHandlingQuiz questionHandling)
+    {
+        questionHandling.selectedCategory = item;
+        questionHandling.dropdownCategory = ""; // Hide the dropdown
+    }
+
+
+    //simple drop down menu for undercategory
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownUnderCategory(CategoryHandlingQuiz questionHandling)
+    {
+        questionHandling.dropdownUnderCategory = questionHandling.dropdownUnderCategory == "" ? "show" : "";
+        questionHandling.dropdownCategory = "";
+        questionHandling.dropdownDifficulty = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectUnderCategory(UnderCategories item1, CategoryHandlingQuiz underCategoryHandling)
+    {
+        underCategoryHandling.selectedUnderCategory = item1;
+        underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
+    }
+
+
+
+    //simple drop down menu for difficulties
+    // Toggle the visibility of the dropdown menu
+    private void ToggleDropdownDifficulties(CategoryHandlingQuiz difficultyHandling)
+    {
+        difficultyHandling.dropdownDifficulty = difficultyHandling.dropdownDifficulty == "" ? "show" : "";
+        difficultyHandling.dropdownCategory = "";
+        difficultyHandling.dropdownUnderCategory = "";
+    }
+
+    // Set the selected item and close the dropdown
+    private void SelectDifficulties(Difficulties difficulties, CategoryHandlingQuiz difficultyHandling)
+    {
+        difficultyHandling.selectedDifficulty = difficulties;
+        difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
+    }
+}

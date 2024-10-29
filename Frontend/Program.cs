@@ -3,6 +3,8 @@ using Blazored.LocalStorage;
 using System.Net.Http;
 using Frontend;
 using OfficeOpenXml;
+using Blazored.SessionStorage;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Add services to the container.
+builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddRazorComponents();

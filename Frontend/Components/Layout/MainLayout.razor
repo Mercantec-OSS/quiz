@@ -2,35 +2,11 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using Login
-
-
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @code
 {
-    string jwtToken = string.Empty;
-
-    public async Task GetJwtToken()
-    {
-        jwtToken = await JSRuntime.InvokeAsync<string>("setCookie", "jwt");
-        Console.WriteLine("main Menu " + jwtToken);
-        StateHasChanged();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        try
-        {
-            Console.WriteLine("OnAfterRenderAsync called.");
-            if (firstRender)
-            {
-                Console.WriteLine("First render triggered.");
-                await GetJwtToken();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in OnAfterRenderAsync: {ex.Message}");
-        }
-    }
+    public static string jwtToken = string.Empty;
+    
 }
 
 
@@ -41,11 +17,7 @@
         <div class="top-row px-4">
             <div class="main-nav"></div>
 
-            @if (string.IsNullOrEmpty(jwtToken))
-            {
-               Task.Run(GetJwtToken);
-            }
-            else
+            @if (!string.IsNullOrEmpty(jwtToken))
             {
                 <div class="dropdown">
                     <button class="dropbtn">More</button>
@@ -63,18 +35,22 @@
                         </NavLink>
 
 
+                        <NavLink class="nav-link" href="quiz">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Quiz
+                        </NavLink>
+
 
                         <NavLink class="nav-link" href="browse">
                             <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
                         </NavLink>
 
 
-                        <NavLink class="nav-link" href="createCategory">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Create Category
+                        <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Category
                         </NavLink>
 
                         <NavLink class="nav-link" href="">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login/logout
                         </NavLink>
                     </div>
                 </div>

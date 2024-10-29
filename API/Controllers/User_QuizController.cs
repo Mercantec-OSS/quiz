@@ -26,13 +26,52 @@ namespace API.Controllers
             }).ToList();
         }
 
+        //GET: api/User_Quiz/5/2
+        [HttpGet("AllUserQuiz/{userId}")]
+        public async Task<ActionResult<IEnumerable<User_QuizInfoDTO>>> GetAllUserQuiz(int userId)
+        {
+            var user_Quiz = (await _context.User_Quiz.
+                Include(uq => uq.quiz).
+                Include(uq => uq.quiz.difficulty).
+                Include(uq => uq.quiz.education).
+                Include(uq => uq.quiz.category).
+                Include(uq => uq.quiz.creator).
+                Include(uq => uq.user).
+                Where(uq => uq.user.ID == userId).ToListAsync())
+                .Select(uq => new User_QuizInfoDTO()
+                {
+                    Completed = uq.Completed,
+                    Results = uq.Results,
+                    TimeUsed = uq.TimeUsed,
+                    QuizEndDate = uq.QuizEndDate,
+
+                    quiz = new QuizDTO
+                    {
+                        Category = uq.quiz.category.Category,
+                        Creator = uq.quiz.creator.Username,
+                        Difficulty = uq.quiz.difficulty.Difficulty,
+                        Education = uq.quiz.education.Education,
+                        ID = uq.quiz.ID,
+                        Timer = uq.quiz.Timer,
+                        Title = uq.quiz.Title
+                    }
+                }).ToList();
+
+            if (user_Quiz == null)
+            {
+                return NotFound("User have not completed any quiz");
+            }
+
+            return user_Quiz;
+        }
+
         // GET: api/User_Quiz/5/2
         [HttpGet("{quizId}/{userId}")]
         public async Task<ActionResult<User_QuizDTO>> GetUser_Quiz(int quizId, int userId)
         {
             var user_Quiz = await _context.User_Quiz.
                 FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
-            
+
             if (user_Quiz == null)
             {
                 return NotFound();

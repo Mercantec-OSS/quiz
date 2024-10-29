@@ -3,6 +3,8 @@
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Frontend.Components
+@using System.Net
+@using System.Linq
 
 <h3>Quiz</h3>
 
@@ -68,17 +70,54 @@
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(Categories.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
 
+@if (Questions != null && Questions.Count > 0)
+{
+    Console.WriteLine($"Questions Count: {Questions.Count}");
 
+    <h4>Spørgsmål:</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Category</th>
+                <th>UnderCategory</th>
+                <th>Difficulty</th>
+                <th>Mulige svar</th>
+                <th>Rigtige svar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var question in Questions)
+            {
+                <tr>
+                    <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
+                    <td>@question.Category</td>
+                    <td>@question.UnderCategory</td>
+                    <td>@question.Difficulty</td>
+                    <td>@string.Join(",", question.PossibleAnswers)</td>
+                    <td>@string.Join(",", question.CorrectAnswer)</td>
+                </tr>
+            }
+        </tbody>
 
+    </table>
+}
+else
+{
+    <p>No questions found</p>
+}
 
 @code
 {
 
     private class CategoryHandlingQuiz
     {
+        public string Title { get; set; }
         public string Categories { get; set; }
         public string UnderCategories { get; set; }
         public string Difficulties { get; set; }
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
 
         //public category dropdown
         public Categories? selectedCategory;
@@ -95,10 +134,13 @@
 
     public class Question
     {
-        public string Text { get; set; }
+        public string Title { get; set; }
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
+        public string[] PossibleAnswers { get; set; }
+        public int[] CorrectAnswer { get; set; }
+
     }
 
     [Inject] public HttpClient? Http { get; set; }
@@ -110,7 +152,6 @@
     private List<API.Models.User> user = new();
 
     private const int MaxQuestions = 25;
-    // private int nextQuestionId = 1;
 
 
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
@@ -121,35 +162,21 @@
         int underCategoryID = questionHandling.selectedUnderCategory.ID;
         int difficultyID = questionHandling.selectedDifficulty.ID;
 
+        string url = $"/api/Questions";
 
-        QuizCreateRandomDTO quizCreate = new QuizCreateRandomDTO
+        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, Http);
+
+        if (statusCode == HttpStatusCode.OK)
         {
-                CreatorID = 1,
-                Title = "my quiz",
-                CategoryID = categoryID,
-                DifficultyID = difficultyID,
-                Timer = 300,
-
-                questions = new QuestionAmount[]
-                {
-                    new QuestionAmount
-                    {
-                        CategoryID = categoryID,
-                        UnderCategoryID = underCategoryID,
-                        DifficultyID = difficultyID,
-                        Amount = 10
-                    }
-                }
-        };
-            var response = await Http.PostAsJsonAsync("/api/Quiz/CreateRandom", quizCreate);
-            if (response.IsSuccessStatusCode)
-            {
-                Questions = await response.Content.ReadFromJsonAsync<List<Question>>() ?? new List<Question>();
-            }
-            else
-            {
-                Console.WriteLine("Error fetching questions: Unsuccessful response from API.");
-            }
+            Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
+            q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
+            Console.WriteLine("Good job fuck face");
+        }
+        else
+        {
+            Console.WriteLine("FUCK YOU");
+        }
 
     }
 

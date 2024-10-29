@@ -1,7 +1,4 @@
-﻿using API.Models;
-using NuGet.Common;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -23,6 +20,7 @@ namespace API.Controllers
         {
             return (await _context.Users.Include(u => u.role).ToListAsync()).Select(u => new UserDTO()
             {
+                ID = u.ID,
                 username = u.Username,
                 email = u.Email,
                 role = u.role.Role,
@@ -42,6 +40,7 @@ namespace API.Controllers
 
             UserDTO userDTO = new UserDTO
             {
+                ID = user.ID,
                 username = user.Username,
                 email = user.Email,
                 role = user.role.Role,
@@ -102,6 +101,7 @@ namespace API.Controllers
             var Token = GenerateJwtToken(user);
             return Ok(new UserDTO()
             {
+                ID = user.ID,
                 email = user.Email,
                 username = user.Username,
                 role = user.role.Role,
@@ -125,6 +125,7 @@ namespace API.Controllers
             var Token = GenerateJwtToken(userFinder);
             return Ok(new UserDTO()
             {
+                ID = userFinder.ID,
                 email = userFinder.Email,
                 username = userFinder.Username,
                 role = userFinder.role.Role,

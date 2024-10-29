@@ -8,6 +8,7 @@
 
 <h3>Quiz</h3>
 
+
 <div>
     @foreach (var question in Categories)
     {
@@ -56,6 +57,10 @@
                         </div>
                     </td>
                     <td>
+                        <label for="questionCount">Enter Amount</label>
+                        <input type="number" id="questionCount" @bind="DesiredQuestionCount" min="1" max="25" />
+                    </td>
+                    <td>
                         <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
                     </td>
                     <td>
@@ -67,6 +72,8 @@
         @* end of dropdown menu  *@
     }
 </div>
+
+
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(Categories.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
 
@@ -94,8 +101,8 @@
                     <td>@question.Category</td>
                     <td>@question.UnderCategory</td>
                     <td>@question.Difficulty</td>
-                    <td>@string.Join(",", question.PossibleAnswers)</td>
-                    <td>@string.Join(",", question.CorrectAnswer)</td>
+                    <td>@string.Join(", ", question.PossibleAnswers)</td>
+                    <td>@string.Join(", ", question.CorrectAnswer)</td>
                 </tr>
             }
         </tbody>
@@ -153,6 +160,8 @@ else
 
     private const int MaxQuestions = 25;
 
+    //for amount of questions displayed
+    private int DesiredQuestionCount { get; set; } = 1;
 
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
@@ -172,6 +181,8 @@ else
             q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
             q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
             Console.WriteLine("Good job fuck face");
+
+            Questions = Questions.Take(DesiredQuestionCount).ToList();
         }
         else
         {
@@ -179,6 +190,12 @@ else
         }
 
     }
+
+    private async Task RandomQuizMaking()
+    {
+        
+    }
+
 
     //getting info from API/DB
     protected override async Task OnInitializedAsync()
@@ -268,4 +285,23 @@ else
         difficultyHandling.selectedDifficulty = difficulties;
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
+
+    //randomize quiz. chosen amount of questions
+    private QuizCreateRandomDTO quizDto = new QuizCreateRandomDTO
+        {
+            CreatorID = 1,
+            Title = "sample",
+            EducationID = 1,
+            CategoryID = 1,
+            DifficultyID = 1,
+            Timer = 30,
+            questions = new QuestionAmount[]
+            {
+            new QuestionAmount { CategoryID = 1, UnderCategoryID = 1, DifficultyID = 1, Amount = 5 }
+            }
+        };
+
+
+        
+
 }

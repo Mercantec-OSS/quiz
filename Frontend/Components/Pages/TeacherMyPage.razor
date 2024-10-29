@@ -1,8 +1,69 @@
 ﻿@page "/TeacherMyPage"
 @rendermode InteractiveServer
 
-<h3>TeacherMyPage</h3>
+@using API.Models
+@using System.Net
+
+<h3>My Page</h3>
+
+@if (quizzesMaked.Count <= 0)
+{
+    <p>
+        Loading...
+    </p>
+}
+else
+{
+    <div class="row">
+        @foreach (QuizDTO quiz in quizzesMaked)
+        {
+            <div class="col-md-6 p-1">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="Split">
+                            <h3 class="card-title">@quiz.Title</h3>
+                            <h4 class="text-end">Creator: @quiz.Creator</h4>
+                        </div>
+                        <div class="MyPageCardGab">
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Category: @quiz.Category</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Score: 0</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 MyPageCardGab">
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Time: @quiz.Timer</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Time used: @quiz.Timer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
 
 @code {
+    [Inject] public HttpClient? Http { get; set; }
+    private List<QuizDTO> quizzesMaked = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http == null) return;
+
+        (HttpStatusCode statusCode, List<QuizDTO>? response) =
+            await HttpHandler.GetAsync<List<QuizDTO>>("api/Quizs", Http);
+
+        if (statusCode == HttpStatusCode.OK)
+        {
+            quizzesMaked = response ?? new();
+        }
+    }
 }

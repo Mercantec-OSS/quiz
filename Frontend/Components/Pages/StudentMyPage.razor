@@ -1,9 +1,25 @@
 ﻿@page "/StudentMyPage"
 @rendermode InteractiveServer
-@using API.Models
-@using System.Net;
 
-<h1>My Page</h1>
+@using API.Models
+@using System.Net
+
+<div class="Split">
+    <h1>My Page</h1>
+
+    <h2>
+        Avg. score:
+        @if (quizzes.Count <= 0)
+        {
+            <span>Loading...</span>
+        }
+        else
+        {
+            <span>@GetAvgScore()</span>
+        }
+    </h2>
+</div>
+
 
 @if (quizzes.Count <= 0)
 {
@@ -13,14 +29,17 @@
 }
 else
 {
-    <div class="row">
+    <div class="row mx-1">
         @foreach (QuizDTO quiz in quizzes)
         {
             <div class="col-md-6 p-1">
-                <div class="card">
+                <div class="card bg-light">
                     <div class="card-body">
-                        <h3 class="card-title">@quiz.Title</h3>
-                        <div style="display: flex; gap: 20px;">
+                        <div class="Split">
+                            <h3 class="card-title">@quiz.Title</h3>
+                            <h4 class="text-end">Creator: @quiz.Creator</h4>
+                        </div>
+                        <div class="MyPageCardGab">
                             <div class="MyPageCustomBox">
                                 <p class="card-text">Category: @quiz.Category</p>
                             </div>
@@ -28,7 +47,15 @@ else
                                 <p class="card-text">Difficulty: @quiz.Difficulty</p>
                             </div>
                             <div class="MyPageCustomBox">
+                                <p class="card-text">Score: 0</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 MyPageCardGab">
+                            <div class="MyPageCustomBox">
                                 <p class="card-text">Time: @quiz.Timer</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Time used: @quiz.Timer</p>
                             </div>
                         </div>
                     </div>
@@ -40,18 +67,28 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    List<QuizDTO> quizzes = new();
+    private List<QuizDTO> quizzes = new();
+    private List<User_QuizDTO> quizLink = new();
 
     protected override async Task OnInitializedAsync()
     {
         if (Http == null) return;
 
         (HttpStatusCode statusCode, List<QuizDTO>? response) =
-        await HttpHandler.GetAsync<List<QuizDTO>>("api/Quizs", Http);
+            await HttpHandler.GetAsync<List<QuizDTO>>("api/Quizs", Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
             quizzes = response ?? new();
         }
+    }
+
+    private double GetAvgScore()
+    {
+        if (quizLink.Any())
+        {
+            return Math.Round(quizLink.Average(ql => ql.Results));
+        }
+        return 0;
     }
 }

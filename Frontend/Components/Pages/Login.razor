@@ -78,7 +78,7 @@
         {
             if (Http == null)
                 return;
-            
+
             // Send POST request to login endpoint
             var response = await Http.PostAsJsonAsync("/api/Users/login", loginRequest);
 
@@ -99,6 +99,9 @@
                 //store JWT in Cookies
                 // await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
                 await sessionStorage.SetItemAsync("jwt", jwtToken);
+                await sessionStorage.SetItemAsync("userRole", dTO.role);
+                await sessionStorage.SetItemAsync("userEmail", dTO.email);
+                await sessionStorage.SetItemAsync("userUsername", dTO.username);
                 MainLayout.jwtToken = jwtToken;
                 MainLayout.userRole = dTO.role;
 

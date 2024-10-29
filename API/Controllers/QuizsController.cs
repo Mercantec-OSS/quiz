@@ -88,7 +88,7 @@ namespace API.Controllers
             return NoContent();
         }
 
-        // POST: api/Quizs
+        // POST: api/Quizs/Random
         [HttpPost("Setup-Quiz/Random")]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateRandomDTO quizDTO)
         {

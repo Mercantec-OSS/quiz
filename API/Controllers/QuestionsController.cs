@@ -36,6 +36,7 @@ namespace API.Controllers
                     Time = q.Time,
                     Title = q.Title,
                     UnderCategory = q.underCategory.UnderCategory,
+                    QuestionType = q.QuestionType,
                 }).ToList();
         }
 
@@ -62,6 +63,7 @@ namespace API.Controllers
                     Time = q.question.Time,
                     Title = q.question.Title,
                     UnderCategory = q.question.underCategory.UnderCategory,
+                    QuestionType = q.question.QuestionType,
                 }).ToList();
         }
 
@@ -89,6 +91,7 @@ namespace API.Controllers
                     Time = q.Time,
                     Title = q.Title,
                     UnderCategory = q.underCategory.UnderCategory,
+                    QuestionType = q.QuestionType,
                 }).ToList();
         }
 
@@ -121,6 +124,7 @@ namespace API.Controllers
                 Creator = question.CreatorID.Username,
                 ID = question.ID,
                 UnderCategory = question.underCategory.UnderCategory,
+                QuestionType = question.QuestionType,
             };
 
             return questionDTO;
@@ -195,7 +199,8 @@ namespace API.Controllers
                 CorrectAnswer = questionDTO.CorrectAnswer, // Convert the result to an array
                 Picture = questionDTO.Picture,
                 Time = questionDTO.Time,
-                QuestionStatus = questionDTO.QuestionStatus
+                QuestionStatus = questionDTO.QuestionStatus,
+                QuestionType = questionDTO.QuestionType,
             };
 
             _context.Questions.Add(question);
@@ -203,6 +208,7 @@ namespace API.Controllers
 
             QuestionDTO questionGetDTO = new()
             {
+                ID = question.ID,
                 Category = category.Category,
                 CorrectAnswer = question.CorrectAnswer,
                 Picture = question.Picture,
@@ -213,9 +219,10 @@ namespace API.Controllers
                 Difficulty = difficulties.Difficulty,
                 Creator = creator.Username,
                 Title = question.Title,
+                QuestionType = question.QuestionType,
             };
 
-            return CreatedAtAction("GetQuestion", new { id = question.ID }, questionDTO);
+            return CreatedAtAction("GetQuestion", new { id = question.ID }, questionGetDTO);
         }
 
         // DELETE: api/Questions/id

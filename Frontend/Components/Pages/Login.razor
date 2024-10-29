@@ -1,12 +1,15 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
 @inject NavigationManager NavManager
-@using Microsoft.AspNetCore.WebUtilities
 @inject IJSRuntime JSRuntime
-@namespace Login
-@using API.Models
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@namespace Login
+
+@using Microsoft.AspNetCore.WebUtilities
+@using API.Models
 @using Frontend.Components.Layout
 
 <PageTitle>Login</PageTitle>
@@ -24,8 +27,17 @@
     <input type="password" @bind="loginRequest.password" id="password" />
 </div>
 
-<!-- Login button -->
-<button @onclick="HandleLogin">Login</button>
+<div>
+    <!-- Login button -->
+    <button @onclick="HandleLogin">Login</button>
+
+    @if (isLoading)
+    {
+        <div class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+    }
+</div>
 
 <div class="logout">
     <NavLink class="nav-link" href="#" @onclick="DeleteJwtCookie">
@@ -33,14 +45,11 @@
     </NavLink>
 </div>
 
-
-
 <!-- Displaying response status, errors, and success message -->
 @if (!string.IsNullOrEmpty(responseMessage))
 {
     <p>@responseMessage</p>
 }
-
 
 @if (loginSuccess)
 {
@@ -53,41 +62,45 @@
     Console.WriteLine(jwtToken);
 }
 
-
-
 @code {
-    private LoginRequest loginRequest = new LoginRequest();
+    private LoginRequest loginRequest = new();
+    private bool isLoading = false;
     private string responseMessage = string.Empty;
     private string jwtToken = string.Empty;
     private bool loginSuccess = false;
-
+    [Inject] public HttpClient? Http { get; set; }
 
     // Method to handle login
     private async Task HandleLogin()
     {
-        // Initialize HttpClient
-        using var httpClient = new HttpClient();
-        httpClient.BaseAddress = new Uri("https://mercantec-quiz.onrender.com");
-
+        isLoading = true;
         try
         {
+            if (Http == null)
+                return;
+            
             // Send POST request to login endpoint
-            var response = await httpClient.PostAsJsonAsync("/api/Users/login", loginRequest);
+            var response = await Http.PostAsJsonAsync("/api/Users/login", loginRequest);
 
             // Read response content
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
+                UserDTO? dTO = HttpHandler.Deserialize<UserDTO>(responseContent);
+                if (dTO == null)
+                    return;
+
                 // If login is successful
                 responseMessage = $"Status Code: {response.StatusCode}";
-                jwtToken = responseContent;  // Assuming the JWT is the response content
+                jwtToken = dTO.token ?? "";  // Assuming the JWT is the response content
                 loginSuccess = true;
 
                 //store JWT in Cookies
                 // await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
                 await sessionStorage.SetItemAsync("jwt", jwtToken);
                 MainLayout.jwtToken = jwtToken;
+                MainLayout.userRole = dTO.role;
 
                 //navigate to home when email/username and password is correct
                 NavigationManager.NavigateTo("/home");
@@ -104,16 +117,11 @@
             // Handling any exceptions
             responseMessage = $"Exception: {ex.Message}";
         }
+        finally
+        {
+            isLoading = false;
+        }
     }
-
-    // Model class for login request
-    public class LoginRequest
-    {
-        public string? email { get; set; }
-        public string? password { get; set; }
-    }
-
-
 
     // // Method to delete the JWT "session"
     private async Task DeleteJwtCookie()
@@ -121,7 +129,7 @@
         // Invoking function to delete the cookie
         await sessionStorage.RemoveItemAsync("jwt");
         MainLayout.jwtToken = string.Empty;
+        MainLayout.userRole = string.Empty;
     }
-
 }
 

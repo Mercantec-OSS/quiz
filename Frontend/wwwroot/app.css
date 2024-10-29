@@ -66,15 +66,6 @@ h1:focus {
     border-radius: 8px;
 }
 
-.MyPageCustomBox {
-    border: 1px solid black;
-    padding: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -82,4 +73,57 @@ h1:focus {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.3);
+}
+
+.MyPageCustomBox {
+    border: 1px solid black;
+    border-radius: .5rem;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.MyPageCardGab {
+    display: flex;
+    gap: 10px;
+}
+
+.Split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 1000;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

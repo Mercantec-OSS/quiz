@@ -175,7 +175,7 @@ else
 
         (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, Http);
 
-        if (statusCode == HttpStatusCode.OK)
+        if (statusCode == HttpStatusCode.OK) 
         {
             Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
             q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&

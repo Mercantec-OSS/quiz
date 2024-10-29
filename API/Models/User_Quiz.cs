@@ -20,7 +20,7 @@
         // This is the date and time that the quiz is available
         public DateTime QuizEndDate { get; set; }
         
-        public int? TimeUsed { get; set; }
+        public int TimeUsed { get; set; }
     }
 
     public class User_QuizDTO
@@ -38,5 +38,22 @@
         
         // The ID of the User
         public int UserID { get; set; }
+
+        public int TimeUsed { get; set; } = 0;
+    }
+
+    public class User_QuizInfoDTO
+    {
+        public DateTime QuizEndDate { get; set; }
+
+        // This is used to flag indicate if the quiz is completed
+        public bool Completed { get; set; } = false;
+
+        // This is used to check the results of the quiz's
+        public int Results { get; set; } = 0;
+
+        public int TimeUsed { get; set; }
+
+        public QuizDTO quiz { get; set; }
     }
 }

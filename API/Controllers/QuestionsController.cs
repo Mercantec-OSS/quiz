@@ -65,6 +65,33 @@ namespace API.Controllers
                 }).ToList();
         }
 
+        [HttpGet("ByCriteria")]
+        public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByCriteria(int category, int underCategory, int difficulty)
+        {
+            return (await _context.Questions.
+                Include(q => q.CreatorID).
+                Include(q => q.category).
+                Include(q => q.underCategory).
+                Include(q => q.difficulty).
+                Where(q => q.category.ID == category).
+                Where(q => q.underCategory.ID == underCategory).
+                Where(q => q.difficulty.ID == difficulty).
+                ToListAsync()).Select(q => new QuestionDTO()
+                {
+                    ID = q.ID,
+                    Creator = q.CreatorID.Username,
+                    Category = q.category.Category,
+                    CorrectAnswer = q.CorrectAnswer,
+                    Difficulty = q.difficulty.Difficulty,
+                    Picture = q.Picture,
+                    PossibleAnswers = q.PossibleAnswers,
+                    QuestionStatus = q.QuestionStatus,
+                    Time = q.Time,
+                    Title = q.Title,
+                    UnderCategory = q.underCategory.UnderCategory,
+                }).ToList();
+        }
+
         // GET: api/Questions/id
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestionDTO>> GetQuestion(int id)

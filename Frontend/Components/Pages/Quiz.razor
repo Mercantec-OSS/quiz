@@ -58,7 +58,7 @@
                     </td>
                     <td>
                         <label for="questionCount">Enter Amount</label>
-                        <input type="number" id="questionCount" @bind="DesiredQuestionCount" min="1" max="25" />
+                        <input type="number" @bind="DesiredQuestionCount" min="1" max="25" />
                     </td>
                     <td>
                         <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
@@ -160,8 +160,14 @@ else
 
     private const int MaxQuestions = 25;
 
+    private QuizCreateRandomDTO quizDto = new();
+
     //for amount of questions displayed
-    private int DesiredQuestionCount { get; set; } = 1;
+    private int DesiredQuestionCount
+    {
+        get => quizDto.questions[0].Amount;
+        set => quizDto.questions[0].Amount = value;
+    }
 
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
@@ -193,7 +199,26 @@ else
 
     private async Task RandomQuizMaking()
     {
-        
+        if (Http == null) return;
+
+        //set up url for API endpoint
+        string url = "/api/Quizs/Setup-Quiz/Random";
+
+        HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
+
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            //successfully made quiz
+            Console.WriteLine("Quiz created correctly");
+
+            //Retrive the quiz details if returned in the response
+            Quiz createdQuiz = await responseMessage.Content.ReadFromJsonAsync<Quiz>();
+        }
+        else
+        {
+            //failed to make quiz
+            Console.WriteLine("Failed to create quiz: " + await responseMessage.Content.ReadAsStringAsync());
+        }
     }
 
 
@@ -245,10 +270,13 @@ else
     }
 
     // Set the selected item and close the dropdown
-    private void SelectCategory(Categories item, CategoryHandlingQuiz questionHandling)
+    private void SelectCategory(Categories category, CategoryHandlingQuiz questionHandling)
     {
-        questionHandling.selectedCategory = item;
+        questionHandling.selectedCategory = category;
         questionHandling.dropdownCategory = ""; // Hide the dropdown
+
+        //update quizDto with selected category ID
+        quizDto.CategoryID = category.ID;
     }
 
 
@@ -262,10 +290,13 @@ else
     }
 
     // Set the selected item and close the dropdown
-    private void SelectUnderCategory(UnderCategories item1, CategoryHandlingQuiz underCategoryHandling)
+    private void SelectUnderCategory(UnderCategories underCategory, CategoryHandlingQuiz underCategoryHandling)
     {
-        underCategoryHandling.selectedUnderCategory = item1;
+        underCategoryHandling.selectedUnderCategory = underCategory;
         underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
+
+        //update quizDto with selectedUndercategory id
+        quizDto.questions[0].UnderCategoryID = underCategory.ID;
     }
 
 
@@ -285,23 +316,4 @@ else
         difficultyHandling.selectedDifficulty = difficulties;
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
-
-    //randomize quiz. chosen amount of questions
-    private QuizCreateRandomDTO quizDto = new QuizCreateRandomDTO
-        {
-            CreatorID = 1,
-            Title = "sample",
-            EducationID = 1,
-            CategoryID = 1,
-            DifficultyID = 1,
-            Timer = 30,
-            questions = new QuestionAmount[]
-            {
-            new QuestionAmount { CategoryID = 1, UnderCategoryID = 1, DifficultyID = 1, Amount = 5 }
-            }
-        };
-
-
-        
-
 }

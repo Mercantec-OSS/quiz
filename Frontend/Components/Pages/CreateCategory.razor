@@ -166,7 +166,8 @@
                 {
                     Category = item.Key.Trim(),
                     EducationID = 1,
-                    UnderCategories = item.Value.Select(i => i.Category.Trim()).ToArray()
+                    // Does not contain a definition for UnderCategories FYI in the CategoryCreateDTO
+                    // UnderCategories = item.Value.Select(i => i.Category.Trim()).ToArray()
                 };
 
             if (Http != null)

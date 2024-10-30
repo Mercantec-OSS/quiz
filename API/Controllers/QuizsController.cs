@@ -1,6 +1,4 @@
-﻿using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,7 +23,6 @@ namespace API.Controllers
                     Creator = q.creator.Username,
                     Difficulty = q.difficulty.Difficulty,
                     Education = q.education.Education,
-                    Timer = q.Timer,
                     Title = q.Title,
                 }).ToList();
         }
@@ -54,7 +51,6 @@ namespace API.Controllers
                 Creator = quiz.creator.Username,
                 Difficulty = quiz.difficulty.Difficulty,
                 Education = quiz.education.Education,
-                Timer = quiz.Timer,
                 Title = quiz.Title,
             };
             return quizDTO;
@@ -72,7 +68,6 @@ namespace API.Controllers
             }
 
             quiz.Title = quizDTO.Title;
-            quiz.Timer = quizDTO.Timer;
 
             _context.Entry(quiz).State = EntityState.Modified;
 
@@ -88,9 +83,91 @@ namespace API.Controllers
             return NoContent();
         }
 
-        // POST: api/Quizs
+        [HttpPost("Setup-Quiz/Custom")]
+        public async Task<ActionResult<QuizDTO>> PostCustomQuiz(QuizCreateCustomDTO quizDTO)
+        {
+            var education = await _context.Educations.FindAsync(quizDTO.EducationID);
+            if (education == null)
+            {
+                return NotFound("Education not found");
+            }
+
+            var category = await _context.Categories.FindAsync(quizDTO.CategoryID);
+            if (category == null)
+            {
+                return NotFound("Category not found");
+            }
+
+            var difficulties = await _context.Difficulties.FindAsync(quizDTO.DifficultyID);
+            if (difficulties == null)
+            {
+                return NotFound("Difficulty not found");
+            }
+
+            var creator = await _context.Users.FindAsync(quizDTO.CreatorID);
+            if (creator == null)
+            {
+                return NotFound("User not found");
+            }
+
+            foreach (int questionID in quizDTO.questions)
+            {
+
+
+                if (!await _context.Questions
+                    .Include(q => q.underCategory)
+                    .Include(q => q.difficulty)
+                    .AnyAsync(q => q.ID == questionID))
+                {
+                    return BadRequest("1 or more questions was not found");
+                }
+            }
+            
+            Quiz quiz = new()
+            {
+                creator = creator,
+                Title = quizDTO.Title,
+                education = education,
+                category = category,
+                difficulty = difficulties,
+            };
+
+            _context.Quizs.Add(quiz);
+            await _context.SaveChangesAsync();
+            
+            Quiz_QuestionController quiz_QuestionController = new(_context);
+
+            foreach (int questionID in quizDTO.questions)
+            {
+                Quiz_QuestionDTO qQ = new()
+                {
+                    QuestionID = questionID,
+                    QuizID = quiz.ID
+                };
+
+                var response = await quiz_QuestionController.PostQuiz_Question(qQ);
+                if (response.Result is NotFoundResult)
+                {
+                    return NotFound("Something went wrong adding the questions to the quiz");
+                }
+            }
+
+            QuizDTO newQuizDTO = new QuizDTO()
+            {
+                Category = quiz.category.Category,
+                Creator = quiz.creator.Username,
+                Difficulty = quiz.difficulty.Difficulty,
+                Education = quiz.education.Education,
+                ID = quiz.ID,
+                Title = quiz.Title,
+            };
+
+            return CreatedAtAction("GetQuiz", new { id = quiz.ID }, newQuizDTO);
+        }
+
+        // POST: api/Quizs/Random
         [HttpPost("Setup-Quiz/Random")]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreateRandomDTO quizDTO)
+        public async Task<ActionResult<QuizDTO>> PostQuiz(QuizCreateRandomDTO quizDTO)
         {
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
             if (education == null)
@@ -166,7 +243,6 @@ namespace API.Controllers
                 education = education,
                 category = category,
                 difficulty = difficulties,
-                Timer = quizDTO.Timer,
             };
 
             _context.Quizs.Add(quiz);
@@ -207,12 +283,23 @@ namespace API.Controllers
                 allQuestions.AddRange(selectedQuestions);
             }
             Quiz_QuestionController quiz_QuestionController = new(_context);
+
             foreach (var question in allQuestions)
             {
                 await quiz_QuestionController.PostQuiz_Question(question);
             }
 
-            return CreatedAtAction("GetQuiz", new { id = quiz.ID }, quizDTO);
+            QuizDTO newQuizDTO = new QuizDTO()
+            {
+                Category = quiz.category.Category,
+                Creator = quiz.creator.Username,
+                Difficulty = quiz.difficulty.Difficulty,
+                Education = quiz.education.Education,
+                ID = quiz.ID,
+                Title = quiz.Title,
+            };
+
+            return CreatedAtAction("GetQuiz", new { id = quiz.ID }, newQuizDTO);
         }
 
         // DELETE: api/Quizs/5
@@ -229,11 +316,6 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool QuizExists(int id)
-        {
-            return _context.Quizs.Any(e => e.ID == id);
         }
     }
 }

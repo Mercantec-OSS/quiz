@@ -1,0 +1,122 @@
+﻿@page "/StudentMyPage"
+@rendermode InteractiveServer
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@using API.Models
+@using System.Net
+
+<div class="Split">
+    <h1>My Page</h1>
+
+    <h2>
+        Avg. score:
+        @if (quizzesLink.Count <= 0)
+        {
+            <span>Loading...</span>
+        }
+        else
+        {
+            <span>@Math.Round(quizzesLink.Average(ql => ql.Results))</span>
+        }
+    </h2>
+</div>
+
+
+@if (quizzesLink.Count <= 0)
+{
+    <p>
+        Loading...
+    </p>
+}
+else
+{
+    <div class="row my-1">
+        @foreach (User_QuizInfoDTO quizLink in quizzesLink)
+        {
+            <div class="col-md-4 p-1">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="Split">
+                            <h3 class="card-title">@quizLink.quiz.Title</h3>
+                            <h4 class="text-end">@quizLink.quiz.Creator</h4>
+                        </div>
+                        <div class="MyPageCardGab">
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Category: @quizLink.quiz.Category</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Difficulty: @quizLink.quiz.Difficulty</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Score: @quizLink.Results</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 MyPageCardGab">
+                            <button class="MyPageCustomBox btn
+                                @(quizLink.Completed ? "btn-secondary" : "btn-primary")"
+                                    @onclick="() => Start(quizLink.Completed)"
+                                    disabled="@quizLink.Completed">
+
+                                <p class="card-text">Start</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (hasEditHtml)
+{
+    <div class="model custom-modal">
+        <h4>Why did you edit the html?</h4>
+        <p>ARE YOU STOOPID!</p>
+        <div class="mt-1">
+            <button class="btn" @onclick="ClosehasEditHtmlModal">Close</button>
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="ClosehasEditHtmlModal" class="modal-overlay"></div>
+}
+
+@code {
+    [Inject] public HttpClient? Http { get; set; }
+    private List<User_QuizInfoDTO> quizzesLink = new();
+    private bool hasEditHtml = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http == null) return;
+        try
+        {
+            int id = await sessionStorage.GetItemAsync<int>("userID");
+
+            (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
+                await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
+                    $"api/User_Quiz/AllUserQuiz/{id}", Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                quizzesLink = response ?? new();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // It fails the first time,
+            // therefore I need this.
+        }
+    }
+
+    private void Start(bool completed)
+    {
+        if (completed)
+        {
+            hasEditHtml = true;
+            return;
+        }
+    }
+
+    private void ClosehasEditHtmlModal() => hasEditHtml = false;
+}

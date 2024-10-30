@@ -1,15 +1,13 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@using Login
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
 @code
 {
     public static string jwtToken = string.Empty;
-    
+    public static string userRole = string.Empty;
 }
-
-
 
 <div class="page">
     <main>
@@ -19,41 +17,43 @@
 
             @if (!string.IsNullOrEmpty(jwtToken))
             {
-                <div class="dropdown">
-                    <button class="dropbtn">More</button>
-                    <div class="dropdown-content">
+                    <div class="dropdown">
+                        <button class="dropbtn">More</button>
+                        <div class="dropdown-content">
 
 
-                        <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-                        </NavLink>
+                            <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                            </NavLink>
+
+                            <NavLink class="nav-link" href="@(userRole == "hej" ? "TeacherMyPage" : "StudentMyPage")">
+                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                            </NavLink>
+
+                            <NavLink class="nav-link" href="create">
+                                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create
+                            </NavLink>
 
 
-
-                        <NavLink class="nav-link" href="create">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create
-                        </NavLink>
-
-
-                        <NavLink class="nav-link" href="quiz">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Quiz
-                        </NavLink>
+                            <NavLink class="nav-link" href="quiz">
+                                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Quiz
+                            </NavLink>
 
 
-                        <NavLink class="nav-link" href="browse">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
-                        </NavLink>
+                            <NavLink class="nav-link" href="browse">
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
+                            </NavLink>
 
 
-                        <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Category
-                        </NavLink>
+                            <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Category
+                            </NavLink>
 
-                        <NavLink class="nav-link" href="">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login/logout
-                        </NavLink>
+                            <NavLink class="nav-link" href="">
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login/logout
+                            </NavLink>
+                        </div>
                     </div>
-                </div>
             }
 
             <div class="about">
@@ -68,7 +68,6 @@
         </article>
     </main>
 </div>
-
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

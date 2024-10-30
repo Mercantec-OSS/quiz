@@ -66,7 +66,7 @@
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Categories>> PostCategories(CategoryCreateDTO categoriesDTO)
+        public async Task<ActionResult<CategoriesDTO>> PostCategories(CategoryCreateDTO categoriesDTO)
         {
             var education = await _context.Educations.FindAsync(categoriesDTO.EducationID);
             if (education == null)
@@ -79,42 +79,18 @@
                 Category = categoriesDTO.Category,
                 education = education,
             };
-            var response = new
-            {
-                Message = "",
-                CreatedCount = 1
 
-            };
             _context.Categories.Add(categories);
-            if (categoriesDTO.UnderCategories != null && categoriesDTO.UnderCategories.Length > 0)
-            {
-                foreach (var underCategory in categoriesDTO.UnderCategories)
-                {
-                    UnderCategories underCategories = new()
-                    {
-                        category = categories,
-                        UnderCategory = underCategory
-                    };
-                    _context.UnderCategories.Add(underCategories);
-                }
-                response = new
-                {
-                    Message = $"1 Category and {categoriesDTO.UnderCategories.Length} under Categories successfully created.", // Custom message
-                    CreatedCount = categoriesDTO.UnderCategories.Length + 1  // Number of created categories
-                };
-            }
-            else
-            {
-                response = new
-                {
-                    Message = $"1 Category successfully created.", // Custom message
-                    CreatedCount = 1
-                };
-            }
             await _context.SaveChangesAsync();
 
+            CategoriesDTO response = new()
+            {
+                ID = categories.ID,
+                Category = categories.Category,
+                EducationID = education.ID,
+            };
 
-            return CreatedAtAction("GetCategories", new { count = categoriesDTO }, response);
+            return CreatedAtAction("GetCategories", new { id = categories.ID }, response);
         }
 
         // DELETE: api/Categories/5

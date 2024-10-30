@@ -30,7 +30,7 @@ namespace API.Controllers
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Roles>> GetRoles(int id)
+        public async Task<ActionResult<RolesDTO>> GetRoles(int id)
         {
             var roles = await _context.Roles.FindAsync(id);
 
@@ -38,20 +38,19 @@ namespace API.Controllers
             {
                 return NotFound();
             }
+            RolesDTO rolesDTO = new RolesDTO()
+            {
+                Role = roles.Role
+            };
 
-            return roles;
+            return rolesDTO;
         }
 
         // PUT: api/Roles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRoles(int id, Roles roles)
+        public async Task<IActionResult> PutRoles(int id, RolesDTO roles)
         {
-            if (id != roles.ID)
-            {
-                return BadRequest();
-            }
-
             _context.Entry(roles).State = EntityState.Modified;
 
             try
@@ -91,7 +90,7 @@ namespace API.Controllers
 
         // DELETE: api/Roles/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRoles(int id)
+        public async Task<IActionResult> DeleteRoles(int id, string token)
         {
             var roles = await _context.Roles.FindAsync(id);
             if (roles == null)

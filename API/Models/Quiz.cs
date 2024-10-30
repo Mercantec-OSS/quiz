@@ -23,9 +23,6 @@ namespace API.Models
 
         [ForeignKey("Difficulty")]
         public virtual Difficulties difficulty { get; set; }
-
-        // This is the amount of time there is to complete the quiz in total
-        public int Timer { get; set; }
     }
 
     public class QuizCreateCustomDTO
@@ -37,10 +34,6 @@ namespace API.Models
         public int EducationID { get; set; } // Fx. Buttons
         public int CategoryID { get; set; } // Fx. Website
         public int DifficultyID { get; set; } // Fx. H3
-
-        // This is the amount of time there is to complete the quiz in total
-        public int Timer { get; set; }
-
         public int[] questions { get; set; }
     }
 
@@ -53,9 +46,6 @@ namespace API.Models
         public int EducationID { get; set; } // Fx. Buttons
         public int CategoryID { get; set; } // Fx. Website
         public int DifficultyID { get; set; } // Fx. H3
-
-        // This is the amount of time there is to complete the quiz in total
-        public int Timer { get; set; }
         public QuestionAmount[] questions { get; set;}
 
     }
@@ -68,8 +58,6 @@ namespace API.Models
         public string Education { get; set; } // Fx. Buttons
         public string Category { get; set; } // Fx. Website
         public string Difficulty { get; set; } // Fx. H3
-        // This is the amount of time there is to complete the quiz in total
-        public int Timer { get; set; }
     }
 
     public class QuestionAmount

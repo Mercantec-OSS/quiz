@@ -18,6 +18,7 @@
         public DbSet<UnderCategories> UnderCategories { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<User_Quiz> User_Quiz { get; set; }
+        public DbSet<Token> Token {  get; set; }
     }
 
 }

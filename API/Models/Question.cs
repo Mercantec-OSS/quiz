@@ -36,6 +36,8 @@ namespace API.Models
 
         // This is for enabeling/disabeling outdated or for another reason Questions
         public bool QuestionStatus { get; set; }
+
+        public string QuestionType { get; set; }
     }
 
 
@@ -62,6 +64,8 @@ namespace API.Models
 
         // This is for enabeling/disabeling outdated or for another reason Questions
         public bool QuestionStatus { get; set; }
+
+        public string QuestionType { get; set; } = "Multi";
     }
 
     public class QuestionCreateDTO
@@ -86,5 +90,7 @@ namespace API.Models
 
         // This is for enabeling/disabeling outdated or for another reason Questions
         public bool QuestionStatus { get; set; }
+
+        public string QuestionType { get; set; } = "Multi";
     }
 }

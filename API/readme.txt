@@ -7,4 +7,5 @@
 
 3. Run "dotnet ef database update" and wait for it to finish.
 
-NOTE: for this to work you need your appsetting to be up to date.
+NOTE: for this to work you need your appsetting to be up to date 
+	  and you can not be running it.

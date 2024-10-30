@@ -18,7 +18,10 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            return (await _context.Users.Include(u => u.role).ToListAsync()).Select(u => new UserDTO()
+            return (await _context.Users
+                .Include(u => u.role)
+                .ToListAsync())
+                .Select(u => new UserDTO()
             {
                 ID = u.ID,
                 username = u.Username,
@@ -99,13 +102,16 @@
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             var Token = GenerateJwtToken(user);
+            _context.Token.Add(Token);
+            await _context.SaveChangesAsync();
+
             return Ok(new UserDTO()
             {
                 ID = user.ID,
                 email = user.Email,
                 username = user.Username,
                 role = user.role.Role,
-                token = Token
+                token = Token.JWTToken
             });
         }
 
@@ -123,13 +129,16 @@
             }
 
             var Token = GenerateJwtToken(userFinder);
+            _context.Token.Add(Token);
+            await _context.SaveChangesAsync();
+
             return Ok(new UserDTO()
             {
                 ID = userFinder.ID,
                 email = userFinder.Email,
                 username = userFinder.Username,
                 role = userFinder.role.Role,
-                token = Token
+                token = Token.JWTToken
             });
         }
 
@@ -156,7 +165,7 @@
         }
 
         // JWT Token used to login users and how long their session is valid for
-        private string GenerateJwtToken(User user)
+        private Token GenerateJwtToken(User user)
         {
 
             var claims = new[]
@@ -184,7 +193,13 @@
 
             signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            Token userToken = new()
+            {
+                JWTToken = new JwtSecurityTokenHandler().WriteToken(token),
+                user = user
+            };
+
+            return userToken;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -52,7 +50,6 @@ namespace API.Controllers
                         Difficulty = uq.quiz.difficulty.Difficulty,
                         Education = uq.quiz.education.Education,
                         ID = uq.quiz.ID,
-                        Timer = uq.quiz.Timer,
                         Title = uq.quiz.Title
                     }
                 }).ToList();

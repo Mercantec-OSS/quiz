@@ -1,6 +1,4 @@
-﻿using API.Models;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,7 +23,6 @@ namespace API.Controllers
                     Creator = q.creator.Username,
                     Difficulty = q.difficulty.Difficulty,
                     Education = q.education.Education,
-                    Timer = q.Timer,
                     Title = q.Title,
                 }).ToList();
         }
@@ -54,7 +51,6 @@ namespace API.Controllers
                 Creator = quiz.creator.Username,
                 Difficulty = quiz.difficulty.Difficulty,
                 Education = quiz.education.Education,
-                Timer = quiz.Timer,
                 Title = quiz.Title,
             };
             return quizDTO;
@@ -72,7 +68,6 @@ namespace API.Controllers
             }
 
             quiz.Title = quizDTO.Title;
-            quiz.Timer = quizDTO.Timer;
 
             _context.Entry(quiz).State = EntityState.Modified;
 
@@ -135,7 +130,6 @@ namespace API.Controllers
                 education = education,
                 category = category,
                 difficulty = difficulties,
-                Timer = quizDTO.Timer,
             };
 
             _context.Quizs.Add(quiz);
@@ -165,7 +159,6 @@ namespace API.Controllers
                 Difficulty = quiz.difficulty.Difficulty,
                 Education = quiz.education.Education,
                 ID = quiz.ID,
-                Timer = quiz.Timer,
                 Title = quiz.Title,
             };
 
@@ -250,7 +243,6 @@ namespace API.Controllers
                 education = education,
                 category = category,
                 difficulty = difficulties,
-                Timer = quizDTO.Timer,
             };
 
             _context.Quizs.Add(quiz);
@@ -304,7 +296,6 @@ namespace API.Controllers
                 Difficulty = quiz.difficulty.Difficulty,
                 Education = quiz.education.Education,
                 ID = quiz.ID,
-                Timer = quiz.Timer,
                 Title = quiz.Title,
             };
 
@@ -325,11 +316,6 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool QuizExists(int id)
-        {
-            return _context.Quizs.Any(e => e.ID == id);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page "/StudentMyPage"
 @rendermode InteractiveServer
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @using API.Models
 @using System.Net
@@ -9,19 +10,19 @@
 
     <h2>
         Avg. score:
-        @if (quizzes.Count <= 0)
+        @if (quizzesLink.Count <= 0)
         {
             <span>Loading...</span>
         }
         else
         {
-            <span>@GetAvgScore()</span>
+            <span>@Math.Round(quizzesLink.Average(ql => ql.Results))</span>
         }
     </h2>
 </div>
 
 
-@if (quizzes.Count <= 0)
+@if (quizzesLink.Count <= 0)
 {
     <p>
         Loading...
@@ -30,33 +31,40 @@
 else
 {
     <div class="row my-1">
-        @foreach (QuizDTO quiz in quizzes)
+        @foreach (User_QuizInfoDTO quizLink in quizzesLink)
         {
-            <div class="col-md-6 p-1">
+            <div class="col-md-4 p-1">
                 <div class="card bg-light">
                     <div class="card-body">
                         <div class="Split">
-                            <h3 class="card-title">@quiz.Title</h3>
-                            <h4 class="text-end">Creator: @quiz.Creator</h4>
+                            <h3 class="card-title">@quizLink.quiz.Title</h3>
+                            <h4 class="text-end">@quizLink.quiz.Creator</h4>
                         </div>
                         <div class="MyPageCardGab">
                             <div class="MyPageCustomBox">
-                                <p class="card-text">Category: @quiz.Category</p>
+                                <p class="card-text">Category: @quizLink.quiz.Category</p>
                             </div>
                             <div class="MyPageCustomBox">
-                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
+                                <p class="card-text">Difficulty: @quizLink.quiz.Difficulty</p>
                             </div>
                             <div class="MyPageCustomBox">
-                                <p class="card-text">Score: 0</p>
+                                <p class="card-text">Score: @quizLink.Results</p>
                             </div>
+                            @if (!quizLink.Completed)
+                            {
+                                <div class="MyPageCustomBox">
+                                    <p class="card-text">Time: @quizLink.quiz.Timer</p>
+                                </div>
+                            }
                         </div>
                         <div class="pt-2 MyPageCardGab">
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Time: @quiz.Timer</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Time used: @quiz.Timer</p>
-                            </div>
+                            <button class="MyPageCustomBox btn
+                                @(quizLink.Completed ? "btn-secondary" : "btn-primary")"
+                                    @onclick="() => Start(quizLink.Completed)"
+                                    disabled="@quizLink.Completed">
+
+                                <p class="card-text">Start</p>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -65,30 +73,56 @@ else
     </div>
 }
 
+@if (hasEditHtml)
+{
+    <div class="model custom-modal">
+        <h4>Why did you edit the html?</h4>
+        <p>ARE YOU STOOPID!</p>
+        <div class="mt-1">
+            <button class="btn" @onclick="ClosehasEditHtmlModal">Close</button>
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="ClosehasEditHtmlModal" class="modal-overlay"></div>
+}
+
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<QuizDTO> quizzes = new();
-    private List<User_QuizDTO> quizLink = new();
+    private List<User_QuizInfoDTO> quizzesLink = new();
+    private bool hasEditHtml = false;
 
     protected override async Task OnInitializedAsync()
     {
         if (Http == null) return;
-
-        (HttpStatusCode statusCode, List<QuizDTO>? response) =
-            await HttpHandler.GetAsync<List<QuizDTO>>("api/Quizs", Http);
-
-        if (statusCode == HttpStatusCode.OK)
+        try
         {
-            quizzes = response ?? new();
+            int id = await sessionStorage.GetItemAsync<int>("userID");
+
+            (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
+                await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
+                    $"api/User_Quiz/AllUserQuiz/{id}", Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                quizzesLink = response ?? new();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // It fails the first time,
+            // therefore I need this.
         }
     }
 
-    private double GetAvgScore()
+    private void Start(bool completed)
     {
-        if (quizLink.Any())
+        if (completed)
         {
-            return Math.Round(quizLink.Average(ql => ql.Results));
+            hasEditHtml = true;
+            return;
         }
-        return 0;
     }
+
+    private void ClosehasEditHtmlModal() => hasEditHtml = false;
 }

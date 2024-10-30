@@ -3,7 +3,6 @@
 
 @inject NavigationManager NavigationManager
 @inject NavigationManager NavManager
-@inject IJSRuntime JSRuntime
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @namespace Login
@@ -51,23 +50,10 @@
     <p>@responseMessage</p>
 }
 
-@if (loginSuccess)
-{
-
-    <p><strong>Login Successful!</strong></p>
-    <p>Email: @loginRequest.email</p>
-    <p>Password: @loginRequest.password</p>
-    <p>JWT: @jwtToken</p>
-
-    Console.WriteLine(jwtToken);
-}
-
 @code {
     private LoginRequest loginRequest = new();
     private bool isLoading = false;
     private string responseMessage = string.Empty;
-    private string jwtToken = string.Empty;
-    private bool loginSuccess = false;
     [Inject] public HttpClient? Http { get; set; }
 
     // Method to handle login
@@ -76,8 +62,7 @@
         isLoading = true;
         try
         {
-            if (Http == null)
-                return;
+            if (Http == null) return;
 
             // Send POST request to login endpoint
             var response = await Http.PostAsJsonAsync("/api/Users/login", loginRequest);
@@ -91,18 +76,13 @@
                 if (dTO == null)
                     return;
 
-                // If login is successful
-                responseMessage = $"Status Code: {response.StatusCode}";
-                jwtToken = dTO.token ?? "";  // Assuming the JWT is the response content
-                loginSuccess = true;
-
-                //store JWT in Cookies
-                // await JSRuntime.InvokeVoidAsync("setCookie", "jwt", jwtToken, 60);
-                await sessionStorage.SetItemAsync("jwt", jwtToken);
+                await sessionStorage.SetItemAsync("jwt", dTO.token);
                 await sessionStorage.SetItemAsync("userRole", dTO.role);
                 await sessionStorage.SetItemAsync("userEmail", dTO.email);
                 await sessionStorage.SetItemAsync("userUsername", dTO.username);
-                MainLayout.jwtToken = jwtToken;
+                await sessionStorage.SetItemAsync("userID", dTO.ID);
+
+                MainLayout.jwtToken = dTO.token ?? "";
                 MainLayout.userRole = dTO.role;
 
                 //navigate to home when email/username and password is correct
@@ -112,7 +92,6 @@
             {
                 // If login fails
                 responseMessage = $"Error: {response.StatusCode}, Message: {responseContent}";
-                loginSuccess = false;
             }
         }
         catch (Exception ex)
@@ -131,8 +110,13 @@
     {
         // Invoking function to delete the cookie
         await sessionStorage.RemoveItemAsync("jwt");
+        await sessionStorage.RemoveItemAsync("userRole");
+        await sessionStorage.RemoveItemAsync("userEmail");
+        await sessionStorage.RemoveItemAsync("userUsername");
+        await sessionStorage.RemoveItemAsync("userID");
         MainLayout.jwtToken = string.Empty;
         MainLayout.userRole = string.Empty;
+        StateHasChanged();
     }
 }
 

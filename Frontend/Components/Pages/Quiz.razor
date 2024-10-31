@@ -5,19 +5,20 @@
 @using Frontend.Components
 @using System.Net
 @using System.Linq
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <h3>Quiz</h3>
 
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="quizDto.Title" placeholder="Enter Quiz Title" class="form-control" />
+    <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" />
 </div>
 
 <div>
     <label for="mainCategory">Main Category:</label>
     <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
-        @(quizDto.CategoryID == 0 ? "Select Main Category" : categories.FirstOrDefault(c => c.ID == quizDto.CategoryID)?.Category ?? "Select Main Category")
+        @(newQuizDto.CategoryID == 0 ? "Select Main Category" : categories.FirstOrDefault(c => c.ID == newQuizDto.CategoryID)?.Category ?? "Select Main Category")
     </button>
     <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
         @foreach (var category in categories)
@@ -31,7 +32,7 @@
 <div>
     <label for="mainDifficulty">Main Difficulty:</label>
     <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
-        @(quizDto.DifficultyID == 0 ? "Select Main Difficulty" : difficulties.FirstOrDefault(c => c.ID == quizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+        @(newQuizDto.DifficultyID == 0 ? "Select Main Difficulty" : difficulties.FirstOrDefault(c => c.ID == newQuizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
     </button>
     <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
         @foreach (var difficulty in difficulties)
@@ -193,11 +194,13 @@ else
     private List<Categories> categories = new();
     private List<UnderCategories> underCategories = new();
     private List<CategoryHandlingQuiz> CategoriesHandler = new();
+    private QuizCreateRandomDTO newQuizDto = new();
     private List<Question> Questions { get; set; } = new();
     private List<API.Models.User> user = new();
-    private QuizCreateRandomDTO quizDto = new();
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
+
+
 
 
     private bool mainCategoryDropdownVisible = false;
@@ -208,7 +211,7 @@ else
 
     private void SelectMainCategory(Categories Category)
     {
-        quizDto.CategoryID = Category.ID;
+        newQuizDto.CategoryID = Category.ID;
         mainCategoryDropdownVisible = false;
     }
 
@@ -222,7 +225,7 @@ else
 
     private void SelectMainDifficulty(Difficulties Difficulty)
     {
-        quizDto.DifficultyID = Difficulty.ID;
+        newQuizDto.DifficultyID = Difficulty.ID;
         mainCategoryDropdownVisible = false;
     }
 
@@ -269,32 +272,41 @@ else
                 });
         }
 
-        quizDto.questions = questions.ToArray();
-        quizDto.EducationID = 1;
-        //Change to non static!!!
-        quizDto.CreatorID = 1;
-        quizDto.CategoryID = quizDto.CategoryID;
-        quizDto.DifficultyID = quizDto.DifficultyID;
+        int userID = await sessionStorage.GetItemAsync<int>("userID");
+        string Jwt = await sessionStorage.GetItemAsStringAsync("jwt");
+
+        QuizCreateRandomDTO quizDto = new()
+            {
+                Title = newQuizDto.Title,
+                questions = questions.ToArray(),
+                EducationID = 1,
+                //Change to non static!!!
+                CreatorID = userID,
+                CategoryID = newQuizDto.CategoryID,
+                DifficultyID = newQuizDto.DifficultyID,
+
+            };
 
         
-
+        // add "jwt" between quizDto and Http
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
-        HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
+        // HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
+        (HttpStatusCode statusCode, QuizDTO? response) =
+           await HttpHandler.PostAsync<QuizDTO>(
+               url, quizDto, Http);
 
-        if (responseMessage.IsSuccessStatusCode)
+        if (statusCode == HttpStatusCode.Created)
         {
             //successfully made quiz
             Console.WriteLine("Quiz created correctly");
 
             //Retrive the quiz details if returned in the response
-            Quiz createdQuiz = await responseMessage.Content.ReadFromJsonAsync<Quiz>();
             SaveQuizMessage = "Random quiz save good";
         }
         else
         {
             //failed to make quiz
-            Console.WriteLine("Failed to create quiz: " + await responseMessage.Content.ReadAsStringAsync());
             SaveQuizMessage = "OH NO SHIT DONT WORK";
         }
     }

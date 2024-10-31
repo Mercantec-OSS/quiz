@@ -131,3 +131,19 @@ h1:focus {
         transform: rotate(360deg);
     }
 }
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+}
+
+    .login-container EditForm {
+        width: 300px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }

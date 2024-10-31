@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 
 @inject NavigationManager NavigationManager
-@inject NavigationManager NavManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @namespace Login
@@ -13,59 +12,68 @@
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
+<div class="login-container">
+    <h1>Login</h1>
 
-<!-- Email and Password input fields -->
-<div>
-    <label for="email">Email:</label>
-    <input type="email" @bind="loginRequest.email" id="email" />
-</div>
-
-<div>
-    <label for="password">Password:</label>
-    <input type="password" @bind="loginRequest.password" id="password" />
-</div>
-
-<div>
-    <!-- Login button -->
-    <button @onclick="HandleLogin">Login</button>
-
-    @if (isLoading)
+    @if (!string.IsNullOrEmpty(ErrorMessage))
     {
-        <div class="spinner-container">
-            <div class="spinner"></div>
-        </div>
+        <p class="text-danger">@ErrorMessage</p>
     }
+
+    <EditForm Model="loginRequest" OnValidSubmit="HandleLogin">
+
+
+        <div class="form-group p-1">
+            <InputText placeholder="Enter your Username" class="form-control"
+                       @bind-Value="loginRequest.email" @oninput="ClearErrorMessage" />
+        </div>
+
+        <div class="form-group p-1">
+            <InputText placeholder="Enter your password" class="form-control" type="password"
+                       @bind-Value="loginRequest.password" @oninput="ClearErrorMessage" />
+        </div>
+
+        <div class="form-group d-flex justify-content-center p-1">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+    </EditForm>
 </div>
 
-<div class="logout">
-    <NavLink class="nav-link" href="#" @onclick="DeleteJwtCookie">
-        <span class="bi bi-box-arrow-right" aria-hidden="true"></span>Log ud
-    </NavLink>
-</div>
-
-<!-- Displaying response status, errors, and success message -->
-@if (!string.IsNullOrEmpty(responseMessage))
+@if (isLoading)
 {
-    <p>@responseMessage</p>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
 }
 
 @code {
-    private LoginRequest loginRequest = new();
+    private LoginModel loginRequest = new();
     private bool isLoading = false;
-    private string responseMessage = string.Empty;
+    private string ErrorMessage = string.Empty;
     [Inject] public HttpClient? Http { get; set; }
 
     // Method to handle login
     private async Task HandleLogin()
     {
+        if (CheckRequirements())
+        {
+            ErrorMessage = "No username or password.";
+            return;
+        }
+
         isLoading = true;
         try
         {
             if (Http == null) return;
 
+            LoginRequest request = new()
+                {
+                    email = loginRequest.email,
+                    password = loginRequest.password
+                };
+
             // Send POST request to login endpoint
-            var response = await Http.PostAsJsonAsync("/api/Users/login", loginRequest);
+            var response = await Http.PostAsJsonAsync("/api/Users/login", request);
 
             // Read response content
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -91,13 +99,13 @@
             else
             {
                 // If login fails
-                responseMessage = $"Error: {response.StatusCode}, Message: {responseContent}";
+                ErrorMessage = "Invalid username or password.";
             }
         }
         catch (Exception ex)
         {
             // Handling any exceptions
-            responseMessage = $"Exception: {ex.Message}";
+            ErrorMessage = $"Exception: {ex.Message}";
         }
         finally
         {
@@ -105,18 +113,24 @@
         }
     }
 
-    // // Method to delete the JWT "session"
-    private async Task DeleteJwtCookie()
+    private void ClearErrorMessage()
     {
-        // Invoking function to delete the cookie
-        await sessionStorage.RemoveItemAsync("jwt");
-        await sessionStorage.RemoveItemAsync("userRole");
-        await sessionStorage.RemoveItemAsync("userEmail");
-        await sessionStorage.RemoveItemAsync("userUsername");
-        await sessionStorage.RemoveItemAsync("userID");
-        MainLayout.jwtToken = string.Empty;
-        MainLayout.userRole = string.Empty;
-        StateHasChanged();
+        if (CheckRequirements())
+        {
+            ErrorMessage = string.Empty;
+        }
+    }
+
+    private bool CheckRequirements()
+    {
+        return string.IsNullOrEmpty(loginRequest.email) ||
+            string.IsNullOrEmpty(loginRequest.password);
+    }
+
+    private class LoginModel
+    {
+        public string email { get; set; } = string.Empty;
+        public string password { get; set; } = string.Empty;
     }
 }
 

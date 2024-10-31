@@ -1,7 +1,10 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class Quiz_QuestionController : ControllerBase
     {
         private readonly AppDBContext _context;
@@ -15,7 +18,10 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quiz_QuestionDTO>>> GetQuiz_Question()
         {
-            return (await _context.Quiz_Question.ToListAsync()).Select(qq => new Quiz_QuestionDTO()
+            return (await _context.Quiz_Question
+                .Include(qq => qq.quiz)
+                .Include(qq => qq.question)
+                .ToListAsync()).Select(qq => new Quiz_QuestionDTO()
             {
                 QuestionID = qq.question.ID,
                 QuizID = qq.quiz.ID,

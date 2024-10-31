@@ -1,11 +1,15 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly AppDBContext _context;
         private readonly IConfiguration _configuration;
+        private readonly TokenController _tokenController;
 
         public UsersController(AppDBContext context, IConfiguration configuration)
         {
@@ -18,6 +22,18 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+
             return (await _context.Users
                 .Include(u => u.role)
                 .ToListAsync())
@@ -34,6 +50,18 @@
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -56,6 +84,22 @@
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, UpdateUserDTO user)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+            else if (userResult.Value.ID != id && userResult.Value.role.Role != "Administrator")
+            {
+                return Unauthorized("You can only edit your own profile.");
+            }
+
             if (id != user.ID)
             {
                 return BadRequest();
@@ -79,6 +123,7 @@
         }
 
         // POST: api/Users
+        [AllowAnonymous]
         [HttpPost("signUp")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
@@ -116,6 +161,7 @@
         }
 
         // POST: api/Users
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> LoginUser(LoginRequest login)
         {
@@ -147,6 +193,22 @@
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+            else if (userResult.Value.role.Role != "Administrator")
+            {
+                return Unauthorized("No premission get out of here.");
+            }
+
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {

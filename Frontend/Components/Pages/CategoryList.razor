@@ -1,8 +1,12 @@
 ﻿@page "/CategoryList"
 @rendermode InteractiveServer
-@using System.Net;
 
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@using System.Net;
 @using API.Models
+
+<PageTitle>Category list</PageTitle>
 
 <h3>CategoryList</h3>
 <ul class="list-group">
@@ -43,13 +47,15 @@
     private List<Categories> categories = new();
     private Categories? categoryShowingUnderCategories;
     private List<UnderCategories> underCategories = new();
+    private string jwt = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         if (Http == null) return;
+        jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
 
         (HttpStatusCode statusCode, List<Categories>? response) =
-            await HttpHandler.GetAsync<List<Categories>>("api/Categories", Http);
+            await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
         if (statusCode == HttpStatusCode.OK)
         {
             categories = response ?? new();
@@ -71,8 +77,9 @@
         if (Http == null) return;
 
         (HttpStatusCode statusCode, List<UnderCategories>? response) =
-            await HttpHandler.GetAsync<List<UnderCategories>>("api/UnderCategories/CategoryID/" + category.ID,
-            Http);
+            await HttpHandler.GetAsync<List<UnderCategories>>(
+                $"api/UnderCategories/CategoryID/{category.ID}", 
+                jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {

@@ -1,6 +1,7 @@
 ﻿@page "/createCategory"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @using API.Models
 @using System.Net
 
@@ -202,6 +203,7 @@
     private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
 
     private bool isLoading = false;
+    private string jwt = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -210,8 +212,10 @@
             if (Http == null) return;
             isLoading = true;
 
+            jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+
             (HttpStatusCode statusCode, List<Categories>? response) =
-                await HttpHandler.GetAsync<List<Categories>>("api/Categories", Http);
+                await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -268,7 +272,7 @@
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
                 await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
-                    $"api/UnderCategories/CategoryID/{category.ID}", Http);
+                    $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -292,7 +296,7 @@
         {
             (HttpStatusCode statusCode, Categories? response) =
                await HttpHandler.PutAsync<Categories>(
-                   $"/api/Categories/{editCategory.ID}", editCategory, Http);
+                   $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
         }
         catch (Exception)
         { }
@@ -315,7 +319,7 @@
         {
             (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
                await HttpHandler.PutAsync<UnderCategoriesGetDTO>(
-                   $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, Http);
+                   $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
         }
         catch (Exception)
         { }
@@ -332,7 +336,7 @@
         isLoading = true;
 
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
-                    $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", Http);
+                    $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.NoContent)
         {
@@ -360,7 +364,7 @@
 
         (HttpStatusCode statusCode, string response) =
            await HttpHandler.PostAsync(
-               $"api/Categories", newCategory, Http);
+               $"api/Categories", newCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -387,7 +391,7 @@
 
         (HttpStatusCode statusCode, string response) =
                 await HttpHandler.PostAsync(
-                    $"api/UnderCategories", newUnderCategories, Http);
+                    $"api/UnderCategories", newUnderCategories, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {

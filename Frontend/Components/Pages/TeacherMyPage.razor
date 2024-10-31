@@ -1,5 +1,6 @@
 ﻿@page "/TeacherMyPage"
 @rendermode InteractiveServer
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @using API.Models
 @using System.Net
@@ -17,21 +18,21 @@
 else
 {
     <div class="row my-1">
-        @foreach (QuizDTO quiz in quizzesMaked)
+        @foreach (User_QuizInfoDTO quiz in quizzesMaked)
         {
             <div class="col-md-6 p-1">
                 <div class="card bg-light">
                     <div class="card-body">
                         <div class="Split">
-                            <h3 class="card-title">@quiz.Title</h3>
-                            <h4 class="text-end">Creator: @quiz.Creator</h4>
+                            <h3 class="card-title">@quiz.quiz.Title</h3>
+                            <h4 class="text-end">Creator: @quiz.quiz.Creator</h4>
                         </div>
                         <div class="MyPageCardGab">
                             <div class="MyPageCustomBox">
-                                <p class="card-text">Category: @quiz.Category</p>
+                                <p class="card-text">Category: @quiz.quiz.Category</p>
                             </div>
                             <div class="MyPageCustomBox">
-                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
+                                <p class="card-text">Difficulty: @quiz.quiz.Difficulty</p>
                             </div>
                             <div class="MyPageCustomBox">
                                 <p class="card-text">Score: 0</p>
@@ -54,18 +55,29 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<QuizDTO> quizzesMaked = new();
+    private List<User_QuizInfoDTO> quizzesMaked = new();
 
     protected override async Task OnInitializedAsync()
     {
         if (Http == null) return;
-
-        (HttpStatusCode statusCode, List<QuizDTO>? response) =
-            await HttpHandler.GetAsync<List<QuizDTO>>("api/Quizs", Http);
-
-        if (statusCode == HttpStatusCode.OK)
+        try
         {
-            quizzesMaked = response ?? new();
+            int id = await sessionStorage.GetItemAsync<int>("userID");
+            string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+
+            (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
+                await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
+                    $"api/User_Quiz/AllUserQuiz/{id}", jwt, Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                quizzesMaked = response ?? new();
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // It fails the first time,
+            // therefore I need this.
         }
     }
 }

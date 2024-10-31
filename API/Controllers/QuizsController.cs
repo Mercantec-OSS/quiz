@@ -1,7 +1,10 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuizsController(AppDBContext context) : ControllerBase
     {
         private readonly AppDBContext _context = context;

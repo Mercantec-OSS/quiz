@@ -15,6 +15,33 @@
 </div>
 
 <div>
+    <label for="mainCategory">Main Category:</label>
+    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
+        @(quizDto.CategoryID == 0 ? "Select Main Category" : categories.FirstOrDefault(c => c.ID == quizDto.CategoryID)?.Category ?? "Select Main Category")
+    </button>
+    <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
+        @foreach (var category in categories)
+        {
+            <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
+        }
+    </div>
+</div>
+
+
+<div>
+    <label for="mainDifficulty">Main Difficulty:</label>
+    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
+        @(quizDto.DifficultyID == 0 ? "Select Main Difficulty" : difficulties.FirstOrDefault(c => c.ID == quizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+    </button>
+    <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
+        @foreach (var difficulty in difficulties)
+        {
+            <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
+        }
+    </div>
+</div>
+
+<div>
     @foreach (var question in CategoriesHandler)
     {
         @* simple drop down menu, very important *@
@@ -173,6 +200,33 @@ else
     private const int MaxQuestions = 25;
 
 
+    private bool mainCategoryDropdownVisible = false;
+    private void ToggleMainCategoryDropdown()
+    {
+        mainCategoryDropdownVisible = !mainCategoryDropdownVisible;
+    }
+
+    private void SelectMainCategory(Categories Category)
+    {
+        quizDto.CategoryID = Category.ID;
+        mainCategoryDropdownVisible = false;
+    }
+
+
+
+    private bool mainDifficultyDropdownVisible = false;
+    private void ToggleMainDifficultyDropdown()
+    {
+        mainDifficultyDropdownVisible = !mainDifficultyDropdownVisible;
+    }
+
+    private void SelectMainDifficulty(Difficulties Difficulty)
+    {
+        quizDto.DifficultyID = Difficulty.ID;
+        mainCategoryDropdownVisible = false;
+    }
+
+
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
         if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
@@ -219,8 +273,9 @@ else
         quizDto.EducationID = 1;
         //Change to non static!!!
         quizDto.CreatorID = 1;
-        // quizDto.DifficultyID = ;
-        
+        quizDto.CategoryID = quizDto.CategoryID;
+        quizDto.DifficultyID = quizDto.DifficultyID;
+
         
 
         //set up url for API endpoint

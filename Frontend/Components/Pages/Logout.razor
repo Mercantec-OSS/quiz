@@ -16,6 +16,7 @@
 </div>
 
 @code {
+    [Inject] public HttpClient? Http { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

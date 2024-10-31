@@ -1,5 +1,8 @@
 ﻿@page "/quiz"
 @rendermode InteractiveServer
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Frontend.Components
@@ -239,8 +242,9 @@ else
         int difficultyID = questionHandling.selectedDifficulty.ID;
 
         string url = $"/api/Questions";
+        string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
 
-        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, Http);
+        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {

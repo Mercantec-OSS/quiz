@@ -1,14 +1,12 @@
 ﻿@page "/quiz"
 @rendermode InteractiveServer
-
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
-
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Frontend.Components
 @using System.Net
 @using System.Linq
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
 
 <h3>Quiz</h3>
 
@@ -295,10 +293,11 @@ else
         // add "jwt" between quizDto and Http
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
-        // HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
+
+
         (HttpStatusCode statusCode, QuizDTO? response) =
            await HttpHandler.PostAsync<QuizDTO>(
-               url, quizDto, Http);
+               url, quizDto, Jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {

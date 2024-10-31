@@ -22,10 +22,6 @@
         if (firstRender)
         {
             // Invoking function to delete the session
-            if (Http != null)
-            {
-                Http.DefaultRequestHeaders.Remove("Authorization");
-            }
             await sessionStorage.ClearAsync();
             MainLayout.jwtToken = string.Empty;
             MainLayout.userRole = string.Empty;

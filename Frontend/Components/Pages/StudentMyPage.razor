@@ -12,7 +12,7 @@
 
     <h2>
         Avg. score:
-        @if (quizzesLink.Count <= 0)
+        @if (quizzesLink == null)
         {
             <span>Loading...</span>
         }
@@ -24,7 +24,7 @@
 </div>
 
 
-@if (quizzesLink.Count <= 0)
+@if (quizzesLink == null)
 {
     <p>
         Loading...
@@ -85,7 +85,7 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<User_QuizInfoDTO> quizzesLink = new();
+    private List<User_QuizInfoDTO>? quizzesLink = null;
     private bool hasEditHtml = false;
 
     protected override async Task OnInitializedAsync()

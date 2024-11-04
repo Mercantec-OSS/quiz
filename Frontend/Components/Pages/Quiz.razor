@@ -298,7 +298,7 @@ else
         // HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
         (HttpStatusCode statusCode, QuizDTO? response) =
            await HttpHandler.PostAsync<QuizDTO>(
-               url, quizDto, Http);
+               url, quizDto, Jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {

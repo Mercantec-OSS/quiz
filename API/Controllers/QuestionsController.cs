@@ -12,12 +12,26 @@ namespace API.Controllers
         public QuestionsController(AppDBContext context)
         {
             _context = context;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/Questions
         [HttpGet]
         public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestions()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" 
+                && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             return (await _context.Questions.
                 Include(q => q.CreatorID).
                 Include(q => q.category).
@@ -43,6 +57,14 @@ namespace API.Controllers
         [HttpGet("ByQuizID/{id}")]
         public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByQuizID(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             return (await _context.Quiz_Question.
                 Include(q => q.question).
                 Include(q => q.question.CreatorID).
@@ -70,6 +92,14 @@ namespace API.Controllers
         [HttpGet("ByCriteria")]
         public async Task<ActionResult<IEnumerable<QuestionDTO>>> GetQuestionsByCriteria(int category, int underCategory, int difficulty)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             return (await _context.Questions.
                 Include(q => q.CreatorID).
                 Include(q => q.category).
@@ -99,6 +129,14 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestionDTO>> GetQuestion(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var question = await _context.Questions.
                 Include(q => q.CreatorID).
                 Include(q => q.category).
@@ -134,9 +172,30 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutQuestion(int id, Question question)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
+            var questionDb = await _context.Questions.
+                Include(q => q.CreatorID)
+                .FirstOrDefaultAsync(q => q.ID == id);
+
+            if (questionDb == null)
+            {
+                return NotFound();
+            }
             if (id != question.ID)
             {
                 return BadRequest();
+            }
+            else if (userResult.ID != questionDb.CreatorID.ID 
+                && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
             }
 
             _context.Entry(question).State = EntityState.Modified;
@@ -164,6 +223,19 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<QuestionDTO>> PostQuestion(QuestionCreateDTO questionDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" 
+                && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             var category = await _context.Categories.FindAsync(questionDTO.Category);
             if (category == null)
             {
@@ -229,13 +301,22 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id, int userId)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var question = await _context.Questions.Include(q => q.CreatorID).FirstOrDefaultAsync(q => q.ID == id); ;
             if (question == null)
             {
                 return NotFound();
             }
 
-            if (question.CreatorID.ID != userId)
+            if (question.CreatorID.ID != userId
+                && userResult.role.Role != "Administrator")
             {
                 return Unauthorized("only the creator can delete the question");
             }

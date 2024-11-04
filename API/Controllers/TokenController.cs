@@ -12,17 +12,15 @@
         }
 
         [HttpGet("UserAuth")]
-        public async Task<ActionResult<User>> GetUserRole(string token)
+        public async Task<User> GetUserRole(string token)
         {
-            // Check if the token is valid
             var isValid = await _context.Token.AnyAsync(t => t.JWTToken == token && t.ExpiresAt >= DateTime.UtcNow);
 
             if (!isValid)
             {
-                return Unauthorized("Invalid token.");
+                return null; // Indicates an invalid token.
             }
 
-            // Retrieve the user based on the token
             var user = await _context.Token
                 .Include(t => t.user)
                 .ThenInclude(u => u.role)
@@ -30,12 +28,7 @@
                 .Select(t => t.user)
                 .FirstOrDefaultAsync();
 
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            return Ok(user);
+            return user; // Null if not found.
         }
     }
 }

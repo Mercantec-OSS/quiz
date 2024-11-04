@@ -17,6 +17,7 @@ namespace API.Controllers
     public class UnderCategoriesController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public UnderCategoriesController(AppDBContext context)
         {

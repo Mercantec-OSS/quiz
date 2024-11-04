@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -22,12 +13,20 @@ namespace API.Controllers
         public DifficultiesController(AppDBContext context)
         {
             _context = context;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/Difficulties
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Difficulties>>> GetDifficulties()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
             return await _context.Difficulties.ToListAsync();
         }
 
@@ -35,6 +34,14 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Difficulties>> GetDifficulties(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var difficulties = await _context.Difficulties.FindAsync(id);
 
             if (difficulties == null)
@@ -50,6 +57,18 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDifficulties(int id, Difficulties difficulties)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             if (id != difficulties.ID)
             {
                 return BadRequest();
@@ -81,6 +100,18 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Difficulties>> PostDifficulties(DifficultiesDTO difficultiesDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             Difficulties difficulties = new()
             {
                 Difficulty = difficultiesDTO.Difficulty,
@@ -96,6 +127,18 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDifficulties(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             var difficulties = await _context.Difficulties.FindAsync(id);
             if (difficulties == null)
             {

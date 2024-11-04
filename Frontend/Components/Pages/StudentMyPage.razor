@@ -1,4 +1,4 @@
-﻿@page "/StudentMyPage"
+﻿@page "/MyPage"
 @rendermode InteractiveServer
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
@@ -12,7 +12,7 @@
 
     <h2>
         Avg. score:
-        @if (quizzesLink.Count <= 0)
+        @if (quizzesLink == null)
         {
             <span>Loading...</span>
         }
@@ -24,7 +24,7 @@
 </div>
 
 
-@if (quizzesLink.Count <= 0)
+@if (quizzesLink == null)
 {
     <p>
         Loading...
@@ -85,7 +85,7 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<User_QuizInfoDTO> quizzesLink = new();
+    private List<User_QuizInfoDTO>? quizzesLink = null;
     private bool hasEditHtml = false;
 
     protected override async Task OnInitializedAsync()
@@ -94,7 +94,7 @@ else
         try
         {
             int id = await sessionStorage.GetItemAsync<int>("userID");
-            string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
                 await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(

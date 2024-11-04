@@ -1,4 +1,4 @@
-﻿@page "/StudentMyPage"
+﻿@page "/MyPage"
 @rendermode InteractiveServer
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
@@ -94,7 +94,7 @@ else
         try
         {
             int id = await sessionStorage.GetItemAsync<int>("userID");
-            string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
                 await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(

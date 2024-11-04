@@ -16,32 +16,39 @@
     <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" />
 </div>
 
-<div>
-    <label for="mainCategory">Main Category:</label>
-    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
-        @(newQuizDto.CategoryID == 0 ? "Select Main Category" : categories.FirstOrDefault(c => c.ID == newQuizDto.CategoryID)?.Category ?? "Select Main Category")
-    </button>
-    <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
-        @foreach (var category in categories)
-        {
-            <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
-        }
-    </div>
-</div>
+<table>
+    <tr>
+        <td>
+            <div>
+                <label for="mainCategory"></label>
+                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
+                    @(newQuizDto.CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == newQuizDto.CategoryID)?.Category ?? "Select Main Category")
+                </button>
+                <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
+                    @foreach (var category in categories)
+                    {
+                        <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
+                    }
+                </div>
+            </div>
+        </td>
 
-
-<div>
-    <label for="mainDifficulty">Main Difficulty:</label>
-    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
-        @(newQuizDto.DifficultyID == 0 ? "Select Main Difficulty" : difficulties.FirstOrDefault(c => c.ID == newQuizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
-    </button>
-    <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
-        @foreach (var difficulty in difficulties)
-        {
-            <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
-        }
-    </div>
-</div>
+        <td>
+            <div>
+                <label for="mainDifficulty"></label>
+                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
+                    @(newQuizDto.DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == newQuizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+                </button>
+                <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
+                    @foreach (var difficulty in difficulties)
+                    {
+                        <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
+                    }
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 
 <div>
     @foreach (var question in CategoriesHandler)
@@ -91,14 +98,14 @@
                         </div>
                     </td>
                     <td>
-                        <label for="questionCount">Enter Amount</label>
+                        <label for="questionCount">Vælg Antal</label>
                         <input type="number" @bind="question.DesiredQuestionCount" min="1" max="25" />
                     </td>
                     <td>
                         <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
                     </td>
                     <td>
-                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Hent spørgsmål</button>
+                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Vis spørgsmål</button>
                     </td>
                 </tr>
             </table>
@@ -227,7 +234,7 @@ else
     private void SelectMainDifficulty(Difficulties Difficulty)
     {
         newQuizDto.DifficultyID = Difficulty.ID;
-        mainCategoryDropdownVisible = false;
+        mainDifficultyDropdownVisible = false;
     }
 
 
@@ -296,8 +303,7 @@ else
 
 
         (HttpStatusCode statusCode, QuizDTO? response) =
-           await HttpHandler.PostAsync<QuizDTO>(
-               url, quizDto, Jwt, Http);
+           await HttpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -319,20 +325,19 @@ else
     {
         if (Http == null) return;
 
-        if(firstRender)
+        if (firstRender)
         {
-            string Jwt = await sessionStorage.GetItemAsStringAsync("jwt");
+            string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCode, Difficulties? response) =
-               await HttpHandler.GetAsync<Difficulties>(
-
-                   "/api/Difficulties", Jwt, Http);
+               await HttpHandler.GetAsync<Difficulties>("/api/Difficulties", Jwt, Http);
 
             var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
             if (getDifficulties != null)
             {
                 difficulties.AddRange(getDifficulties);
             }
+
 
             var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
             if (getCategories != null)
@@ -348,7 +353,7 @@ else
 
             AddNewCategory();
         }
-        
+
     }
 
     //delete button

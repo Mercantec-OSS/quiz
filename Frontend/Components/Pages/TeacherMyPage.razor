@@ -18,34 +18,20 @@
 else
 {
     <div class="row my-1">
-        @foreach (User_QuizInfoDTO quiz in quizzesMaked)
+        @foreach (QuizDTO quiz in quizzesMaked)
         {
-            <div class="col-md-6 p-1">
+            <div class="col-md-6 p-1" @onclick="() => ToggleQuizModal(quiz)">
                 <div class="card bg-light">
                     <div class="card-body">
-                        <div class="Split">
-                            <h3 class="card-title">@quiz.quiz.Title</h3>
-                            <h4 class="text-end">Creator: @quiz.quiz.Creator</h4>
-                        </div>
+                        <h3 class="card-title">@quiz.Title</h3>
                         <div class="MyPageCardGab">
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Category: @quiz.quiz.Category</p>
+                            <div class="MyPageCustomBox" @onclick:stopPropagation>
+                                <p class="card-text">Category: @quiz.Category</p>
                             </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Difficulty: @quiz.quiz.Difficulty</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Score: 0</p>
+                            <div class="MyPageCustomBox" @onclick:stopPropagation>
+                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
                             </div>
                         </div>
-                        @* <div class="pt-2 MyPageCardGab">
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Time: @quiz.Timer</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Time used: @quiz.Timer</p>
-                            </div>
-                        </div> *@
                     </div>
                 </div>
             </div>
@@ -53,31 +39,121 @@ else
     </div>
 }
 
+@if (quizOpenInModal != null)
+{
+    <div class="model custom-modal custom-modal-teacherSeesStudent">
+        <div class="Split">
+            <h4>@quizOpenInModal.Title</h4>
+            <button class="btn btn-outline-secondary" @onclick="() => ToggleQuizModal()">Close</button>
+        </div>
+
+        <div class="row my-1 scrollable-content">
+            @foreach (UserDTO user in usersToQuizModal)
+            {
+                <div class="col-md-6 p-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title">@user.username</h3>
+                            <div class="MyPageCardGab">
+                                <div class="MyPageCustomBox">
+                                    <p class="card-text">ID: @user.ID</p>
+                                </div>
+                                <div class="MyPageCustomBox">
+                                    <p class="card-text">Email: @user.email</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Modal overlay (transparent background) -->
+    <div @onclick="() => ToggleQuizModal()" class="modal-overlay"></div>
+}
+
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
+
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<User_QuizInfoDTO> quizzesMaked = new();
+    private List<QuizDTO> quizzesMaked = new();
+
+    private QuizDTO? quizOpenInModal = null;
+    private List<UserDTO> usersToQuizModal = new();
+
+    private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if (Http == null) return;
         try
         {
-            int id = await sessionStorage.GetItemAsync<int>("userID");
-            string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+            isLoading = true;
+            StateHasChanged();
 
-            (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
-                await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
-                    $"api/User_Quiz/AllUserQuiz/{id}", jwt, Http);
+            string userUsername = await sessionStorage.GetItemAsync<string>("userUsername");
 
-            if (statusCode == HttpStatusCode.OK)
+            for (int i = 0; i < 15; i++)
             {
-                quizzesMaked = response ?? new();
+                quizzesMaked.Add(new()
+                    {
+                        ID = i,
+                        Title = "Yess.. a title",
+                        Category = "Who fuck knows?",
+                        Difficulty = "H2",
+                        Creator = userUsername,
+                        Education = "Education name"
+                    });
             }
+
+            // if (Http == null) return;
+            // int id = await sessionStorage.GetItemAsync<int>("userID");
+            // string jwt = await sessionStorage.GetItemAsStringAsync("jwt");
+
+            // (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
+            //     await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
+            //         $"api/User_Quiz/AllUserQuiz/{id}", jwt, Http);
+
+            // if (statusCode == HttpStatusCode.OK)
+            // {
+            //     quizzesMaked = response ?? new();
+            // }
         }
         catch (InvalidOperationException)
         {
             // It fails the first time,
             // therefore I need this.
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleQuizModal(QuizDTO? quiz = null)
+    {
+        usersToQuizModal.Clear();
+        quizOpenInModal = quiz;
+
+        if (quiz != null)
+        {
+            for (int i = 0; i < 25; i++)
+            {
+                usersToQuizModal.Add(new()
+                    {
+                        ID = i,
+                        username = $"Student {i}",
+                        email = $"MyStudentIdIs{i}SoIWantAVeryLongTextToTestThis@test.com",
+                        role = "Student",
+                        token = "hey",
+                    });
+            }
         }
     }
 }

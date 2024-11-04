@@ -33,7 +33,7 @@
             </table>
         </div>
 
-        <button class="btn btn-warning" @onclick="() => ToggleEditCategoryModal(selectedCategory)">
+        <button class="btn btn-warning" @onclick="() => ToggleEditCategoryModal(selectedCategory)" disabled="@(selectedCategory == null)">
             Edit Kategori
         </button>
 
@@ -211,8 +211,9 @@
         {
             if (Http == null) return;
             isLoading = true;
+            StateHasChanged();
 
-            jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+            jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCode, List<Categories>? response) =
                 await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
@@ -223,6 +224,7 @@
             }
 
             isLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -362,13 +364,25 @@
                 EducationID = 1,
             };
 
-        (HttpStatusCode statusCode, string response) =
-           await HttpHandler.PostAsync(
+        (HttpStatusCode statusCode, CategoriesDTO? response) =
+           await HttpHandler.PostAsync<CategoriesDTO>(
                $"api/Categories", newCategory, jwt, Http);
 
-        if (statusCode == HttpStatusCode.Created)
+        if (statusCode == HttpStatusCode.Created && response != null)
         {
-            Console.WriteLine("Can't add as i don't have the id of the category");
+            Categories newCategoryFromDB = new()
+                {
+                    ID = response.ID,
+                    Category = response.Category,
+                    education = new()
+                    {
+                        ID = response.EducationID,
+                    }
+                };
+
+            selectedCategory = newCategoryFromDB;
+            categories.Add(newCategoryFromDB);
+            underCategories.Clear();
         }
         isLoading = false;
     }

@@ -19,7 +19,8 @@ public static class HttpHandler
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.GetAsync(path);
-        return (response.StatusCode, Deserialize<T>(await response.Content.ReadAsStringAsync()));
+        return (response.StatusCode, Deserialize<T>(
+            await response.Content.ReadAsStringAsync()));
     }
 
     public static async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http)
@@ -29,7 +30,14 @@ public static class HttpHandler
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PostAsync(path, Serialize(dto));
-        return (response.StatusCode, await response.Content.ReadAsStringAsync());
+        try
+        {
+            return (response.StatusCode, await response.Content.ReadAsStringAsync());
+        }
+        catch (Exception)
+        {
+            return (HttpStatusCode.NotImplemented, "Something went wrong, reading from the response.");
+        }
     }
 
     public static async Task<(HttpStatusCode, T?)> PostAsync<T>(string path, object dto, string JWTtoken, HttpClient http)
@@ -39,7 +47,8 @@ public static class HttpHandler
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PostAsync(path, Serialize(dto));
-        return (response.StatusCode, Deserialize<T>(await response.Content.ReadAsStringAsync()));
+        return (response.StatusCode, Deserialize<T>(
+            await response.Content.ReadAsStringAsync()));
     }
 
     public static async Task<HttpStatusCode> PutAsync(string path, object dto, string JWTtoken, HttpClient http)
@@ -59,7 +68,8 @@ public static class HttpHandler
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PutAsync(path, Serialize(dto));
-        return (response.StatusCode, Deserialize<T>(await response.Content.ReadAsStringAsync()));
+        return (response.StatusCode, Deserialize<T>(
+            await response.Content.ReadAsStringAsync()));
     }
 
     public static async Task<HttpStatusCode> DeleteAsync(string path, string JWTtoken, HttpClient http)
@@ -74,7 +84,14 @@ public static class HttpHandler
 
     public static T? Deserialize<T>(string response)
     {
-        return JsonSerializer.Deserialize<T>(response, options);
+        try
+        {
+            return JsonSerializer.Deserialize<T>(response, options);
+        }
+        catch (Exception)
+        {
+            return default;
+        }
     }
 
     private static StringContent Serialize(object toSerialize)

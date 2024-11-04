@@ -9,7 +9,8 @@
 <PageTitle>Category list</PageTitle>
 
 <h3>CategoryList</h3>
-<ul class="list-group">
+
+<ul class="list-group my-2">
     @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
     {
         <li class="list-group-item @(i % 2 == 1 ? "list-group-item-dark" : "list-group-item-light")"
@@ -21,7 +22,7 @@
                 </h4>
                 @if (categoryShowingUnderCategories == category)
                 {
-                    if (underCategories.Count <= 0)
+                    if (underCategories == null)
                     {
                         <p style="border-top: 1px solid gray; padding-top: 10px;">
                             Loading...
@@ -29,10 +30,19 @@
                     }
                     else
                     {
-                        foreach (var (item, x) in underCategories.Select((category, index) => (category, index)))
+                        if (underCategories.Count > 0)
+                        {
+                            foreach (var (item, x) in underCategories.Select((category, index) => (category, index)))
+                            {
+                                <p style="border-top: 1px solid gray; padding-top: 10px;">
+                                    @item.UnderCategory
+                                </p>
+                            }
+                        }
+                        else
                         {
                             <p style="border-top: 1px solid gray; padding-top: 10px;">
-                                @item.UnderCategory
+                                No Under Category found.
                             </p>
                         }
                     }
@@ -42,29 +52,47 @@
     }
 </ul>
 
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
+
 @code {
     [Inject] public HttpClient? Http { get; set; }
     private List<Categories> categories = new();
     private Categories? categoryShowingUnderCategories;
-    private List<UnderCategories> underCategories = new();
+    private List<UnderCategories>? underCategories;
+
+    private bool isLoading = false;
     private string jwt = string.Empty;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null) return;
-        jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
-
-        (HttpStatusCode statusCode, List<Categories>? response) =
-            await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
-        if (statusCode == HttpStatusCode.OK)
+        if (firstRender)
         {
-            categories = response ?? new();
+            if (Http == null) return;
+            isLoading = true;
+
+            jwt = await sessionStorage.GetItemAsync<string>("jwt");
+
+            (HttpStatusCode statusCode, List<Categories>? response) =
+                await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                categories = response ?? new();
+            }
+
+            isLoading = false;
+            StateHasChanged();
         }
     }
 
     private Task ClearSubCategories()
     {
-        underCategories.Clear();
+        underCategories = null;
         categoryShowingUnderCategories = null;
         return Task.CompletedTask;
     }
@@ -78,7 +106,7 @@
 
         (HttpStatusCode statusCode, List<UnderCategories>? response) =
             await HttpHandler.GetAsync<List<UnderCategories>>(
-                $"api/UnderCategories/CategoryID/{category.ID}", 
+                $"api/UnderCategories/CategoryID/{category.ID}",
                 jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)

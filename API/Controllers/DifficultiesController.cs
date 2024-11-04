@@ -7,14 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DifficultiesController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public DifficultiesController(AppDBContext context)
         {

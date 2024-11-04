@@ -1,10 +1,14 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public CategoriesController(AppDBContext context)
         {

@@ -1,10 +1,14 @@
-﻿namespace API.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class User_QuizController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public User_QuizController(AppDBContext context)
         {
@@ -15,6 +19,18 @@
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User_QuizDTO>>> GetUser_Quiz()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+
             return (await _context.User_Quiz.ToListAsync()).Select(uq => new User_QuizDTO()
             {
                 Completed = uq.Completed,
@@ -28,6 +44,22 @@
         [HttpGet("AllUserQuiz/{userId}")]
         public async Task<ActionResult<IEnumerable<User_QuizInfoDTO>>> GetAllUserQuiz(int userId)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+            else if (userResult.Value.ID != userId && userResult.Value.role.Role != "Administrator")
+            {
+                return Unauthorized("You can only get quizs your account is added to.");
+            }
+
             var user_Quiz = (await _context.User_Quiz.
                 Include(uq => uq.quiz).
                 Include(uq => uq.quiz.difficulty).
@@ -66,6 +98,22 @@
         [HttpGet("{quizId}/{userId}")]
         public async Task<ActionResult<User_QuizDTO>> GetUser_Quiz(int quizId, int userId)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult.Result is UnauthorizedResult)
+            {
+                return Unauthorized("Invalid token.");
+            }
+            else if (!(userResult.Value is User))
+            {
+                return NotFound("User not found");
+            }
+            else if (userResult.Value.ID != userId && userResult.Value.role.Role != "Administrator")
+            {
+                return Unauthorized("You can only get quizs your account is added to.");
+            }
+
             var user_Quiz = await _context.User_Quiz.
                 FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
 

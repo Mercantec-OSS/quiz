@@ -1,14 +1,14 @@
-﻿using API.Models;
-using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuestionsController : ControllerBase
     {
         private readonly AppDBContext _context;
-
+        private readonly TokenController _tokenController;
         public QuestionsController(AppDBContext context)
         {
             _context = context;

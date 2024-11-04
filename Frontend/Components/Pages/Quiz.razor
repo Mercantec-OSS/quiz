@@ -289,7 +289,7 @@ else
 
             };
 
-        
+
         // add "jwt" between quizDto and Http
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
@@ -315,29 +315,40 @@ else
     }
 
     //getting info from API/DB
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (Http == null) return;
 
-        var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
-        if (getDifficulties != null)
+        if(firstRender)
         {
-            difficulties.AddRange(getDifficulties);
-        }
+            string Jwt = await sessionStorage.GetItemAsStringAsync("jwt");
 
-        var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
-        if (getCategories != null)
-        {
-            categories.AddRange(getCategories);
-        }
+            (HttpStatusCode statusCode, Difficulties? response) =
+               await HttpHandler.GetAsync<Difficulties>(
 
-        var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
-        if (getUnderCategories != null)
-        {
-            underCategories.AddRange(getUnderCategories);
-        }
+                   "/api/Difficulties", Jwt, Http);
 
-        AddNewCategory();
+            var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
+            if (getDifficulties != null)
+            {
+                difficulties.AddRange(getDifficulties);
+            }
+
+            var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
+            if (getCategories != null)
+            {
+                categories.AddRange(getCategories);
+            }
+
+            var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
+            if (getUnderCategories != null)
+            {
+                underCategories.AddRange(getUnderCategories);
+            }
+
+            AddNewCategory();
+        }
+        
     }
 
     //delete button

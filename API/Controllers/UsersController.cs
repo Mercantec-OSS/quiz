@@ -189,17 +189,13 @@ namespace API.Controllers
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
-            if (userResult.Result is UnauthorizedResult)
+            if (userResult == null)
             {
-                return Unauthorized("Invalid token.");
+                return Unauthorized("Invalid Token");
             }
-            else if (!(userResult.Value is User))
+            else if (userResult.role.Role != "Administrator")
             {
-                return NotFound("User not found");
-            }
-            else if (userResult.Value.role.Role != "Administrator")
-            {
-                return Unauthorized("No premission get out of here.");
+                return Unauthorized("Unauthorized.");
             }
 
             var user = await _context.Users.FindAsync(id);

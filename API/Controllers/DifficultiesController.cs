@@ -17,6 +17,7 @@ namespace API.Controllers
     public class DifficultiesController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public DifficultiesController(AppDBContext context)
         {

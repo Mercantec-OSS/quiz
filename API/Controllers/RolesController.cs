@@ -8,7 +8,7 @@ namespace API.Controllers
     public class RolesController : ControllerBase
     {
         private readonly AppDBContext _context;
-
+        private readonly TokenController _tokenController;
         public RolesController(AppDBContext context)
         {
             _context = context;

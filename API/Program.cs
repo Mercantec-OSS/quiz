@@ -43,6 +43,17 @@ namespace API
                 });
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()   // Allow requests from any origin
+                          .AllowAnyMethod()   // Allow any HTTP method (GET, POST, PUT, DELETE, etc.)
+                          .AllowAnyHeader();  // Allow any header
+                });
+            });
+
+
             IConfiguration Configuration = builder.Configuration;
 
             string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("DefaultConnection");
@@ -73,6 +84,8 @@ namespace API
             builder.Services.AddAuthentication();
 
             var app = builder.Build();
+
+            app.UseCors("AllowAll");
 
             app.UseSwagger();
             app.UseSwaggerUI();

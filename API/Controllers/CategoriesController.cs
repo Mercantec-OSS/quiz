@@ -8,6 +8,7 @@ namespace API.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDBContext _context;
+        private readonly TokenController _tokenController;
 
         public CategoriesController(AppDBContext context)
         {

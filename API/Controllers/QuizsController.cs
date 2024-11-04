@@ -8,6 +8,7 @@ namespace API.Controllers
     public class QuizsController(AppDBContext context) : ControllerBase
     {
         private readonly AppDBContext _context = context;
+        private readonly TokenController _tokenController;
 
         // GET: api/Quizs
         [HttpGet]

@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -22,12 +11,25 @@ namespace API.Controllers
         public UnderCategoriesController(AppDBContext context)
         {
             _context = context;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/UnderCategories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UnderCategories>>> GetUnderCategories()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             return await _context.UnderCategories.ToListAsync();
         }
 
@@ -35,6 +37,14 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UnderCategories>> GetUnderCategories(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var underCategories = await _context.UnderCategories.FindAsync(id);
 
             if (underCategories == null)
@@ -48,6 +58,14 @@ namespace API.Controllers
         [HttpGet("CategoryID/{id}")]
         public async Task<ActionResult<IEnumerable<UnderCategoriesGetDTO>>> GetUnderCategoriesByCategoryID(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var underCategories = await _context.UnderCategories
                 .Include(u => u.category)
                 .Where(u => u.category.ID == id)
@@ -70,6 +88,18 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUnderCategories(int id, UnderCategories underCategories)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             if (id != underCategories.ID)
             {
                 return BadRequest();
@@ -101,6 +131,18 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesDTO underCategoriesDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             var category = await _context.Categories.FindAsync(underCategoriesDTO.CategoryID);
             if (category == null)
             {
@@ -123,6 +165,18 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUnderCategories(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             var underCategories = await _context.UnderCategories.FindAsync(id);
             if (underCategories == null)
             {

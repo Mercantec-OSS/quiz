@@ -41,6 +41,20 @@
 
         public int TimeUsed { get; set; } = 0;
     }
+    public class User_QuizUserInfoDTO
+    {
+        public DateTime QuizEndDate { get; set; }
+
+        // This is used to flag indicate if the quiz is completed
+        public bool Completed { get; set; } = false;
+
+        // This is used to check the results of the quiz's
+        public int Results { get; set; } = 0;
+
+        public int TimeUsed { get; set; }
+
+        public UserDTO User { get; set; }
+    }
 
     public class User_QuizInfoDTO
     {

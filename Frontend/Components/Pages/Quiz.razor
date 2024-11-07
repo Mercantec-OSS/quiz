@@ -116,11 +116,7 @@
 
 
 
-<button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(CategoriesHandler.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
-<p>@SaveQuizMessage</p>
 
-@* button for making the random quiz *@
-<button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
 
 
 @* this is where the list is being displayed/made *@
@@ -160,6 +156,13 @@ else
 {
     <p>No questions found</p>
 }
+
+<button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(CategoriesHandler.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
+<p>@SaveQuizMessage</p>
+
+@* button for making the random quiz *@
+<button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
+
 
 @code
 {
@@ -329,26 +332,28 @@ else
         {
             string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-            (HttpStatusCode statusCode, Difficulties? response) =
-               await HttpHandler.GetAsync<Difficulties>("/api/Difficulties", Jwt, Http);
+            (HttpStatusCode statusCodeDifficulties, List<Difficulties>? getDifficulties) =
+               await HttpHandler.GetAsync<List<Difficulties>>("api/Difficulties", Jwt, Http);
 
-            var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
-            if (getDifficulties != null)
+            if (statusCodeDifficulties == HttpStatusCode.OK)
             {
-                difficulties.AddRange(getDifficulties);
+                difficulties.AddRange(getDifficulties ?? new());
+            }
+
+            (HttpStatusCode statusCodeCategories, List<Categories>? getCategories) =
+            await HttpHandler.GetAsync<List<Categories>>("api/Categories", Jwt, Http);
+            if (statusCodeCategories == HttpStatusCode.OK)
+            {
+                categories.AddRange(getCategories ?? new());
             }
 
 
-            var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
-            if (getCategories != null)
-            {
-                categories.AddRange(getCategories);
-            }
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategories>? getUnderCategories) =
+            await HttpHandler.GetAsync<List<UnderCategories>>("/api/UnderCategories", Jwt, Http);
 
-            var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
-            if (getUnderCategories != null)
+            if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
-                underCategories.AddRange(getUnderCategories);
+                underCategories.AddRange(getUnderCategories ?? new());
             }
 
             AddNewCategory();

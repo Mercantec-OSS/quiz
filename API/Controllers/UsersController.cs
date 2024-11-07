@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -15,6 +13,7 @@ namespace API.Controllers
         {
             _context = context;
             _configuration = configuration;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/Users
@@ -25,13 +24,13 @@ namespace API.Controllers
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
-            if (userResult.Result is UnauthorizedResult)
+            if (userResult == null)
             {
-                return Unauthorized("Invalid token.");
+                return Unauthorized("Invalid Token");
             }
-            else if (!(userResult.Value is User))
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
             {
-                return NotFound("User not found");
+                return Unauthorized("Unauthorized.");
             }
 
             return (await _context.Users
@@ -53,13 +52,9 @@ namespace API.Controllers
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
-            if (userResult.Result is UnauthorizedResult)
+            if (userResult == null)
             {
-                return Unauthorized("Invalid token.");
-            }
-            else if (!(userResult.Value is User))
-            {
-                return NotFound("User not found");
+                return Unauthorized("Invalid Token");
             }
 
             var user = await _context.Users.FindAsync(id);
@@ -87,15 +82,11 @@ namespace API.Controllers
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
-            if (userResult.Result is UnauthorizedResult)
+            if (userResult == null)
             {
-                return Unauthorized("Invalid token.");
+                return Unauthorized("Invalid Token");
             }
-            else if (!(userResult.Value is User))
-            {
-                return NotFound("User not found");
-            }
-            else if (userResult.Value.ID != id && userResult.Value.role.Role != "Administrator")
+            else if (userResult.ID != id && userResult.role.Role != "Administrator")
             {
                 return Unauthorized("You can only edit your own profile.");
             }
@@ -127,6 +118,30 @@ namespace API.Controllers
         [HttpPost("signUp")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+            if(await _context.Users.
+                Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Email == userSignUp.email) != null)
+            {
+                return BadRequest("Email allready excist.");
+            }
+            if(await _context.Users.
+            Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Username == userSignUp.username) != null)
+            {
+                return BadRequest("Username allready excist.");
+            }
+
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.password);
 
             var Roles = await _context.Roles.FindAsync(1);
@@ -196,17 +211,13 @@ namespace API.Controllers
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
-            if (userResult.Result is UnauthorizedResult)
+            if (userResult == null)
             {
-                return Unauthorized("Invalid token.");
+                return Unauthorized("Invalid Token");
             }
-            else if (!(userResult.Value is User))
+            else if (userResult.role.Role != "Administrator")
             {
-                return NotFound("User not found");
-            }
-            else if (userResult.Value.role.Role != "Administrator")
-            {
-                return Unauthorized("No premission get out of here.");
+                return Unauthorized("Unauthorized.");
             }
 
             var user = await _context.Users.FindAsync(id);

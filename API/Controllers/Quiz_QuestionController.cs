@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,12 +10,25 @@ namespace API.Controllers
         public Quiz_QuestionController(AppDBContext context)
         {
             _context = context;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/Quiz_Question
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quiz_QuestionDTO>>> GetQuiz_Question()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             return (await _context.Quiz_Question
                 .Include(qq => qq.quiz)
                 .Include(qq => qq.question)
@@ -32,6 +43,14 @@ namespace API.Controllers
         [HttpGet("{quizId}/{questionId}")]
         public async Task<ActionResult<Quiz_Question>> GetQuiz_Question(int quizId, int questionId)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+
             var quiz_Question = await _context.Quiz_Question.
                 FirstOrDefaultAsync(qq => qq.quiz.ID == quizId && qq.question.ID == questionId); ;
 
@@ -56,6 +75,18 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Quiz_Question>> PostQuiz_Question(Quiz_QuestionDTO quiz_QuestionDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+
             var newQuiz = await _context.Quizs.FindAsync(quiz_QuestionDTO.QuizID);
             if (newQuiz == null)
             {
@@ -84,12 +115,26 @@ namespace API.Controllers
         [HttpDelete("{quizId}/{questionId}")]
         public async Task<IActionResult> DeleteQuiz_Question(int quizId, int questionId)
         {
-            var quiz_Question = await _context.Quiz_Question.
-                FirstOrDefaultAsync(qq => qq.quiz.ID == quizId && qq.question.ID == questionId); ;
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            
+            var quiz_Question = await _context.Quiz_Question
+                .Include(qq => qq.quiz)
+                .ThenInclude(q => q.creator)
+                .FirstOrDefaultAsync(qq => qq.quiz.ID == quizId && qq.question.ID == questionId); ;
 
             if (quiz_Question == null)
             {
                 return NotFound();
+            }
+            else if (userResult.ID != quiz_Question.quiz.creator.ID && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
             }
 
             _context.Quiz_Question.Remove(quiz_Question);

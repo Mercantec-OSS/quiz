@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,6 +10,7 @@ namespace API.Controllers
         public RolesController(AppDBContext context)
         {
             _context = context;
+            _tokenController = new TokenController(context);
         }
 
         // GET: api/Roles
@@ -25,6 +24,18 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RolesDTO>> GetRoles(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             var roles = await _context.Roles.FindAsync(id);
 
             if (roles == null)
@@ -44,6 +55,18 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRoles(int id, RolesDTO roles)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             _context.Entry(roles).State = EntityState.Modified;
 
             try
@@ -70,6 +93,18 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Roles>> PostRoles(RolesDTO rolesDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             Roles roles = new()
             {
                 Role = rolesDTO.Role,
@@ -83,8 +118,20 @@ namespace API.Controllers
 
         // DELETE: api/Roles/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRoles(int id, string token)
+        public async Task<IActionResult> DeleteRoles(int id)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             var roles = await _context.Roles.FindAsync(id);
             if (roles == null)
             {

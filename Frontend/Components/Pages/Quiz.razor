@@ -110,51 +110,58 @@
                 </tr>
             </table>
         </div>
-        @* end of dropdown menu  *@
     }
 </div>
+@* end of dropdown menu  *@
 
 
 
 
 
-
-@* this is where the list is being displayed/made *@
-@if (Questions != null && Questions.Count > 0)
+@foreach (var questionSet in CategoriesHandler)
 {
-    Console.WriteLine($"Questions Count: {Questions.Count}");
 
-    <h4>Spørgsmål:</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Question</th>
-                <th>Category</th>
-                <th>UnderCategory</th>
-                <th>Difficulty</th>
-                <th>Mulige svar</th>
-                <th>Rigtige svar</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var question in Questions)
-            {
+    @* this is where the list is being displayed/made *@
+    @if (Questions != null && Questions.Any(q => q.Category == questionSet.selectedCategory?.Category &&
+                                                          q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
+                                                          q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
+    {
+        Console.WriteLine($"Questions Count: {Questions.Count}");
+
+        <h4>Spørgsmål:</h4>
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
-                    <td>@question.Category</td>
-                    <td>@question.UnderCategory</td>
-                    <td>@question.Difficulty</td>
-                    <td>@string.Join(", ", question.PossibleAnswers)</td>
-                    <td>@string.Join(", ", question.CorrectAnswer)</td>
+                    <th>Question</th>
+                    <th>Category</th>
+                    <th>UnderCategory</th>
+                    <th>Difficulty</th>
+                    <th>Mulige svar</th>
+                    <th>Rigtige svar</th>
                 </tr>
-            }
-        </tbody>
+            </thead>
+            <tbody>
+                @foreach (var question in Questions.Where(q => q.Category == questionSet.selectedCategory?.Category &&
+               q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
+               q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
+                {
+                    <tr>
+                        <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
+                        <td>@question.Category</td>
+                        <td>@question.UnderCategory</td>
+                        <td>@question.Difficulty</td>
+                        <td>@string.Join(", ", question.PossibleAnswers)</td>
+                        <td>@string.Join(", ", question.CorrectAnswer)</td>
+                    </tr>
+                }
+            </tbody>
 
-    </table>
-}
-else
-{
-    <p>No questions found</p>
+        </table>
+    }
+    else
+    {
+        <p>No questions found</p>
+    }
 }
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(CategoriesHandler.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>

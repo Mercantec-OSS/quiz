@@ -11,3 +11,4 @@ global using NUnit.Framework;
 global using System.Text;
 global using API.Models;
 global using API.Data;
+global using Novell.Directory.Ldap;

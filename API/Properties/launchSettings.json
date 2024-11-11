@@ -15,7 +15,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "AD_CONNECTION_TEST_LOGIN": "jona70k6__Xba99wdb",
+        "AD_CONNECTION_TEST_LOGIN": "{username}__{password}",
         "AD_CONNECTION_STRING": "172.16.2.50__global.local",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

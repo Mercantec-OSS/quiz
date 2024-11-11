@@ -13,7 +13,7 @@
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" />
+    <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" style="width: 40%"/>
 </div>
 
 <table>
@@ -98,7 +98,7 @@
                         </div>
                     </td>
                     <td>
-                        <label for="questionCount">Vælg Antal</label>
+                        <label for="questionCount">Antal</label>
                         <input type="number" @bind="question.DesiredQuestionCount" min="1" max="25" />
                     </td>
                     <td>
@@ -110,66 +110,61 @@
                 </tr>
             </table>
         </div>
+
+        <h4>Spørgsmål for @question.selectedCategory?.Category - @question.selectedUnderCategory?.UnderCategory - @question.selectedDifficulty?.Difficulty:</h4>
+
+        @* this is where the list is being displayed/made *@
+        @if (question.Questions != null && question.Questions.Any())
+        {
+            Console.WriteLine($"Questions Count: {Questions.Count}");
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Valgt</th>
+                        <th>Question</th>
+                        <th>Category</th>
+                        <th>UnderCategory</th>
+                        <th>Difficulty</th>
+                        <th>Mulige svar</th>
+                        <th>Rigtige svar</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var q in question.Questions)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" @bind="q.IsSelected" />
+                            </td>
+                            <td>@(!string.IsNullOrEmpty(q.Title) ? q.Title : "No Title")</td>
+                            <td>@q.Category</td>
+                            <td>@q.UnderCategory</td>
+                            <td>@q.Difficulty</td>
+                            <td>@string.Join(", ", q.PossibleAnswers)</td>
+                            <td>@string.Join(", ", q.CorrectAnswer)</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <p>No questions found</p>
+        }
     }
 </div>
 @* end of dropdown menu  *@
 
-
-
-
-
-@foreach (var questionSet in CategoriesHandler)
-{
-    <h4>Spørgsmål for @questionSet.selectedCategory?.Category - @questionSet.selectedUnderCategory?.UnderCategory - @questionSet.selectedDifficulty?.Difficulty:</h4>
-
-    @* this is where the list is being displayed/made *@
-    @if (questionSet.Questions != null && questionSet.Questions.Any())
-    {
-        Console.WriteLine($"Questions Count: {Questions.Count}");
-
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Valgt</th>
-                    <th>Question</th>
-                    <th>Category</th>
-                    <th>UnderCategory</th>
-                    <th>Difficulty</th>
-                    <th>Mulige svar</th>
-                    <th>Rigtige svar</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var question in questionSet.Questions)
-                {
-                    <tr>
-                        <td>
-                            <input type="checkbox" @bind="question.IsSelected" />
-                        </td>
-                        <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
-                        <td>@question.Category</td>
-                        <td>@question.UnderCategory</td>
-                        <td>@question.Difficulty</td>
-                        <td>@string.Join(", ", question.PossibleAnswers)</td>
-                        <td>@string.Join(", ", question.CorrectAnswer)</td>
-                    </tr>
-                }
-            </tbody>
-
-        </table>
-    }
-    else
-    {
-        <p>No questions found</p>
-    }
-}
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(CategoriesHandler.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
 <p>@SaveQuizMessage</p>
 
 @* button for making the random quiz *@
 <button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
-<></>
+<button class="btn btn-success" @onclick="customQuiz">Gem valgte som quiz</button>
 
 @code
 {
@@ -265,7 +260,7 @@
         mainDifficultyDropdownVisible = false;
     }
 
-
+    //Get the question and info
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
         if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
@@ -357,6 +352,13 @@
             SaveQuizMessage = "OH NO SHIT DONT WORK";
         }
     }
+
+    private async Task customQuiz()
+    {
+        
+    }
+
+
 
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)

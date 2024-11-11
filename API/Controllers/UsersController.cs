@@ -176,7 +176,7 @@
         {
             User? userFinder = await _context.Users.
                 Include(item => item.role).
-                FirstOrDefaultAsync(item => item.Email == login.username);
+                FirstOrDefaultAsync(item => item.Username == login.username);
             if (userFinder == null || userFinder.HashedPassword == "ADLogin")
             {
                 //check up against AD

@@ -130,6 +130,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Valgt</th>
                     <th>Question</th>
                     <th>Category</th>
                     <th>UnderCategory</th>
@@ -168,7 +169,7 @@
 
 @* button for making the random quiz *@
 <button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
-
+<></>
 
 @code
 {
@@ -221,6 +222,20 @@
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
 
+
+    public List<Question> GetSelectedQuestions()
+    {
+        var selectedQuestions = new List<Question>();
+        foreach (var questionSet in CategoriesHandler)
+        {
+            if (questionSet.Questions != null)
+            {
+                selectedQuestions.AddRange(questionSet.Questions.Where(questionSet => questionSet.IsSelected));
+            }
+        }
+
+        return selectedQuestions;
+    }
 
 
 

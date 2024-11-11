@@ -9,3 +9,4 @@ Frontend/bin/Debug/net8.0/appsettings.Development.json
 Frontend/bin/Debug/net8.0/appsettings.json
 /Frontend/bin
 /Frontend/obj
+/API/Properties/launchSettings.json

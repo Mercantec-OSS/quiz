@@ -37,14 +37,12 @@ namespace API.Models
     public class LoginRequest
     {
         // This is the login requirements
-        public string email { get; set; }
+        public string username { get; set; }
         public string password { get; set; }
     }
 
     public class SignUpRequest
     {
-        // This is the sign up requirements
-        public string email { get; set; }
         public string username { get; set; }
         public string password { get; set; }
 

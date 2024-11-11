@@ -1,57 +1,301 @@
 ﻿@page "/browse"
-@attribute [StreamRendering]
+
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Collections.Generic
+@using API.Models
+@using System.Net
+
+@* @attribute [StreamRendering] *@
 
 <PageTitle>Browse</PageTitle>
 
-<h1>Weather</h1>
+<div class="Split">
+    <h2>Browse</h2>
 
-<p>This component demonstrates showing data.</p>
+    <div class="MyPageCardGab">
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownCreator()">
+                                @(selectedCreators == null ? "Filter by creators" : selectedCreators)
+                            </button>
+                            <div class="dropdown-menu @dropdownCreator">
+                                <a class="dropdown-item" @onclick="() => SelectCreator(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string creator in creators)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCreator(creator)">
+                                        @creator
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-@if (forecasts == null)
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownCategory()">
+                                @(selectedCategory == null ? "Filter by Kategori" : selectedCategory)
+                            </button>
+                            <div class="dropdown-menu @dropdownCategory">
+                                <a class="dropdown-item" @onclick="() => SelectCategory(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string category in categories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCategory(category)">
+                                        @category
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownDifficulty()">
+                                @(selectedDifficulty == null ? "Filter by difficulty" : selectedDifficulty)
+                            </button>
+                            <div class="dropdown-menu @dropdownDifficuly">
+                                <a class="dropdown-item" @onclick="() => SelectDifficulty(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string difficulty in difficulties)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectDifficulty(difficulty)">
+                                        @difficulty
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        Loading...
+    </p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row my-1">
+        @foreach (QuizDTO quiz in Sort())
+        {
+            <div class="col-md-4 p-1">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="Split">
+                            <h3 class="card-title">@quiz.Title</h3>
+                            <h4 class="text-end">@quiz.Creator</h4>
+                        </div>
+                        <div class="MyPageCardGab">
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Category: @quiz.Category</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 MyPageCardGab">
+                            <button class="MyPageCustomBox btn btn-primary" @onclick="StartQuiz">
+                                <p class="card-text">Start</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    [Inject] public HttpClient? Http { get; set; }
+    private List<QuizDTO> allQuizzes = new();
 
-    protected override async Task OnInitializedAsync()
+    private List<string> creators = new();
+    private List<string> categories = new();
+    private List<string> difficulties = new();
+
+    private string? selectedCategory;
+    private string? selectedCreators;
+    private string? selectedDifficulty;
+
+    private string dropdownCreator = string.Empty;
+    private string dropdownCategory = string.Empty;
+    private string dropdownDifficuly = string.Empty;
+
+    private bool isLoading = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        if (firstRender)
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            if (Http == null) return;
+
+            isLoading = true;
+            StateHasChanged();
+
+            string searchWord = "";
+            Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out var dataValue))
+            {
+                searchWord = dataValue.ToArray()[0] ?? "";
+            }
+
+            Dictionary<string, string> parameters = new()
+            {
+                {"searchWord", searchWord}
+            };
+
+            (HttpStatusCode statusCode, List<QuizDTO>? response) =
+                await HttpHandler.GetAsync<List<QuizDTO>>(
+                    $"/api/Quizs/QuizSearch", parameters, jwt, Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                allQuizzes = response ?? new();
+                Dictionary<string, int> creators = new();
+                Dictionary<string, int> categories = new();
+                Dictionary<string, int> difficulty = new();
+                foreach (QuizDTO item in allQuizzes)
+                {
+                    if (!creators.TryAdd(item.Creator, 1))
+                    {
+                        creators[item.Creator]++;
+                    }
+                    if (!categories.TryAdd(item.Category, 1))
+                    {
+                        categories[item.Category]++;
+                    }
+                    if (!difficulty.TryAdd(item.Difficulty, 1))
+                    {
+                        difficulty[item.Difficulty]++;
+                    }
+                }
+
+                this.creators = creators.Keys.ToList();
+                this.categories = categories.Keys.ToList();
+                this.difficulties = difficulty.Keys.ToList();
+            }
+
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleDropdownCreator()
+    {
+        dropdownCreator = dropdownCreator == "" ? "show" : "";
+    }
+
+    private void ToggleDropdownCategory()
+    {
+        dropdownCategory = dropdownCategory == "" ? "show" : "";
+    }
+
+    private void ToggleDropdownDifficulty()
+    {
+        dropdownDifficuly = dropdownDifficuly == "" ? "show" : "";
+    }
+
+    private void SelectCreator(string? creator)
+    {
+        selectedCreators = creator;
+        StateHasChanged();
+    }
+
+    private void SelectCategory(string? category)
+    {
+        selectedCategory = category;
+        StateHasChanged();
+    }
+
+    private void SelectDifficulty(string? difficult)
+    {
+        selectedDifficulty = difficult;
+        StateHasChanged();
+    }
+
+    private List<QuizDTO> Sort()
+    {
+        List<QuizDTO> quizzes = new();
+        foreach (QuizDTO item in allQuizzes)
+        {
+            if (!string.IsNullOrEmpty(selectedCreators))
+            {
+                if (item.Creator != selectedCreators)
+                {
+                    continue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(selectedCategory))
+            {
+                if (item.Category != selectedCategory)
+                {
+                    continue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(selectedDifficulty))
+            {
+                if (item.Difficulty != selectedDifficulty)
+                {
+                    continue;
+                }
+            }
+
+            quizzes.Add(item);
+        }
+
+        return quizzes;
+    }
+
+    private void StartQuiz()
+    {
+
     }
 
     private class WeatherForecast

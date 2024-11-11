@@ -89,10 +89,11 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            List<QuizDTO> quiz;
+
+            List<QuizDTO> quizs;
             if (userResult.role.Role == "Student")
             {
-                quiz = await _context.User_Quiz
+                quizs = await _context.User_Quiz
                     .Include(q => q.user)
                     .Include(q => q.quiz)
                     .Include(q => q.quiz.creator)
@@ -114,7 +115,7 @@
             }
             else
             {
-                quiz = await _context.Quizs
+                quizs = await _context.Quizs
                     .Include(q => q.creator)
                     .Include(q => q.category)
                     .Include(q => q.difficulty)
@@ -133,7 +134,15 @@
                     .ToListAsync();
             }
 
-            return Ok(quiz);
+            foreach(var quiz in quizs)
+            {
+                quiz.QestionsAmount = await _context.Quiz_Question.
+                    Include(q => q.quiz).
+                    Where(q => q.quiz.ID == quiz.ID).
+                    CountAsync();
+            }
+
+            return Ok(quizs);
         }
 
         // GET: api/Quizs/5

@@ -58,6 +58,7 @@ namespace API.Models
         public string Education { get; set; } // Fx. Buttons
         public string Category { get; set; } // Fx. Website
         public string Difficulty { get; set; } // Fx. H3
+        public int QestionsAmount { get; set; } = 0;
     }
 
     public class QuestionAmount

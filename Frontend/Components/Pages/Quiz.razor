@@ -123,9 +123,7 @@
     <h4>Spørgsmål for @questionSet.selectedCategory?.Category - @questionSet.selectedUnderCategory?.UnderCategory - @questionSet.selectedDifficulty?.Difficulty:</h4>
 
     @* this is where the list is being displayed/made *@
-    @if (Questions != null && Questions.Any(q => q.Category == questionSet.selectedCategory?.Category &&
-                                                        q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
-                                                        q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
+    @if (questionSet.Questions != null && questionSet.Questions.Any())
     {
         Console.WriteLine($"Questions Count: {Questions.Count}");
 
@@ -141,11 +139,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var question in Questions.Where(q => q.Category == questionSet.selectedCategory?.Category &&
-               q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
-               q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
+                @foreach (var question in questionSet.Questions)
                 {
                     <tr>
+                        <td>
+                            <input type="checkbox" @bind="question.IsSelected" />
+                        </td>
                         <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
                         <td>@question.Category</td>
                         <td>@question.UnderCategory</td>
@@ -195,6 +194,8 @@
         //Public difficulty dropdown
         public Difficulties? selectedDifficulty;
         public string dropdownDifficulty = "";
+
+        public List<Question> Questions { get; set; } = new();
     }
 
     public class Question
@@ -205,6 +206,8 @@
         public string Difficulty { get; set; }
         public string[] PossibleAnswers { get; set; }
         public int[] CorrectAnswer { get; set; }
+
+        public bool IsSelected { get; set; }
     }
 
     [Inject] public HttpClient? Http { get; set; }
@@ -259,13 +262,23 @@
         string url = $"/api/Questions";
         string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
 
+        Console.WriteLine("Fetching questions for selected category, undercategory, and difficulty.");
+        if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null)
+        {
+            Console.WriteLine("FetchQuestions aborted due to missing selections.");
+            return;
+        }
+
         (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            questionHandling.Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
             q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
             q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
+
+            Console.WriteLine($"Fetched {questionHandling.Questions.Count} questions.");
+            StateHasChanged();
         }
         else
         {

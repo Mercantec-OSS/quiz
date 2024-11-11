@@ -120,15 +120,15 @@
 
 @foreach (var questionSet in CategoriesHandler)
 {
+    <h4>Spørgsmål for @questionSet.selectedCategory?.Category - @questionSet.selectedUnderCategory?.UnderCategory - @questionSet.selectedDifficulty?.Difficulty:</h4>
 
     @* this is where the list is being displayed/made *@
     @if (Questions != null && Questions.Any(q => q.Category == questionSet.selectedCategory?.Category &&
-                                                          q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
-                                                          q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
+                                                        q.UnderCategory == questionSet.selectedUnderCategory?.UnderCategory &&
+                                                        q.Difficulty == questionSet.selectedDifficulty?.Difficulty))
     {
         Console.WriteLine($"Questions Count: {Questions.Count}");
 
-        <h4>Spørgsmål:</h4>
         <table class="table table-striped">
             <thead>
                 <tr>

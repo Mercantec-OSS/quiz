@@ -37,12 +37,12 @@
                 .Include(u => u.role)
                 .ToListAsync())
                 .Select(u => new UserDTO()
-            {
-                ID = u.ID,
-                username = u.Username,
-                email = u.Email,
-                role = u.role.Role,
-            }).ToList();
+                {
+                    ID = u.ID,
+                    username = u.Username,
+                    email = u.Email,
+                    role = u.role.Role,
+                }).ToList();
         }
 
         // GET: api/Users/5
@@ -115,7 +115,7 @@
 
         // POST: api/Users
         [AllowAnonymous]
-        [HttpPost("signUp")]
+        [HttpPost("Signup")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -129,13 +129,7 @@
             {
                 return Unauthorized("Unauthorized");
             }
-            if(await _context.Users.
-                Include(item => item.role).
-                FirstOrDefaultAsync(item => item.Email == userSignUp.email) != null)
-            {
-                return BadRequest("Email allready excist.");
-            }
-            if(await _context.Users.
+            if (await _context.Users.
             Include(item => item.role).
                 FirstOrDefaultAsync(item => item.Username == userSignUp.username) != null)
             {
@@ -152,7 +146,7 @@
 
             User user = new()
             {
-                Email = userSignUp.email,
+                Email = userSignUp.username + "@eud.mercantec.dk",
                 Username = userSignUp.username,
                 HashedPassword = HashedPassword,
                 role = Roles,
@@ -177,14 +171,34 @@
 
         // POST: api/Users
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> LoginUser(LoginRequest login)
         {
             User? userFinder = await _context.Users.
                 Include(item => item.role).
-                FirstOrDefaultAsync(item => item.Email == login.email);
-
-            if (userFinder == null || !BCrypt.Net.BCrypt.Verify(login.password, userFinder.HashedPassword))
+                FirstOrDefaultAsync(item => item.Username == login.username);
+            if (userFinder == null || userFinder.HashedPassword == "ADLogin")
+            {
+                //check up against AD
+                var connection = Service.LdapService.ValidateAsync(login.username, login.password);
+                if (connection)
+                {
+                    if (userFinder == null)
+                    {
+                        SignUpRequest sr = new SignUpRequest()
+                        {
+                            username = login.username,
+                            password = "ADLogin"
+                        };
+                        return await PostADUser(sr);
+                    }
+                }
+                else
+                {
+                    return BadRequest("Incorrect username or password");
+                }
+            }
+            else if (!BCrypt.Net.BCrypt.Verify(login.password, userFinder.HashedPassword))
             {
                 return BadRequest("Incorrect username or password");
             }
@@ -203,6 +217,47 @@
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost("ADSignup")]
+        public async Task<ActionResult<UserDTO>> PostADUser(SignUpRequest userSignUp)
+        {
+            if (await _context.Users.
+            Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Username == userSignUp.username) != null)
+            {
+                return BadRequest("User allready exist.");
+            }
+
+            var Roles = await _context.Roles.FindAsync(1);
+            if (Roles == null)
+            {
+                return NotFound();
+            }
+
+            User user = new()
+            {
+                Email = userSignUp.username + "@eud.mercantec.dk",
+                Username = userSignUp.username,
+                HashedPassword = "ADLogin",
+                role = Roles,
+                Salt = "non",
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            var Token = GenerateJwtToken(user);
+            _context.Token.Add(Token);
+            await _context.SaveChangesAsync();
+
+            return Ok(new UserDTO()
+            {
+                ID = user.ID,
+                email = user.Email,
+                username = user.Username,
+                role = user.role.Role,
+                token = Token.JWTToken
+            });
+        }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]

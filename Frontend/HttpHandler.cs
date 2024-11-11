@@ -23,6 +23,31 @@ public static class HttpHandler
             await response.Content.ReadAsStringAsync()));
     }
 
+    public static async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, Dictionary<string, string> parameters, string JWTtoken, HttpClient http)
+    {
+        if (!string.IsNullOrEmpty(JWTtoken))
+        {
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
+        }
+
+        if (parameters.Count > 0)
+        {
+            path += "?";
+            foreach (var item in parameters)
+            {
+                if (path.Last() != '?')
+                {
+                    path += "&";
+                }
+                path += item.Key + "=" + item.Value;
+            }
+        }
+
+        HttpResponseMessage response = await http.GetAsync(path);
+        return (response.StatusCode, Deserialize<T>(
+            await response.Content.ReadAsStringAsync()));
+    }
+
     public static async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http)
     {
         if (!string.IsNullOrEmpty(JWTtoken))

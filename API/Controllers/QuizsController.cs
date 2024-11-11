@@ -80,7 +80,7 @@
         }
 
         [HttpGet("QuizSearch")]
-        public async Task<ActionResult<IEnumerable<QuizDTO>>> QuizSearch(string searchWord)
+        public async Task<ActionResult<IEnumerable<QuizDTO>>> QuizSearch(string? searchWord)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -100,7 +100,7 @@
                     .Include(q => q.quiz.difficulty)
                     .Include(q => q.quiz.education)
                     .Where(q => q.user.ID == userResult.ID)
-                    .Where(q => q.quiz.Title.Contains(searchWord))
+                    .Where(q => q.quiz.Title.Contains(searchWord ?? ""))
                     .Select(q => new QuizDTO()
                     {
                         ID = q.quiz.ID,
@@ -119,7 +119,7 @@
                     .Include(q => q.category)
                     .Include(q => q.difficulty)
                     .Include(q => q.education)
-                    .Where(q => q.Title.Contains(searchWord))
+                    .Where(q => q.Title.Contains(searchWord ?? ""))
                     .Select(q => new QuizDTO()
                     {
 

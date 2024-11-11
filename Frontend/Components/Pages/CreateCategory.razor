@@ -7,7 +7,7 @@
 
 <PageTitle>Create Kategori</PageTitle>
 
-<div style="align-content: center;">
+<div style="display: flex; align-items: center; flex-direction: column;">
     <h1>Create Kategori</h1>
 
     <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
@@ -16,15 +16,25 @@
                 <tr>
                     <td>
                         <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle" @onclick="ToggleDropdownCategory">
+                            <button class="btn btn-primary dropdown-toggle"
+                                    @onclick="() => ToggleDropdownCategory()">
                                 @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
                             </button>
                             <div class="dropdown-menu @dropdownCategory">
-                                @foreach (Categories category in categories)
+                                <a class="dropdown-item">
+                                    <input type="text" class="form-control" placeholder="Search"
+                                           @oninput="SearchWordChange"
+                                           @bind="searchWord" />
+                                </a>
+                                @foreach (Categories category in searchWord == string.Empty
+                                ? categories : categories.Where(c => c.Category.ToLower().Contains(searchWord.ToLower())))
                                 {
-                                    <a class="dropdown-item" @onclick="() => SelectCategory(category)">
-                                        @category.Category
-                                    </a>
+                                    @if (category != selectedCategory)
+                                    {
+                                        <a class="dropdown-item" @onclick="() => SelectCategory(category)">
+                                            @category.Category
+                                        </a>
+                                    }
                                 }
                             </div>
                         </div>
@@ -42,7 +52,7 @@
         </button>
     </div>
 
-    <div style="max-width: 50%;">
+    <div style="min-width: 50%;">
         <table class="table">
             <thead>
                 <tr>
@@ -72,13 +82,11 @@
                 }
                 @if (selectedCategory != null)
                 {
-                    <tr>
+                    <tr style="border-bottom: hidden">
                         <td>
-                            <div style="display: flex; justify-content: @(underCategories.Any() ? "flex-end" : "center"); ">
-                                <button class="btn btn-primary" @onclick="ToggleAddNewUnderCategory">
-                                    Add New Under Category
-                                </button>
-                            </div>
+                            <button class="btn btn-primary" @onclick="ToggleAddNewUnderCategory">
+                                Add New Under Category
+                            </button>
                         </td>
                         <td></td>
                         <td></td>
@@ -202,18 +210,24 @@
 
     private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
 
+    private string searchWord = string.Empty;
+
     private bool isLoading = false;
-    private string jwt = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+            }
+
             if (Http == null) return;
             isLoading = true;
             StateHasChanged();
 
-            jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCode, List<Categories>? response) =
                 await HttpHandler.GetAsync<List<Categories>>("api/Categories", jwt, Http);
@@ -226,6 +240,11 @@
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+    private void SearchWordChange(ChangeEventArgs e)
+    {
+        searchWord = e.Value?.ToString() ?? string.Empty;
     }
 
     private void ToggleDropdownCategory()
@@ -271,6 +290,7 @@
 
         if (Http == null) return;
         isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
                 await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
@@ -293,6 +313,7 @@
         }
 
         isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         editCategory.Category = editCategoryText;
         try
         {
@@ -316,6 +337,7 @@
         }
 
         isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         editUnderCategory.UnderCategory = editUnderCategoryText;
         try
         {
@@ -336,7 +358,7 @@
             return;
 
         isLoading = true;
-
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
 
@@ -357,6 +379,7 @@
 
         if (Http == null) return;
         isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         CategoryCreateDTO newCategory = new()
             {
@@ -396,6 +419,7 @@
         if (selectedCategory == null) return;
         if (Http == null) return;
         isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         UnderCategoriesDTO newUnderCategories = new()
             {
@@ -419,4 +443,3 @@
         isLoading = false;
     }
 }
-

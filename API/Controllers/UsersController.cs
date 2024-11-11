@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -120,6 +118,30 @@ namespace API.Controllers
         [HttpPost("signUp")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+            if(await _context.Users.
+                Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Email == userSignUp.email) != null)
+            {
+                return BadRequest("Email allready excist.");
+            }
+            if(await _context.Users.
+            Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Username == userSignUp.username) != null)
+            {
+                return BadRequest("Username allready excist.");
+            }
+
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.password);
 
             var Roles = await _context.Roles.FindAsync(1);

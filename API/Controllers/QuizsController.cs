@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -81,6 +79,63 @@ namespace API.Controllers
             return quizDTO;
         }
 
+        [HttpGet("QuizSearch")]
+        public async Task<ActionResult<IEnumerable<QuizDTO>>> QuizSearch(string? searchWord)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            List<QuizDTO> quiz;
+            if (userResult.role.Role == "Student")
+            {
+                quiz = await _context.User_Quiz
+                    .Include(q => q.user)
+                    .Include(q => q.quiz)
+                    .Include(q => q.quiz.creator)
+                    .Include(q => q.quiz.category)
+                    .Include(q => q.quiz.difficulty)
+                    .Include(q => q.quiz.education)
+                    .Where(q => q.user.ID == userResult.ID)
+                    .Where(q => q.quiz.Title.Contains(searchWord ?? ""))
+                    .Select(q => new QuizDTO()
+                    {
+                        ID = q.quiz.ID,
+                        Category = q.quiz.category.Category,
+                        Creator = q.quiz.creator.Username,
+                        Difficulty = q.quiz.difficulty.Difficulty,
+                        Education = q.quiz.education.Education,
+                        Title = q.quiz.Title,
+                    })
+                    .ToListAsync();
+            }
+            else
+            {
+                quiz = await _context.Quizs
+                    .Include(q => q.creator)
+                    .Include(q => q.category)
+                    .Include(q => q.difficulty)
+                    .Include(q => q.education)
+                    .Where(q => q.Title.Contains(searchWord ?? ""))
+                    .Select(q => new QuizDTO()
+                    {
+
+                        ID = q.ID,
+                        Category = q.category.Category,
+                        Creator = q.creator.Username,
+                        Difficulty = q.difficulty.Difficulty,
+                        Education = q.education.Education,
+                        Title = q.Title,
+                    })
+                    .ToListAsync();
+            }
+
+            return Ok(quiz);
+        }
+
         // GET: api/Quizs/5
         [HttpGet("ByCreater/{id}")]
         public async Task<ActionResult<IEnumerable<QuizDTO>>> GetQuizByCreater(int id)
@@ -91,7 +146,8 @@ namespace API.Controllers
             if (userResult == null)
             {
                 return Unauthorized("Invalid Token");
-            }else if (userResult.ID != id && userResult.role.Role != "Administrator")
+            }
+            else if (userResult.ID != id && userResult.role.Role != "Administrator")
             {
                 return Unauthorized("Unauthorized.");
             }
@@ -212,7 +268,7 @@ namespace API.Controllers
                     return BadRequest("1 or more questions was not found");
                 }
             }
-            
+
             Quiz quiz = new()
             {
                 creator = creator,
@@ -224,7 +280,7 @@ namespace API.Controllers
 
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
-            
+
             Quiz_QuestionController quiz_QuestionController = new(_context);
 
             foreach (int questionID in quizDTO.questions)

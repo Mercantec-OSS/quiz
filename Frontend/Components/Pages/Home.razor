@@ -1,213 +1,82 @@
 ﻿@page "/home"
-@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Home</PageTitle>
 
-    <body>
-        <main>
-            <h1>QUIZ</h1>
-            <br><br><br>
+<div style="display: flex; align-items: center; flex-direction: column;">
+    <h1>QUIZ</h1>
+    <br><br><br>
 
-            <h2>
-                Search for a quiz
-            </h2>
+    <h2>
+        Search for a quiz
+    </h2>
 
-            <div id="cover">
-                <form method="get" action="">
-                    <div class="tb">
-                        <div class="td"><input type="text" placeholder="Search" required></div>
-                        <div class="td" id="s-cover">
-                            <button type="submit">
-                                <div id="s-circle"></div>
-                                <span></span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+    <div>
+        <EditForm Model="searchWord" OnValidSubmit="OnSearchClick">
+            <div class="form-group p-1">
+                <InputText placeholder="Search..." class="form-control" type="text"
+                           @bind-Value="searchWord.word" />
             </div>
 
-
-            <div class="flex-container">
-                <a href="/create">
-                    <button type="button" class="btn btn-primary" id="create-btn">Create</button>
-                </a>
-
-                <a class="browse-btn" href="/browse">
-                    <button type="button" class="btn btn-primary" id="browse-btn">Browse</button>
-                </a>
+            <div class="form-group d-flex justify-content-center p-1">
+                <button type="submit" class="btn btn-primary">Search</button>
             </div>
-        </main>
+        </EditForm>
+    </div>
 
-    </body>
-
-
-<style>
-    body{
-        font-family: 'Trebuchet MS', sans-serif;
-        height: 100%;
-        min-height: 100%;
-    }
-
-    h1,
-    h2 {
-        text-align: center;
-    }
-
-    .flex-container{
-        display: flex;
-        justify-content: center; /* Centers items horizontally */
-        gap: 20px; /* Adjusts space between buttons */
-    }
-
-    #create-btn, #browse-btn{
-        font-family: 'Trebuchet MS', sans-serif;
-        height: 40px;
-        background-color: #0E38AB;
-        border-color: #0E38AB;
-    }
-
-    #create-btn:hover, #browse-btn:hover{
-            background-color: #2E6BB8;
-            border-color: #2E6BB8;
-    }
-
-    * {
-        outline: none;
-    }
-
-    .tb {
-        display: table;
-        width: 100%;
-    }
-
-    .td {
-        display: table-cell;
-        vertical-align: middle;
-    }
-
-    input,
-    button {
-        color: #fff;
-        font-family: 'Trebuchet MS', sans-serif;
-        padding: 0;
-        margin: 0;
-        border: 0;
-        background-color: transparent;
-    }
-
-    #cover {
-        right: 0;
-        width: 550px;
-        padding: 35px;
-        margin: 0 auto;
-        background-color: #0E38AB;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px #0A2C89, 0 0 0 20px #ffffffeb;
-        transform: scale(0.6);
-    }
-
-    form {
-        height: 96px;
-    }
-
-    input[type="text"] {
-        width: 100%;
-        height: 96px;
-        font-size: 60px;
-        line-height: 1;
-    }
-
-        input[type="text"]::placeholder {
-            color: #4A8EDB;
+    <div style="gap: 5px; display: flex;">
+        @if (userRole == "Teacher")
+        {
+            <button class="btn btn-primary">Create</button>
         }
+        <button class="btn btn-primary" @onclick="() => GoToBrowse()">Browse</button>
+    </div>
+</div>
 
-    #s-cover {
-        width: 1px;
-        padding-left: 35px;
-    }
+@code {
+    private SearchWord searchWord = new();
+    private string userRole = string.Empty;
 
-    button {
-        position: relative;
-        display: block;
-        width: 84px;
-        height: 96px;
-        cursor: pointer;
-    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
 
-    #s-circle {
-        position: relative;
-        top: -8px;
-        left: 0;
-        width: 43px;
-        height: 43px;
-        margin-top: 0;
-        border-width: 15px;
-        border: 15px solid #fff;
-        background-color: transparent;
-        border-radius: 50%;
-        transition: 0.5s ease all;
-    }
-
-    button span {
-        position: absolute;
-        top: 68px;
-        left: 43px;
-        display: block;
-        width: 45px;
-        height: 15px;
-        background-color: transparent;
-        border-radius: 10px;
-        transform: rotateZ(52deg);
-        transition: 0.5s ease all;
-    }
-
-        button span:before,
-        button span:after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 45px;
-            height: 15px;
-            background-color: #fff;
-            border-radius: 10px;
-            transform: rotateZ(0);
-            transition: 0.5s ease all;
+            userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            if (userRole == "Teacher")
+            {
+                StateHasChanged();
+            }
         }
-
-    #s-cover:hover #s-circle {
-        top: -1px;
-        width: 67px;
-        height: 15px;
-        border-width: 0;
-        background-color: #fff;
-        border-radius: 20px;
     }
 
-    #s-cover:hover span {
-        top: 50%;
-        left: 56px;
-        width: 25px;
-        margin-top: -9px;
-        transform: rotateZ(0);
+    private void OnSearchClick()
+    {
+        GoToBrowse(searchWord.word);
     }
 
-    #s-cover:hover button span:before {
-        bottom: 11px;
-        transform: rotateZ(52deg);
+    private void GoToBrowse(string searchWord = "")
+    {
+        const string navigateTo = "/Browse";
+        if (!string.IsNullOrEmpty(searchWord))
+        {
+            NavigationManager.NavigateTo($"{navigateTo}?search={Uri.EscapeDataString(searchWord)}");
+            return;
+        }
+        NavigationManager.NavigateTo(navigateTo);
     }
 
-    #s-cover:hover button span:after {
-        bottom: -11px;
-        transform: rotateZ(-52deg);
+    private class SearchWord
+    {
+        public string word = string.Empty;
     }
-
-    #s-cover:hover button span:before,
-    #s-cover:hover button span:after {
-        right: -6px;
-        width: 40px;
-        background-color: #fff;
-    }
-
-</style>
+}

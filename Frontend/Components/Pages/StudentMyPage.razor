@@ -1,5 +1,6 @@
 ﻿@page "/MyPage"
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @using API.Models
@@ -18,11 +19,12 @@
         }
         else
         {
-            <span>@Math.Round(quizzesLink.Average(ql => ql.Results))</span>
+            <span>
+                @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Average(ql => ql.Results)) : "0")
+            </span>
         }
     </h2>
 </div>
-
 
 @if (quizzesLink == null)
 {
@@ -93,8 +95,14 @@ else
         if (Http == null) return;
         try
         {
-            int id = await sessionStorage.GetItemAsync<int>("userID");
             string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            int id = await sessionStorage.GetItemAsync<int>("userID");
 
             (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
                 await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(

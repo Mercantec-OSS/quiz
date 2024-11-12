@@ -13,7 +13,7 @@
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" style="width: 40%"/>
+    <input type="text" id="quizTitle" @bind="Title" placeholder="Enter Quiz Title" class="form-control" style="width: 40%"/>
 </div>
 
 <table>
@@ -22,7 +22,7 @@
             <div>
                 <label for="mainCategory"></label>
                 <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
-                    @(newQuizDto.CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == newQuizDto.CategoryID)?.Category ?? "Select Main Category")
+                    @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
                 </button>
                 <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
                     @foreach (var category in categories)
@@ -37,7 +37,7 @@
             <div>
                 <label for="mainDifficulty"></label>
                 <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
-                    @(newQuizDto.DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == newQuizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+                    @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
                 </button>
                 <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
                     @foreach (var difficulty in difficulties)
@@ -196,13 +196,13 @@
 
     public class Question
     {
+        public int ID { get; set; }
         public string Title { get; set; }
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
         public string[] PossibleAnswers { get; set; }
         public int[] CorrectAnswer { get; set; }
-
         public bool IsSelected { get; set; }
     }
 
@@ -211,7 +211,9 @@
     private List<Categories> categories = new();
     private List<UnderCategories> underCategories = new();
     private List<CategoryHandlingQuiz> CategoriesHandler = new();
-    private QuizCreateRandomDTO newQuizDto = new();
+    private int CategoryID { get; set; }
+    private int DifficultyID { get; set; }
+    private string Title { get; set; }
     private List<Question> Questions { get; set; } = new();
     private List<API.Models.User> user = new();
     private string SaveQuizMessage = string.Empty;
@@ -242,7 +244,7 @@
 
     private void SelectMainCategory(Categories Category)
     {
-        newQuizDto.CategoryID = Category.ID;
+        CategoryID = Category.ID;
         mainCategoryDropdownVisible = false;
     }
 
@@ -256,7 +258,7 @@
 
     private void SelectMainDifficulty(Difficulties Difficulty)
     {
-        newQuizDto.DifficultyID = Difficulty.ID;
+        DifficultyID = Difficulty.ID;
         mainDifficultyDropdownVisible = false;
     }
 
@@ -319,13 +321,13 @@
 
         QuizCreateRandomDTO quizDto = new()
             {
-                Title = newQuizDto.Title,
+                Title = Title,
                 questions = questions.ToArray(),
                 EducationID = 1,
                 //Change to non static!!!
                 CreatorID = userID,
-                CategoryID = newQuizDto.CategoryID,
-                DifficultyID = newQuizDto.DifficultyID,
+                CategoryID = CategoryID,
+                DifficultyID = DifficultyID,
 
             };
 
@@ -355,7 +357,46 @@
 
     private async Task customQuiz()
     {
-        
+        if (Http == null) return;
+
+        var selectedQuestions = GetSelectedQuestions();
+
+        if (selectedQuestions == null || !selectedQuestions.Any())
+        {
+            SaveQuizMessage = "Ingen spørgsmål valgt";
+            return;
+        }
+
+        int userID = await sessionStorage.GetItemAsync<int>("userID");
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+
+
+        int[] questionIDs = selectedQuestions.Select(q => q.ID).ToArray();
+
+        QuizCreateCustomDTO customQuizDto = new()
+            {
+                Title = Title,
+                CreatorID = userID,
+                EducationID = 1,
+                CategoryID = CategoryID,
+                DifficultyID = DifficultyID,
+                questions = questionIDs,
+            };
+
+        string url = "/api/Quizs/Setup-Quiz/Custom";
+
+        (HttpStatusCode statusCode, QuizDTO? response) =
+        await HttpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
+
+        if(statusCode == HttpStatusCode.Created)
+        {
+            SaveQuizMessage = "Quiz gemt succesfuldt";
+        }
+        else
+        {
+            SaveQuizMessage = "Lortet fejlede";
+        }
+        StateHasChanged();
     }
 
 

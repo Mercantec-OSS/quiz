@@ -30,7 +30,10 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            return (await _context.User_Quiz.ToListAsync()).Select(uq => new User_QuizDTO()
+            return (await _context.User_Quiz.
+                Include(uq => uq.quiz).
+                Include(uq => uq.user).
+                ToListAsync()).Select(uq => new User_QuizDTO()
             {
                 Completed = uq.Completed,
                 QuizID = uq.quiz.ID,

@@ -35,7 +35,7 @@
 else
 {
     <div class="row my-1">
-        @foreach (User_QuizInfoDTO quizLink in quizzesLink)
+        @foreach (User_QuizQuizInfoDTO quizLink in quizzesLink)
         {
             <div class="col-md-4 p-1">
                 <div class="card bg-light">
@@ -87,7 +87,7 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private List<User_QuizInfoDTO>? quizzesLink = null;
+    private List<User_QuizQuizInfoDTO>? quizzesLink = null;
     private bool hasEditHtml = false;
 
     protected override async Task OnInitializedAsync()
@@ -104,8 +104,8 @@ else
 
             int id = await sessionStorage.GetItemAsync<int>("userID");
 
-            (HttpStatusCode statusCode, List<User_QuizInfoDTO>? response) =
-                await HttpHandler.GetAsync<List<User_QuizInfoDTO>>(
+            (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO>? response) =
+                await HttpHandler.GetAsync<List<User_QuizQuizInfoDTO>>(
                     $"api/User_Quiz/AllUserQuiz/{id}", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)

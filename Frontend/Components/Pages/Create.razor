@@ -18,7 +18,7 @@
             <h5>Spørgsmål @((Questions.IndexOf(question) + 1))</h5>
 
 
-            <input type="text" placeholder="Enter question" @bind="question.questionModel.QuestionText"> <br> <br>
+            <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
 
             @* simple drop down menu, very  important *@
             <div class="drop-menu">
@@ -75,16 +75,16 @@
 
             <div class="answer-option">
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
-                <input type="text" placeholder="Enter answer 1" @bind="question.questionModel.Answer1" />
+                <input type="text" placeholder="Valgmulighed 1" @bind="question.questionModel.Answer1" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[1]" />
-                <input type="text" placeholder="Enter answer 2" @bind="question.questionModel.Answer2" />
+                <input type="text" placeholder="Valgmulighed 2" @bind="question.questionModel.Answer2" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[2]" />
-                <input type="text" placeholder="Enter answer 3" @bind="question.questionModel.Answer3" />
+                <input type="text" placeholder="Valgmulighed 3" @bind="question.questionModel.Answer3" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[3]" />
-                <input type="text" placeholder="Enter answer 4" @bind="question.questionModel.Answer4" />
+                <input type="text" placeholder="Valmulighed 4" @bind="question.questionModel.Answer4" />
 
             </div> <br> <br>
 

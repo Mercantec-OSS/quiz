@@ -13,7 +13,7 @@
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="Title" placeholder="Enter Quiz Title" class="form-control" style="width: 40%"/>
+    <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%"/>
 </div>
 
 <table>
@@ -111,7 +111,7 @@
             </table>
         </div>
 
-        <h4>Spørgsmål for @question.selectedCategory?.Category - @question.selectedUnderCategory?.UnderCategory - @question.selectedDifficulty?.Difficulty:</h4>
+        <h4>Spørgsmål til @question.selectedCategory?.Category - @question.selectedUnderCategory?.UnderCategory - @question.selectedDifficulty?.Difficulty:</h4>
 
         @* this is where the list is being displayed/made *@
         @if (question.Questions != null && question.Questions.Any())
@@ -152,7 +152,7 @@
         }
         else
         {
-            <p>No questions found</p>
+            <p>Ingen Spørgsmål</p>
         }
     }
 </div>
@@ -317,7 +317,7 @@
         }
 
         int userID = await sessionStorage.GetItemAsync<int>("userID");
-        string Jwt = await sessionStorage.GetItemAsStringAsync("jwt");
+        string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         QuizCreateRandomDTO quizDto = new()
             {
@@ -346,7 +346,7 @@
             Console.WriteLine("Quiz created correctly");
 
             //Retrive the quiz details if returned in the response
-            SaveQuizMessage = "Random quiz save good";
+            SaveQuizMessage = "Quiz gemt succesfuldt";
         }
         else
         {

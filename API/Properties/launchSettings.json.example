@@ -1,4 +1,4 @@
-{
+﻿{
   "profiles": {
     "http": {
       "commandName": "Project",
@@ -16,7 +16,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "AD_CONNECTION_TEST_LOGIN": "{username}__{password}",
-        "AD_CONNECTION_STRING": "172.16.2.50__global.local",
+        "AD_CONNECTION_STRING": "{host}__{domain}",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,

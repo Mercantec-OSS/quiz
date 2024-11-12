@@ -73,9 +73,8 @@
         // POST: api/Quiz_Question
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Quiz_Question>> PostQuiz_Question(Quiz_QuestionDTO quiz_QuestionDTO)
+        public async Task<ActionResult<Quiz_Question>> PostQuiz_Question(Quiz_QuestionDTO quiz_QuestionDTO, string token)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 
             if (userResult == null)

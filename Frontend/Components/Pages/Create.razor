@@ -3,7 +3,9 @@
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using OfficeOpenXml
+@using System.Net
 @inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 
 
@@ -16,7 +18,7 @@
             <h5>Spørgsmål @((Questions.IndexOf(question) + 1))</h5>
 
 
-            <input type="text" placeholder="Enter question" @bind="question.questionModel.QuestionText"> <br> <br>
+            <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
 
             @* simple drop down menu, very  important *@
             <div class="drop-menu">
@@ -73,16 +75,16 @@
 
             <div class="answer-option">
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
-                <input type="text" placeholder="Enter answer 1" @bind="question.questionModel.Answer1" />
+                <input type="text" placeholder="Valgmulighed 1" @bind="question.questionModel.Answer1" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[1]" />
-                <input type="text" placeholder="Enter answer 2" @bind="question.questionModel.Answer2" />
+                <input type="text" placeholder="Valgmulighed 2" @bind="question.questionModel.Answer2" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[2]" />
-                <input type="text" placeholder="Enter answer 3" @bind="question.questionModel.Answer3" />
+                <input type="text" placeholder="Valgmulighed 3" @bind="question.questionModel.Answer3" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[3]" />
-                <input type="text" placeholder="Enter answer 4" @bind="question.questionModel.Answer4" />
+                <input type="text" placeholder="Valmulighed 4" @bind="question.questionModel.Answer4" />
 
             </div> <br> <br>
 
@@ -211,24 +213,37 @@
     [Inject] public HttpClient? Http { get; set; }
 
     //getting info from API/DB
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var getDifficulties = await _httpClient.GetFromJsonAsync<List<Difficulties>>($"https://mercantec-quiz.onrender.com/api/Difficulties");
-        if (getDifficulties != null)
-        {
-            difficulties.AddRange(getDifficulties);
-        }
+        if (Http == null) return;
 
-        var getCategories = await _httpClient.GetFromJsonAsync<List<Categories>>($"https://mercantec-quiz.onrender.com/api/Categories");
-        if (getCategories != null)
+        if (firstRender)
         {
-            categories.AddRange(getCategories);
-        }
+            string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        var getUnderCategories = await _httpClient.GetFromJsonAsync<List<UnderCategories>>($"https://mercantec-quiz.onrender.com/api/UnderCategories");
-        if (getUnderCategories != null)
-        {
-            underCategories.AddRange(getUnderCategories);
+            (HttpStatusCode statusCodeDifficulties, List<Difficulties>? getDifficulties) =
+               await HttpHandler.GetAsync<List<Difficulties>>("api/Difficulties", Jwt, Http);
+
+            if (statusCodeDifficulties == HttpStatusCode.OK)
+            {
+                difficulties.AddRange(getDifficulties ?? new());
+            }
+
+            (HttpStatusCode statusCodeCategories, List<Categories>? getCategories) =
+               await HttpHandler.GetAsync<List<Categories>>("api/Categories", Jwt, Http);
+
+            if (statusCodeCategories == HttpStatusCode.OK)
+            {
+                categories.AddRange(getCategories ?? new());
+            }
+
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategories>? getUnderCategories) =
+               await HttpHandler.GetAsync<List<UnderCategories>>("api/UnderCategories", Jwt, Http);
+
+            if (statusCodeUnderCategories == HttpStatusCode.OK)
+            {
+                underCategories.AddRange(getUnderCategories ?? new());
+            }
         }
     }
 
@@ -290,7 +305,7 @@
                     Title = question.questionModel.QuestionText,
                     Category = question.selectedCategory.ID,
                     UnderCategory = question.selectedUnderCategory.ID,
-                    PossibleAnswers = new[] { 
+                    PossibleAnswers = new[] {
                      question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",

@@ -1,8 +1,5 @@
 ﻿@page "/quiz"
 @rendermode InteractiveServer
-
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
-
 @using API.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using Frontend.Components
@@ -10,40 +7,48 @@
 @using System.Linq
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+
 <h3>Quiz</h3>
 
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="newQuizDto.Title" placeholder="Enter Quiz Title" class="form-control" />
+    <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%"/>
 </div>
 
-<div>
-    <label for="mainCategory">Main Category:</label>
-    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
-        @(newQuizDto.CategoryID == 0 ? "Select Main Category" : categories.FirstOrDefault(c => c.ID == newQuizDto.CategoryID)?.Category ?? "Select Main Category")
-    </button>
-    <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
-        @foreach (var category in categories)
-        {
-            <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
-        }
-    </div>
-</div>
+<table>
+    <tr>
+        <td>
+            <div>
+                <label for="mainCategory"></label>
+                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
+                    @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
+                </button>
+                <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
+                    @foreach (var category in categories)
+                    {
+                        <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
+                    }
+                </div>
+            </div>
+        </td>
 
-
-<div>
-    <label for="mainDifficulty">Main Difficulty:</label>
-    <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
-        @(newQuizDto.DifficultyID == 0 ? "Select Main Difficulty" : difficulties.FirstOrDefault(c => c.ID == newQuizDto.DifficultyID)?.Difficulty ?? "Select Main Difficulty")
-    </button>
-    <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
-        @foreach (var difficulty in difficulties)
-        {
-            <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
-        }
-    </div>
-</div>
+        <td>
+            <div>
+                <label for="mainDifficulty"></label>
+                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
+                    @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+                </button>
+                <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
+                    @foreach (var difficulty in difficulties)
+                    {
+                        <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
+                    }
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 
 <div>
     @foreach (var question in CategoriesHandler)
@@ -93,22 +98,65 @@
                         </div>
                     </td>
                     <td>
-                        <label for="questionCount">Enter Amount</label>
+                        <label for="questionCount">Antal</label>
                         <input type="number" @bind="question.DesiredQuestionCount" min="1" max="25" />
                     </td>
                     <td>
                         <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
                     </td>
                     <td>
-                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Hent spørgsmål</button>
+                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Vis spørgsmål</button>
                     </td>
                 </tr>
             </table>
         </div>
-        @* end of dropdown menu  *@
+
+        <h4>Spørgsmål til @question.selectedCategory?.Category - @question.selectedUnderCategory?.UnderCategory - @question.selectedDifficulty?.Difficulty:</h4>
+
+        @* this is where the list is being displayed/made *@
+        @if (question.Questions != null && question.Questions.Any())
+        {
+            Console.WriteLine($"Questions Count: {Questions.Count}");
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Valgt</th>
+                        <th>Question</th>
+                        <th>Category</th>
+                        <th>UnderCategory</th>
+                        <th>Difficulty</th>
+                        <th>Mulige svar</th>
+                        <th>Rigtige svar</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var q in question.Questions)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" @bind="q.IsSelected" />
+                            </td>
+                            <td>@(!string.IsNullOrEmpty(q.Title) ? q.Title : "No Title")</td>
+                            <td>@q.Category</td>
+                            <td>@q.UnderCategory</td>
+                            <td>@q.Difficulty</td>
+                            <td>@string.Join(", ", q.PossibleAnswers)</td>
+                            <td>@string.Join(", ", q.CorrectAnswer)</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <p>Ingen Spørgsmål</p>
+        }
     }
 </div>
-
+@* end of dropdown menu  *@
 
 
 <button class="btn btn-primary" @onclick="AddNewCategory" disabled="@(CategoriesHandler.Count >= MaxQuestions)">Tilføj flere spørgsmål</button>
@@ -116,45 +164,7 @@
 
 @* button for making the random quiz *@
 <button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
-
-
-@* this is where the list is being displayed/made *@
-@if (Questions != null && Questions.Count > 0)
-{
-    Console.WriteLine($"Questions Count: {Questions.Count}");
-
-    <h4>Spørgsmål:</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Question</th>
-                <th>Category</th>
-                <th>UnderCategory</th>
-                <th>Difficulty</th>
-                <th>Mulige svar</th>
-                <th>Rigtige svar</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var question in Questions)
-            {
-                <tr>
-                    <td>@(!string.IsNullOrEmpty(question.Title) ? question.Title : "No Title")</td>
-                    <td>@question.Category</td>
-                    <td>@question.UnderCategory</td>
-                    <td>@question.Difficulty</td>
-                    <td>@string.Join(", ", question.PossibleAnswers)</td>
-                    <td>@string.Join(", ", question.CorrectAnswer)</td>
-                </tr>
-            }
-        </tbody>
-
-    </table>
-}
-else
-{
-    <p>No questions found</p>
-}
+<button class="btn btn-success" @onclick="customQuiz">Gem valgte som quiz</button>
 
 @code
 {
@@ -180,16 +190,20 @@ else
         //Public difficulty dropdown
         public Difficulties? selectedDifficulty;
         public string dropdownDifficulty = "";
+
+        public List<Question> Questions { get; set; } = new();
     }
 
     public class Question
     {
+        public int ID { get; set; }
         public string Title { get; set; }
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
         public string[] PossibleAnswers { get; set; }
         public int[] CorrectAnswer { get; set; }
+        public bool IsSelected { get; set; }
     }
 
     [Inject] public HttpClient? Http { get; set; }
@@ -197,12 +211,28 @@ else
     private List<Categories> categories = new();
     private List<UnderCategories> underCategories = new();
     private List<CategoryHandlingQuiz> CategoriesHandler = new();
-    private QuizCreateRandomDTO newQuizDto = new();
+    private int CategoryID { get; set; }
+    private int DifficultyID { get; set; }
+    private string Title { get; set; }
     private List<Question> Questions { get; set; } = new();
     private List<API.Models.User> user = new();
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
 
+
+    public List<Question> GetSelectedQuestions()
+    {
+        var selectedQuestions = new List<Question>();
+        foreach (var questionSet in CategoriesHandler)
+        {
+            if (questionSet.Questions != null)
+            {
+                selectedQuestions.AddRange(questionSet.Questions.Where(questionSet => questionSet.IsSelected));
+            }
+        }
+
+        return selectedQuestions;
+    }
 
 
 
@@ -214,7 +244,7 @@ else
 
     private void SelectMainCategory(Categories Category)
     {
-        newQuizDto.CategoryID = Category.ID;
+        CategoryID = Category.ID;
         mainCategoryDropdownVisible = false;
     }
 
@@ -228,11 +258,11 @@ else
 
     private void SelectMainDifficulty(Difficulties Difficulty)
     {
-        newQuizDto.DifficultyID = Difficulty.ID;
-        mainCategoryDropdownVisible = false;
+        DifficultyID = Difficulty.ID;
+        mainDifficultyDropdownVisible = false;
     }
 
-
+    //Get the question and info
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
         if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
@@ -244,13 +274,23 @@ else
         string url = $"/api/Questions";
         string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
 
+        Console.WriteLine("Fetching questions for selected category, undercategory, and difficulty.");
+        if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null)
+        {
+            Console.WriteLine("FetchQuestions aborted due to missing selections.");
+            return;
+        }
+
         (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            questionHandling.Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
             q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
             q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
+
+            Console.WriteLine($"Fetched {questionHandling.Questions.Count} questions.");
+            StateHasChanged();
         }
         else
         {
@@ -277,28 +317,28 @@ else
         }
 
         int userID = await sessionStorage.GetItemAsync<int>("userID");
-        string Jwt = await sessionStorage.GetItemAsStringAsync("jwt");
+        string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         QuizCreateRandomDTO quizDto = new()
             {
-                Title = newQuizDto.Title,
+                Title = Title,
                 questions = questions.ToArray(),
                 EducationID = 1,
                 //Change to non static!!!
                 CreatorID = userID,
-                CategoryID = newQuizDto.CategoryID,
-                DifficultyID = newQuizDto.DifficultyID,
+                CategoryID = CategoryID,
+                DifficultyID = DifficultyID,
 
             };
 
-        
+
         // add "jwt" between quizDto and Http
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
-        // HttpResponseMessage responseMessage = await Http.PostAsJsonAsync(url, quizDto);
+
+
         (HttpStatusCode statusCode, QuizDTO? response) =
-           await HttpHandler.PostAsync<QuizDTO>(
-               url, quizDto, Jwt, Http);
+           await HttpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -306,7 +346,7 @@ else
             Console.WriteLine("Quiz created correctly");
 
             //Retrive the quiz details if returned in the response
-            SaveQuizMessage = "Random quiz save good";
+            SaveQuizMessage = "Quiz gemt succesfuldt";
         }
         else
         {
@@ -315,30 +355,88 @@ else
         }
     }
 
-    //getting info from API/DB
-    protected override async Task OnInitializedAsync()
+    private async Task customQuiz()
     {
         if (Http == null) return;
 
-        var getDifficulties = await Http.GetFromJsonAsync<List<Difficulties>>($"/api/Difficulties");
-        if (getDifficulties != null)
+        var selectedQuestions = GetSelectedQuestions();
+
+        if (selectedQuestions == null || !selectedQuestions.Any())
         {
-            difficulties.AddRange(getDifficulties);
+            SaveQuizMessage = "Ingen spørgsmål valgt";
+            return;
         }
 
-        var getCategories = await Http.GetFromJsonAsync<List<Categories>>($"/api/Categories");
-        if (getCategories != null)
+        int userID = await sessionStorage.GetItemAsync<int>("userID");
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+
+
+        int[] questionIDs = selectedQuestions.Select(q => q.ID).ToArray();
+
+        QuizCreateCustomDTO customQuizDto = new()
+            {
+                Title = Title,
+                CreatorID = userID,
+                EducationID = 1,
+                CategoryID = CategoryID,
+                DifficultyID = DifficultyID,
+                questions = questionIDs,
+            };
+
+        string url = "/api/Quizs/Setup-Quiz/Custom";
+
+        (HttpStatusCode statusCode, QuizDTO? response) =
+        await HttpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
+
+        if(statusCode == HttpStatusCode.Created)
         {
-            categories.AddRange(getCategories);
+            SaveQuizMessage = "Quiz gemt succesfuldt";
+        }
+        else
+        {
+            SaveQuizMessage = "Lortet fejlede";
+        }
+        StateHasChanged();
+    }
+
+
+
+    //getting info from API/DB
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Http == null) return;
+
+        if (firstRender)
+        {
+            string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+
+            (HttpStatusCode statusCodeDifficulties, List<Difficulties>? getDifficulties) =
+               await HttpHandler.GetAsync<List<Difficulties>>("api/Difficulties", Jwt, Http);
+
+            if (statusCodeDifficulties == HttpStatusCode.OK)
+            {
+                difficulties.AddRange(getDifficulties ?? new());
+            }
+
+            (HttpStatusCode statusCodeCategories, List<Categories>? getCategories) =
+            await HttpHandler.GetAsync<List<Categories>>("api/Categories", Jwt, Http);
+            if (statusCodeCategories == HttpStatusCode.OK)
+            {
+                categories.AddRange(getCategories ?? new());
+            }
+
+
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategories>? getUnderCategories) =
+            await HttpHandler.GetAsync<List<UnderCategories>>("/api/UnderCategories", Jwt, Http);
+
+            if (statusCodeUnderCategories == HttpStatusCode.OK)
+            {
+                underCategories.AddRange(getUnderCategories ?? new());
+            }
+
+            AddNewCategory();
         }
 
-        var getUnderCategories = await Http.GetFromJsonAsync<List<UnderCategories>>($"/api/UnderCategories");
-        if (getUnderCategories != null)
-        {
-            underCategories.AddRange(getUnderCategories);
-        }
-
-        AddNewCategory();
     }
 
     //delete button

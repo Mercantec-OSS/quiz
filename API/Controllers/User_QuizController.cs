@@ -202,7 +202,10 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate;
+            if (user_QuizDTO.QuizEndDate != null)
+            {
+                user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate.Value;
+            }
             if (user_QuizDTO.Results != 0 && user_QuizDTO.Results != null)
             {
                 user_Quiz.Results = user_QuizDTO.Results;
@@ -275,7 +278,7 @@
                 {
                     Completed = false,
                     Results = user_QuizDTO.Results,
-                    QuizEndDate = user_QuizDTO.QuizEndDate,
+                    QuizEndDate = user_QuizDTO.QuizEndDate ?? DateTime.UtcNow.AddDays(1),
                     TimeUsed = user_QuizDTO.TimeUsed,
                     User = new UserDTO
                     {

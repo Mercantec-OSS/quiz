@@ -34,12 +34,12 @@
                 Include(uq => uq.quiz).
                 Include(uq => uq.user).
                 ToListAsync()).Select(uq => new User_QuizDTO()
-            {
-                Completed = uq.Completed,
-                QuizID = uq.quiz.ID,
-                Results = uq.Results,
-                UserID = uq.user.ID,
-            }).ToList();
+                {
+                    Completed = uq.Completed,
+                    QuizID = uq.quiz.ID,
+                    Results = uq.Results,
+                    UserID = uq.user.ID,
+                }).ToList();
         }
 
         //GET: api/User_Quiz/5/2
@@ -186,7 +186,7 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            
+
 
             var user_Quiz = await _context.User_Quiz.
                 Include(uq => uq.user).
@@ -202,8 +202,14 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate;
-            user_Quiz.Results = user_QuizDTO.Results;
+            if (user_QuizDTO.QuizEndDate != null)
+            {
+                user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate.Value;
+            }
+            if (user_QuizDTO.Results != 0 && user_QuizDTO.Results != null)
+            {
+                user_Quiz.Results = user_QuizDTO.Results;
+            }
             user_Quiz.Completed = user_QuizDTO.Completed;
 
             _context.Entry(user_Quiz).State = EntityState.Modified;
@@ -211,13 +217,12 @@
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok("Sucessfully updated");
             }
             catch (DbUpdateConcurrencyException)
             {
                 return BadRequest("Something went wrong");
             }
-
-            return NoContent();
         }
 
         // POST: api/User_Quiz
@@ -273,7 +278,7 @@
                 {
                     Completed = false,
                     Results = user_QuizDTO.Results,
-                    QuizEndDate = user_QuizDTO.QuizEndDate,
+                    QuizEndDate = user_QuizDTO.QuizEndDate ?? DateTime.UtcNow.AddDays(1),
                     TimeUsed = user_QuizDTO.TimeUsed,
                     User = new UserDTO
                     {

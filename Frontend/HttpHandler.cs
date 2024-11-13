@@ -121,6 +121,10 @@ public static class HttpHandler
 
     private static StringContent Serialize(object toSerialize)
     {
-        return new StringContent(JsonSerializer.Serialize(toSerialize), Encoding.UTF8, "application/json");
+        return new StringContent(
+            JsonSerializer.Serialize(toSerialize),
+            Encoding.UTF8,
+            "application/json"
+        );
     }
 }

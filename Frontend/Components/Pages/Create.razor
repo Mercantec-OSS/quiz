@@ -20,6 +20,7 @@
 
             <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
 
+
             @* simple drop down menu, very  important *@
             <div class="drop-menu">
 
@@ -64,6 +65,10 @@
                                     }
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            <label for="Time">Tid</label>
+                            <input type="number" placeholder="Tid (sek)" @bind="question.questionModel.Time" min="10" step="5" style="width: 90px;">
                         </td>
                     </tr>
                 </table>
@@ -165,7 +170,7 @@
         public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
         public string Difficulties { get; set; }
         public bool QuestionStatus { get; set; }
-        public int Time { get; set; }
+        public int? Time { get; set; }
         public int User { get; set; }
         public string Picture { get; set; }
     }
@@ -256,9 +261,6 @@
             Questions.Add(new()
                 {
                     questionModel = new()
-                    {
-                        // Id = nextQuestionId++
-                    }
                 });
         }
     }
@@ -293,6 +295,17 @@
                 return;
             }
 
+            if (question.questionModel == null)
+            {
+                return;
+            }
+
+            if(question.questionModel.Time == null)
+            {
+                return;
+            }
+
+            
 
             var correctAnswerIds = question.questionModel?.CorrectAnswers
             .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
@@ -309,7 +322,7 @@
                      question.questionModel.Answer1, question.questionModel.Answer2, question.questionModel.Answer3, question.questionModel.Answer4 }, // Placeholder, replace with actual values
                     CorrectAnswer = correctAnswerIds,
                     Picture = "some_url",
-                    Time = 30,
+                    Time = question.questionModel.Time ?? 0,
                     Difficulty = question.selectedDifficulty.ID,
                     QuestionStatus = true,
                     Creator = 1,

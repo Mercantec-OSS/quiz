@@ -122,10 +122,11 @@
                 <thead>
                     <tr>
                         <th>Valgt</th>
-                        <th>Question</th>
-                        <th>Category</th>
-                        <th>UnderCategory</th>
-                        <th>Difficulty</th>
+                        <th>Spørgsmål</th>
+                        <th>Kategori</th>
+                        <th>UnderKategori</th>
+                        <th>Niveau</th>
+                        <th>Tid</th>
                         <th>Mulige svar</th>
                         <th>Rigtige svar</th>
                     </tr>
@@ -142,6 +143,7 @@
                             <td>@q.Category</td>
                             <td>@q.UnderCategory</td>
                             <td>@q.Difficulty</td>
+                            <td>@q.Time</td>
                             <td>@string.Join(", ", q.PossibleAnswers)</td>
                             <td>@string.Join(", ", q.CorrectAnswer)</td>
                         </tr>
@@ -201,6 +203,7 @@
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
+        public int Time { get; set;}
         public string[] PossibleAnswers { get; set; }
         public int[] CorrectAnswer { get; set; }
         public bool IsSelected { get; set; }

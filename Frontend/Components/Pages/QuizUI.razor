@@ -101,6 +101,8 @@ else
     private List<bool?> answeredCorrectly = new();
     private List<QuestionDTO> questions = new();
 
+    private User_QuizDTO userQuiz = new();
+
     private Timer timer = new(1000)
         {
             AutoReset = true,
@@ -123,26 +125,40 @@ else
             isLoading = true;
             StateHasChanged();
 
+            // Getting the quiz id from the url, if it's invalid redirect to browse.
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             if (!QueryHelpers.ParseQuery(uri.Query).TryGetValue("quiz_id", out var dataValue))
             {
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/browse");
                 return;
             }
 
             if (!int.TryParse(dataValue[0], out quizID))
             {
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/browse");
                 return;
             }
 
-            (HttpStatusCode statusCode, List<QuestionDTO>? response) =
+            int userID = await sessionStorage.GetItemAsync<int>("userID");
+            (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
+                await HttpHandler.GetAsync<User_QuizDTO>(
+                    $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
+
+            if (statusCodeUserQuiz != HttpStatusCode.OK || userQuiz == null || userQuiz.Completed)
+            {
+                // Isn't invited to this quiz or has completed it before.
+                NavigationManager.NavigateTo("/browse");
+                return;
+            }
+            else this.userQuiz = userQuiz ?? new();
+
+            (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
                 await HttpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt, Http);
 
-            if (statusCode == HttpStatusCode.OK && response != null)
+            if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
             {
-                questions.AddRange(response);
+                questions.AddRange(QuestionDTOs);
                 timer.Elapsed += OnTimedEvent;
             }
 
@@ -220,7 +236,7 @@ else
 
         currentTime = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, addTimeHours, addTimeMin, addTimeSec);
 
-        // timer.Start();
+        timer.Start();
         if (asyncReload)
         {
             await InvokeAsync(StateHasChanged);
@@ -259,20 +275,20 @@ else
         User_QuizDTO updateUserQuiz = new()
             {
                 Completed = true,
-                QuizEndDate = DateTime.Now,
+                QuizEndDate = DateTime.UtcNow,
                 QuizID = quizID,
                 UserID = userID,
                 Results = pointsGained,
-                TimeUsed = 10,
+                TimeUsed = 0,
             };
 
-        (HttpStatusCode statusCodeUserQuiz, string? test) =
-           await HttpHandler.PutAsync<string>(
+        HttpStatusCode statusCodeUserQuiz =
+           await HttpHandler.PutAsync(
                    $"/api/User_Quiz", updateUserQuiz, jwt, Http);
 
-        if (statusCodeUserQuiz != HttpStatusCode.OK)
+        if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
         {
-            
+            throw new Exception();
         }
 
         (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =

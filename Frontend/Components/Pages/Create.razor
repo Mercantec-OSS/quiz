@@ -12,10 +12,10 @@
 <PageTitle>Create</PageTitle>
 
 <div>
-    @foreach (var question in Questions)
+    @foreach (var question in questionsHandler)
     {
         <div>
-            <h5>Spørgsmål @((Questions.IndexOf(question) + 1))</h5>
+            <h5>Spørgsmål @((questionsHandler.IndexOf(question) + 1))</h5>
 
 
             <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
@@ -93,40 +93,9 @@
 
             </div> <br> <br>
 
-
             <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Slet Spørgsmål</button>
-
-            @if (SelectedQuestion != null && SelectedQuestion.Id == question.questionModel.Id)
-            {
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
-                        <h5 class="card-body">
-                            <h5 class="card-title">@SelectedQuestion.QuestionText</h5>
-                            <p class="card-text">
-                                @if (SelectedQuestion.CorrectAnswers[0])
-                                {
-                                <p>@SelectedQuestion.Answer1</p>
-                                }
-                                @if (SelectedQuestion.CorrectAnswers[1])
-                                {
-                                <p>@SelectedQuestion.Answer2</p>
-                                }
-                                @if (SelectedQuestion.CorrectAnswers[2])
-                                {
-                                <p>@SelectedQuestion.Answer3</p>
-                                }
-                                @if (SelectedQuestion.CorrectAnswers[3])
-                                {
-                                <p>@SelectedQuestion.Answer4</p>
-                                }
-                            </p>
-                        </h5>
-                    </div>
-                </div>
-            }
-
         </div>
-        <hr>
+        <hr />
     }
 </div>
 
@@ -135,12 +104,12 @@
 <div>
 
 
-    @if (Questions.Count >= MaxQuestions)
+    @if (questionsHandler.Count >= MaxQuestions)
     {
         <p style="color:red"> MAXIMUM ANTAL SPØRGSMÅL NÅET!!! (@MaxQuestions)</p>
     }
 
-    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(Questions.Count >= MaxQuestions)">Tilføj spørgsmål</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(questionsHandler.Count >= MaxQuestions)">Tilføj spørgsmål</button>
 
     <button class="btn btn-success" @onclick="SaveQuestions">Gem spørgsmål</button>
 
@@ -154,6 +123,25 @@
 </div>
 
 
+
+@if (createdQuestions)
+{
+    <div class="model custom-modal">
+        <h4>Spørgsmål gemt succesfuldt</h4>
+        <div class="m-1 Split">
+            <button class="btn btn-outline-dark" @onclick="ToggleCreatedConfirmed">Close</button>
+        </div>
+    </div>
+
+    <div @onclick="ToggleCreatedConfirmed" class="modal-overlay"></div>
+}
+
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
 
 
 @code {
@@ -202,18 +190,16 @@
         public string dropdownDifficulty = "";
     }
 
-    private readonly HttpClient _httpClient = new();
-
-
     private List<Difficulties> difficulties = new();
     private List<Categories> categories = new();
     private List<UnderCategories> underCategories = new();
-    private List<API.Models.User> user = new();
+
+    private bool createdQuestions = false;
+    private bool isLoading = false;
 
     private const int MaxQuestions = 25;
     // private int nextQuestionId = 1;
-    private List<QuestionHandling> Questions = new();
-    private QuestionModel? SelectedQuestion;
+    private List<QuestionHandling> questionsHandler = new();
 
     [Inject] public HttpClient? Http { get; set; }
 
@@ -225,6 +211,8 @@
         if (firstRender)
         {
             string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+
+            isLoading = true;
 
             (HttpStatusCode statusCodeDifficulties, List<Difficulties>? getDifficulties) =
                await HttpHandler.GetAsync<List<Difficulties>>("api/Difficulties", Jwt, Http);
@@ -249,16 +237,26 @@
             {
                 underCategories.AddRange(getUnderCategories ?? new());
             }
+
+            isLoading = false;
+            StateHasChanged();
         }
     }
+
+
+    private void ToggleCreatedConfirmed()
+    {
+        createdQuestions = !createdQuestions;
+    }
+
 
 
     //method to add new question to the quiz
     private void AddNewQuestion()
     {
-        if (Questions.Count < MaxQuestions)
+        if (questionsHandler.Count < MaxQuestions)
         {
-            Questions.Add(new()
+            questionsHandler.Add(new()
                 {
                     questionModel = new()
                 });
@@ -274,7 +272,9 @@
     // save questions to database, to save for other use
     private async Task SaveQuestions()
     {
-        foreach (QuestionHandling question in Questions)
+        isLoading = true;
+
+        foreach (QuestionHandling question in questionsHandler)
         {
             //error handeling
             if (question.selectedDifficulty == null)
@@ -300,12 +300,12 @@
                 return;
             }
 
-            if(question.questionModel.Time == null)
+            if (question.questionModel.Time == null)
             {
                 return;
             }
 
-            
+
 
             var correctAnswerIds = question.questionModel?.CorrectAnswers
             .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
@@ -335,12 +335,7 @@
                 var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
 
                 // Check if the request was successful
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Question '{dto.Title}' saved successfully.");
-                    NavigationManager.NavigateTo("/home");
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     // Log the status code and reason phrase in case of failure
                     Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
@@ -351,10 +346,11 @@
                 // Log any exceptions that occur during the request
                 Console.WriteLine($"Error saving question '{dto.Title}': {ex.Message}");
             }
-
-
-
         }
+        questionsHandler.Clear();
+        ToggleCreatedConfirmed();
+        isLoading =false;
+        StateHasChanged();
     }
 
 
@@ -427,7 +423,7 @@
     //delete button
     private void DeleteQuestion(QuestionHandling questionHandling)
     {
-        Questions.Remove(questionHandling);
+        questionsHandler.Remove(questionHandling);
     }
 
 
@@ -493,7 +489,7 @@
                             question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
 
 
-                            Questions.Add(new()
+                            questionsHandler.Add(new()
                                 {
                                     questionModel = question
                                 });

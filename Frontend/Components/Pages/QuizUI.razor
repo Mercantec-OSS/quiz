@@ -69,7 +69,7 @@ else
                         </p>
                     </div>
                     <div class="MyPageCustomBox">
-                        <p class="card-text">Points: @(answeredCorrectly.Count(isCorrect => isCorrect ?? false) * 100)</p>
+                        <p class="card-text">Points: @pointsGained</p>
                     </div>
                 </div>
             </div>
@@ -151,6 +151,15 @@ else
                 return;
             }
             else this.userQuiz = userQuiz ?? new();
+
+            (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
+               await HttpHandler.GetAsync<QuizDTO>(
+                   $"/api/Quizs/{quizID}", jwt, Http);
+
+            if (statusCodeQuiz == HttpStatusCode.OK)
+            {
+                quiz = quizDTO;
+            }
 
             (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
                 await HttpHandler.GetAsync<List<QuestionDTO>>(
@@ -265,17 +274,55 @@ else
     private async Task OpenSummery()
     {
         if (Http == null) return;
-        isLoading = true;
+        if (quiz == null)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
 
+        isLoading = true;
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
-        pointsGained = answeredCorrectly.Count(isCorrect => isCorrect ?? false) * 100;
+        (HttpStatusCode statusCodeDifficulties, List<Difficulties>? difficulties) =
+                await HttpHandler.GetAsync<List<Difficulties>>(
+                    $"/api/Difficulties", jwt, Http);
+        if (statusCodeDifficulties != HttpStatusCode.OK)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
+
+        Difficulties? quizDifficulty = difficulties?.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
+        if (quizDifficulty == null)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
+
+        for (int i = 0; i < questions.Count; i++)
+        {
+            if (answeredCorrectly[i] ?? false)
+            {
+                Difficulties? questionDifficulty = difficulties?
+                    .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
+
+                if (questionDifficulty == null)
+                {
+                    // Gets default
+                    pointsGained += 100;
+                    continue;
+                }
+
+                int difference = questionDifficulty.ID - quizDifficulty.ID;
+                int difficultyAddition = (1 + difference / 10);
+                pointsGained += 100 * difficultyAddition;
+            }
+        }
 
         User_QuizDTO updateUserQuiz = new()
             {
                 Completed = true,
-                QuizEndDate = DateTime.UtcNow,
                 QuizID = quizID,
                 UserID = userID,
                 Results = pointsGained,
@@ -289,15 +336,6 @@ else
         if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
         {
             throw new Exception();
-        }
-
-        (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
-               await HttpHandler.GetAsync<QuizDTO>(
-                   $"/api/Quizs/{quizID}", jwt, Http);
-
-        if (statusCodeQuiz == HttpStatusCode.OK)
-        {
-            quiz = quizDTO;
         }
 
         isLoading = false;

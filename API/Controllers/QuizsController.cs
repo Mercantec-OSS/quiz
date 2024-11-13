@@ -1,4 +1,6 @@
-﻿namespace API.Controllers
+﻿using API.Models;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -7,7 +9,7 @@
     {
         private readonly AppDBContext _context = context;
         private readonly TokenController _tokenController = new(context);
-
+        Quiz_QuestionController quiz_QuestionController = new(context);
 
         // GET: api/Quizs
         [HttpGet]
@@ -25,7 +27,7 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            return (await _context.Quizs.
+            var quizs = (await _context.Quizs.
                 Include(q => q.creator).
                 Include(q => q.category).
                 Include(q => q.difficulty).
@@ -40,6 +42,16 @@
                     Education = q.education.Education,
                     Title = q.Title,
                 }).ToList();
+
+            foreach (var quiz in quizs)
+            {
+                quiz.QestionsAmount = await _context.Quiz_Question.
+                    Include(q => q.quiz).
+                    Where(q => q.quiz.ID == quiz.ID).
+                    CountAsync();
+            }
+
+            return quizs;
         }
 
         // GET: api/Quizs/5
@@ -76,6 +88,13 @@
                 Education = quiz.education.Education,
                 Title = quiz.Title,
             };
+
+
+            quizDTO.QestionsAmount = await _context.Quiz_Question.
+                    Include(q => q.quiz).
+                    Where(q => q.quiz.ID == quiz.ID).
+                    CountAsync();
+
             return quizDTO;
         }
 
@@ -134,7 +153,7 @@
                     .ToListAsync();
             }
 
-            foreach(var quiz in quizs)
+            foreach (var quiz in quizs)
             {
                 quiz.QestionsAmount = await _context.Quiz_Question.
                     Include(q => q.quiz).
@@ -161,7 +180,7 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            var quiz = (await _context.Quizs.
+            var quizs = (await _context.Quizs.
                 Include(q => q.creator).
                 Include(q => q.category).
                 Include(q => q.difficulty).
@@ -179,12 +198,20 @@
                     Title = q.Title,
                 });
 
-            if (quiz == null)
+            if (quizs == null)
             {
                 return NotFound();
             }
 
-            return Ok(quiz);
+            foreach (var quiz in quizs)
+            {
+                quiz.QestionsAmount = await _context.Quiz_Question.
+                    Include(q => q.quiz).
+                    Where(q => q.quiz.ID == quiz.ID).
+                    CountAsync();
+            }
+
+            return Ok(quizs);
         }
 
         // PUT: api/Quizs/5
@@ -290,7 +317,7 @@
             _context.Quizs.Add(quiz);
             await _context.SaveChangesAsync();
 
-            Quiz_QuestionController quiz_QuestionController = new(_context);
+            
 
             foreach (int questionID in quizDTO.questions)
             {
@@ -300,7 +327,7 @@
                     QuizID = quiz.ID
                 };
 
-                var response = await quiz_QuestionController.PostQuiz_Question(qQ);
+                var response = await quiz_QuestionController.PostQuiz_Question(qQ, token);
                 if (response.Result is NotFoundResult)
                 {
                     return NotFound("Something went wrong adding the questions to the quiz");
@@ -324,6 +351,18 @@
         [HttpPost("Setup-Quiz/Random")]
         public async Task<ActionResult<QuizDTO>> PostQuiz(QuizCreateRandomDTO quizDTO)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
             var education = await _context.Educations.FindAsync(quizDTO.EducationID);
             if (education == null)
             {
@@ -437,11 +476,10 @@
                 var selectedQuestions = questions.Take(questionAmount.Amount).ToList();
                 allQuestions.AddRange(selectedQuestions);
             }
-            Quiz_QuestionController quiz_QuestionController = new(_context);
 
             foreach (var question in allQuestions)
             {
-                await quiz_QuestionController.PostQuiz_Question(question);
+                await quiz_QuestionController.PostQuiz_Question(question, token);
             }
 
             QuizDTO newQuizDTO = new QuizDTO()

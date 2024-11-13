@@ -30,18 +30,21 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            return (await _context.User_Quiz.ToListAsync()).Select(uq => new User_QuizDTO()
-            {
-                Completed = uq.Completed,
-                QuizID = uq.quiz.ID,
-                Results = uq.Results,
-                UserID = uq.user.ID,
-            }).ToList();
+            return (await _context.User_Quiz.
+                Include(uq => uq.quiz).
+                Include(uq => uq.user).
+                ToListAsync()).Select(uq => new User_QuizDTO()
+                {
+                    Completed = uq.Completed,
+                    QuizID = uq.quiz.ID,
+                    Results = uq.Results,
+                    UserID = uq.user.ID,
+                }).ToList();
         }
 
         //GET: api/User_Quiz/5/2
         [HttpGet("AllUserQuiz/{userId}")]
-        public async Task<ActionResult<IEnumerable<User_QuizInfoDTO>>> GetAllUserQuiz(int userId)
+        public async Task<ActionResult<IEnumerable<User_QuizQuizInfoDTO>>> GetAllUserQuiz(int userId)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -63,7 +66,7 @@
                 Include(uq => uq.quiz.creator).
                 Include(uq => uq.user).
                 Where(uq => uq.user.ID == userId).ToListAsync())
-                .Select(uq => new User_QuizInfoDTO()
+                .Select(uq => new User_QuizQuizInfoDTO()
                 {
                     Completed = uq.Completed,
                     Results = uq.Results,
@@ -183,7 +186,7 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            
+
 
             var user_Quiz = await _context.User_Quiz.
                 Include(uq => uq.user).
@@ -200,7 +203,10 @@
             }
 
             user_Quiz.QuizEndDate = user_QuizDTO.QuizEndDate;
-            user_Quiz.Results = user_QuizDTO.Results;
+            if (user_QuizDTO.Results != 0 && user_QuizDTO.Results != null)
+            {
+                user_Quiz.Results = user_QuizDTO.Results;
+            }
             user_Quiz.Completed = user_QuizDTO.Completed;
 
             _context.Entry(user_Quiz).State = EntityState.Modified;
@@ -208,19 +214,18 @@
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok("Sucessfully updated");
             }
             catch (DbUpdateConcurrencyException)
             {
                 return BadRequest("Something went wrong");
             }
-
-            return NoContent();
         }
 
         // POST: api/User_Quiz
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User_Quiz>> PostUser_Quiz(User_QuizDTO user_QuizDTO)
+        public async Task<ActionResult<User_QuizInfoDTO>> PostUser_Quiz(User_QuizDTO user_QuizDTO)
         {
 
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -238,13 +243,13 @@
             var quiz = await _context.Quizs.FindAsync(user_QuizDTO.QuizID);
             if (quiz == null)
             {
-                return NotFound();
+                return NotFound("Quiz not found.");
             }
 
             var user = await _context.Users.FindAsync(user_QuizDTO.UserID);
             if (user == null)
             {
-                return NotFound();
+                return NotFound("User not found.");
             }
 
             User_Quiz user_Quiz = new()
@@ -256,7 +261,42 @@
             _context.User_Quiz.Add(user_Quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser_Quiz", user_Quiz);
+            var User_QuizInfoDTO = await _context.User_Quiz
+                .Include(uq => uq.quiz)
+                .Include(uq => uq.quiz.category)
+                .Include(uq => uq.quiz.education)
+                .Include(uq => uq.quiz.difficulty)
+                .Include(uq => uq.quiz.creator)
+                .Include(uq => uq.user)
+                .ThenInclude(uq => uq.role)
+                .Where(uq => uq.quiz.ID == user_Quiz.quiz.ID)
+                .Where(uq => uq.user.ID == user_Quiz.user.ID)
+                .Select(uq => new User_QuizInfoDTO
+                {
+                    Completed = false,
+                    Results = user_QuizDTO.Results,
+                    QuizEndDate = user_QuizDTO.QuizEndDate,
+                    TimeUsed = user_QuizDTO.TimeUsed,
+                    User = new UserDTO
+                    {
+                        email = uq.user.Email,
+                        ID = uq.user.ID,
+                        role = uq.user.role.Role,
+                        username = uq.user.Username,
+                    },
+                    Quiz = new QuizDTO
+                    {
+                        ID = uq.quiz.ID,
+                        Category = uq.quiz.category.Category,
+                        Creator = uq.quiz.creator.Username,
+                        Difficulty = uq.quiz.difficulty.Difficulty,
+                        Education = uq.quiz.education.Education,
+                        Title = uq.quiz.Title,
+                        //could add question count but as this is for adding a student to a quiz i dont see the need
+                    },
+                }).FirstOrDefaultAsync();
+
+            return CreatedAtAction("GetUser_Quiz", User_QuizInfoDTO);
         }
 
         // DELETE: api/User_Quiz/5/2

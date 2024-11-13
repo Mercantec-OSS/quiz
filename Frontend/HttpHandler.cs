@@ -32,15 +32,7 @@ public static class HttpHandler
 
         if (parameters.Count > 0)
         {
-            path += "?";
-            foreach (var item in parameters)
-            {
-                if (path.Last() != '?')
-                {
-                    path += "&";
-                }
-                path += item.Key + "=" + item.Value;
-            }
+            AddParameters(path, parameters);
         }
 
         HttpResponseMessage response = await http.GetAsync(path);
@@ -107,6 +99,20 @@ public static class HttpHandler
         return response.StatusCode;
     }
 
+    private static string AddParameters(string path, Dictionary<string, string> parameters)
+    {
+        path += "?";
+        foreach (var item in parameters)
+        {
+            if (path.Last() != '?')
+            {
+                path += "&";
+            }
+            path += item.Key + "=" + item.Value;
+        }
+        return path;
+    }
+
     public static T? Deserialize<T>(string response)
     {
         try
@@ -121,6 +127,10 @@ public static class HttpHandler
 
     private static StringContent Serialize(object toSerialize)
     {
-        return new StringContent(JsonSerializer.Serialize(toSerialize), Encoding.UTF8, "application/json");
+        return new StringContent(
+            JsonSerializer.Serialize(toSerialize),
+            Encoding.UTF8,
+            "application/json"
+        );
     }
 }

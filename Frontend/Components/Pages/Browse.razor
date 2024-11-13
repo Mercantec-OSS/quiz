@@ -128,7 +128,7 @@ else
                             </div>
                         </div>
                         <div class="pt-2 MyPageCardGab">
-                            <button class="MyPageCustomBox btn btn-primary" @onclick="StartQuiz">
+                            <button class="MyPageCustomBox btn btn-primary" @onclick="() => StartQuiz(quiz.ID ?? 0)">
                                 <p class="card-text">Start</p>
                             </button>
                         </div>
@@ -296,9 +296,14 @@ else
         return quizzes;
     }
 
-    private void StartQuiz()
+    private void StartQuiz(int quizID)
     {
+        if (quizID == 0)
+        {
+            return;
+        }
 
+        NavigationManager.NavigateTo($"/quiz_ui?quiz_id={Uri.EscapeDataString(quizID.ToString())}");
     }
 
     private class WeatherForecast

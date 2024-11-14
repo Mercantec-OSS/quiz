@@ -32,7 +32,7 @@ public static class HttpHandler
 
         if (parameters.Count > 0)
         {
-            AddParameters(path, parameters);
+            path = AddParameters(path, parameters);
         }
 
         HttpResponseMessage response = await http.GetAsync(path);

@@ -1,0 +1,344 @@
+﻿@page "/quiz_ui"
+
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Collections.Generic
+@using API.Models
+@using System.Net
+@using System.Timers
+
+@* @attribute [StreamRendering] *@
+
+<PageTitle>@pageTitle</PageTitle>
+
+@if (!ready)
+{
+    <h3>Quiz UI</h3>
+    <div>
+        Are you ready?
+        <buton class="btn btn-primary" @onclick="Start">Start</buton>
+    </div>
+}
+else
+{
+    if (questions.Count > correctlyQuestionAnswering && correctlyQuestion != null)
+    {
+        <div class="Split">
+            <h3>@correctlyQuestion.Title</h3>
+            <h2>@currentTime.ToString(currentTime.Hour > 0 ? "HH:mm:ss" : "mm:ss")</h2>
+        </div>
+
+        <div class="row flex-fill d-flex flex-wrap" style="height: 40vh;">
+            @foreach (var (cardText, i) in correctlyQuestion.PossibleAnswers.Select((category, index) => (category, index)))
+            {
+                <div class="col-6 d-flex p-2" @onclick="() => SelectAnswer(i)">
+                    <div class="card flex-fill text-center @(selectedAnswers[i] ? "bg-success" : null)">
+                        <div class="card-body" style="max-height: 175px; overflow-y: auto;">
+                            <h5 class="card-title">@cardText</h5>
+                            <p class="card-text">
+                                This is a dynamically generated card. This content can be very long, so I am adding more text here to simulate a longer description. The content should scroll when it overflows the available space.
+                                Keep adding more content here to see the scrolling effect.
+                                Keep adding more content here to see the scrolling effect. Keep adding more content here to see the scrolling effect.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            <button class="btn btn-primary" @onclick="AnswerQuestion">Answer</button>
+        </div>
+    }
+    else if (questions.Count <= correctlyQuestionAnswering && quiz != null)
+    {
+        <h3>Summery</h3>
+        <div class="card bg-light">
+            <div class="card-body">
+                <div>
+                    <h3 class="card-title">@quiz.Title</h3>
+                </div>
+                <div class="MyPageCardGab">
+                    <div class="MyPageCustomBox">
+                        <p class="card-text">@answeredCorrectly.Count(a => a == true) / @questions.Count</p>
+                    </div>
+                    <div class="MyPageCustomBox">
+                        <p class="card-text">
+                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect ?? false) / questions.Count * 100, 2))%
+                        </p>
+                    </div>
+                    <div class="MyPageCustomBox">
+                        <p class="card-text">Points: @pointsGained</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
+
+@code {
+    [Inject] public HttpClient? Http { get; set; }
+    private bool isLoading = false;
+    private string pageTitle = "Quiz ui";
+    private bool ready = false;
+    private int quizID;
+    private QuizDTO? quiz;
+    private int pointsGained = 0;
+
+    private bool[] selectedAnswers = new bool[0];
+    private int correctlyQuestionAnswering = -1;
+    private QuestionDTO? correctlyQuestion = null;
+    private DateTime currentTime = new DateTime();
+
+    private List<bool?> answeredCorrectly = new();
+    private List<QuestionDTO> questions = new();
+
+    private User_QuizDTO userQuiz = new();
+
+    private Timer timer = new(1000)
+        {
+            AutoReset = true,
+        };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            timer.Stop();
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            if (Http == null) return;
+
+            isLoading = true;
+            StateHasChanged();
+
+            // Getting the quiz id from the url, if it's invalid redirect to browse.
+            Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            if (!QueryHelpers.ParseQuery(uri.Query).TryGetValue("quiz_id", out var dataValue))
+            {
+                NavigationManager.NavigateTo("/browse");
+                return;
+            }
+
+            if (!int.TryParse(dataValue[0], out quizID))
+            {
+                NavigationManager.NavigateTo("/browse");
+                return;
+            }
+
+            int userID = await sessionStorage.GetItemAsync<int>("userID");
+            (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
+                await HttpHandler.GetAsync<User_QuizDTO>(
+                    $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
+
+            if (statusCodeUserQuiz != HttpStatusCode.OK || userQuiz == null || userQuiz.Completed)
+            {
+                // Isn't invited to this quiz or has completed it before.
+                NavigationManager.NavigateTo("/browse");
+                return;
+            }
+            else this.userQuiz = userQuiz ?? new();
+
+            (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
+               await HttpHandler.GetAsync<QuizDTO>(
+                   $"/api/Quizs/{quizID}", jwt, Http);
+
+            if (statusCodeQuiz == HttpStatusCode.OK)
+            {
+                quiz = quizDTO;
+            }
+
+            (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
+                await HttpHandler.GetAsync<List<QuestionDTO>>(
+                    $"/api/Questions/ByQuizID/{quizID}", jwt, Http);
+
+            if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
+            {
+                questions.AddRange(QuestionDTOs);
+                timer.Elapsed += OnTimedEvent;
+            }
+
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Start()
+    {
+        ready = true;
+        OpenNextQuestion(false);
+    }
+
+    private void SelectAnswer(int answerIndex)
+    {
+        if (correctlyQuestion == null) return;
+
+        selectedAnswers[answerIndex] = !selectedAnswers[answerIndex];
+        if (correctlyQuestion.QuestionType != "Multi")
+        {
+            for (int i = 0; i < selectedAnswers.Length; i++)
+            {
+                if (i != answerIndex)
+                {
+                    selectedAnswers[i] = true;
+                }
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void AnswerQuestion()
+    {
+        if (correctlyQuestion == null) return;
+
+        bool answeredCorrectly = true;
+        for (int i = 0; i < correctlyQuestion.CorrectAnswer.Length; i++)
+        {
+            if (!selectedAnswers[correctlyQuestion.CorrectAnswer[i] - 1])
+            {
+                answeredCorrectly = false;
+                break;
+            }
+        }
+        this.answeredCorrectly.Add(answeredCorrectly);
+        OpenNextQuestion(false);
+    }
+
+    private void SkipQuestion()
+    {
+        answeredCorrectly.Add(null);
+        OpenNextQuestion(true);
+    }
+
+    private async void OpenNextQuestion(bool asyncReload)
+    {
+        timer.Stop();
+        correctlyQuestionAnswering++;
+        if (questions.Count <= correctlyQuestionAnswering)
+        {
+            await OpenSummery();
+            return;
+        }
+
+        correctlyQuestion = questions[correctlyQuestionAnswering];
+        pageTitle = correctlyQuestion.Title;
+        selectedAnswers = new bool[correctlyQuestion.PossibleAnswers.Length];
+
+        int timeToAddFromSec = int.Parse(correctlyQuestion.Time.ToString());
+
+        int addTimeHours = timeToAddFromSec / 3600;
+        int addTimeMin = (timeToAddFromSec - (3600 * addTimeHours)) / 60;
+        int addTimeSec = timeToAddFromSec - (3600 * addTimeHours + 60 * addTimeMin);
+
+        currentTime = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, addTimeHours, addTimeMin, addTimeSec);
+
+        timer.Start();
+        if (asyncReload)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void OnTimedEvent(object? sender, ElapsedEventArgs e)
+    {
+        // Update the current time
+        currentTime = currentTime.AddSeconds(-1);
+
+        if (currentTime.TimeOfDay.TotalSeconds <= 0)
+        {
+            SkipQuestion();
+        }
+        else
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OpenSummery()
+    {
+        if (Http == null) return;
+        if (quiz == null)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
+
+        isLoading = true;
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        int userID = await sessionStorage.GetItemAsync<int>("userID");
+
+        (HttpStatusCode statusCodeDifficulties, List<Difficulties>? difficulties) =
+                await HttpHandler.GetAsync<List<Difficulties>>(
+                    $"/api/Difficulties", jwt, Http);
+        if (statusCodeDifficulties != HttpStatusCode.OK)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
+
+        Difficulties? quizDifficulty = difficulties?.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
+        if (quizDifficulty == null)
+        {
+            NavigationManager.NavigateTo("/home");
+            return;
+        }
+
+        for (int i = 0; i < questions.Count; i++)
+        {
+            if (answeredCorrectly[i] ?? false)
+            {
+                Difficulties? questionDifficulty = difficulties?
+                    .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
+
+                if (questionDifficulty == null)
+                {
+                    // Gets default
+                    pointsGained += 100;
+                    continue;
+                }
+
+                int difference = questionDifficulty.ID - quizDifficulty.ID;
+                int difficultyAddition = (1 + difference / 10);
+                pointsGained += 100 * difficultyAddition;
+            }
+        }
+
+        User_QuizDTO updateUserQuiz = new()
+            {
+                Completed = true,
+                QuizID = quizID,
+                UserID = userID,
+                Results = pointsGained,
+                TimeUsed = 0,
+            };
+
+        HttpStatusCode statusCodeUserQuiz =
+           await HttpHandler.PutAsync(
+                   $"/api/User_Quiz", updateUserQuiz, jwt, Http);
+
+        if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
+        {
+            throw new Exception();
+        }
+
+        isLoading = false;
+        StateHasChanged();
+    }
+}

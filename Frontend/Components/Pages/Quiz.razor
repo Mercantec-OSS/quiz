@@ -13,7 +13,7 @@
 
 <div>
     <label for="quizTitle">Titel:</label>
-    <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%"/>
+    <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%" />
 </div>
 
 <table>
@@ -24,7 +24,7 @@
                 <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
                     @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
                 </button>
-                <div class="dropdown-menu @(mainCategoryDropdownVisible ? "show" : "")">
+                <div class="dropdown-menu scrollable-dropdown @(mainCategoryDropdownVisible ? "show" : "")">
                     @foreach (var category in categories)
                     {
                         <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
@@ -39,7 +39,7 @@
                 <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
                     @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
                 </button>
-                <div class="dropdown-menu @(mainDifficultyDropdownVisible ? "show" : "")">
+                <div class="dropdown-menu scrollable-dropdown @(mainDifficultyDropdownVisible ? "show" : "")">
                     @foreach (var difficulty in difficulties)
                     {
                         <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
@@ -62,7 +62,7 @@
                             <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
                                 @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                             </button>
-                            <div class="dropdown-menu @question.dropdownCategory">
+                            <div class="dropdown-menu scrollable-dropdown @question.dropdownCategory">
                                 @foreach (Categories category in categories)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
@@ -76,7 +76,7 @@
                             <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
                                 @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                             </button>
-                            <div class="dropdown-menu @question.dropdownUnderCategory">
+                            <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
                                 @foreach (UnderCategories underCategory in underCategories)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
@@ -89,7 +89,7 @@
                             <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
                                 @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                             </button>
-                            <div class="dropdown-menu @question.dropdownDifficulty">
+                            <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
                                 @foreach (Difficulties difficulty in difficulties)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
@@ -111,7 +111,9 @@
             </table>
         </div>
 
-        <h4>Spørgsmål til @question.selectedCategory?.Category - @question.selectedUnderCategory?.UnderCategory - @question.selectedDifficulty?.Difficulty:</h4>
+        <br>
+
+        <h4>Tilgængelige spørgsmål:</h4>
 
         @* this is where the list is being displayed/made *@
         @if (question.Questions != null && question.Questions.Any())
@@ -122,10 +124,8 @@
                 <thead>
                     <tr>
                         <th>Valgt</th>
-                        <th>Question</th>
-                        <th>Category</th>
-                        <th>UnderCategory</th>
-                        <th>Difficulty</th>
+                        <th>Spørgsmål</th>
+                        <th>Tid</th>
                         <th>Mulige svar</th>
                         <th>Rigtige svar</th>
                     </tr>
@@ -139,9 +139,7 @@
                                 <input type="checkbox" @bind="q.IsSelected" />
                             </td>
                             <td>@(!string.IsNullOrEmpty(q.Title) ? q.Title : "No Title")</td>
-                            <td>@q.Category</td>
-                            <td>@q.UnderCategory</td>
-                            <td>@q.Difficulty</td>
+                            <td>@q.Time</td>
                             <td>@string.Join(", ", q.PossibleAnswers)</td>
                             <td>@string.Join(", ", q.CorrectAnswer)</td>
                         </tr>
@@ -201,6 +199,7 @@
         public string Category { get; set; }
         public string UnderCategory { get; set; }
         public string Difficulty { get; set; }
+        public int Time { get; set; }
         public string[] PossibleAnswers { get; set; }
         public int[] CorrectAnswer { get; set; }
         public bool IsSelected { get; set; }
@@ -218,6 +217,7 @@
     private List<API.Models.User> user = new();
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
+
 
 
     public List<Question> GetSelectedQuestions()
@@ -388,7 +388,7 @@
         (HttpStatusCode statusCode, QuizDTO? response) =
         await HttpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
 
-        if(statusCode == HttpStatusCode.Created)
+        if (statusCode == HttpStatusCode.Created)
         {
             SaveQuizMessage = "Quiz gemt succesfuldt";
         }
@@ -502,3 +502,15 @@
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
 }
+
+<style>
+    .scrollable-dropdown {
+        max-height: 200px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+        .scrollable-dropdown::-webkit-scrollbar {
+            width: 8px;
+        }
+</style>

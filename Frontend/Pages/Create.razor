@@ -1,6 +1,7 @@
 ﻿@page "/create"
-@inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@using OfficeOpenXml
+@using System.IO
 
 <PageTitle>Create</PageTitle>
 
@@ -20,44 +21,43 @@
                 <table>
                     <tr>
                         <td>
-                            <div class="dropdown-categories">
-                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
                                     @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
-                                </button>
-                                <div class="dropdown-menu scrollable-dropdown @question.dropdownCategory">
+                                </DropdownToggle>
+                                <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (CategoriesDTO category in categories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
+                                        <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
                                     }
-                                </div>
-                            </div>
+                                </DropdownMenu>
+                            </Dropdown>
                         </td>
                         <td>
-
-                            <div class="dropdown-underCategories">
-                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
-                                </button>
-                                <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
+                                </DropdownToggle>
+                                <DropdownMenu  MaxMenuHeight="100px">
                                     @foreach (UnderCategoriesGetDTO underCategory in underCategories)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
+                                        <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
                                     }
-                                </div>
-                            </div>
+                                </DropdownMenu>
+                            </Dropdown>
                         </td>
                         <td>
-                            <div class="dropdown-difficulties">
-                                <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
-                                </button>
-                                <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
+                                </DropdownToggle>
+                                <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (DifficultiesDTO difficulty in difficulties)
                                     {
-                                        <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
+                                        <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
                                     }
-                                </div>
-                            </div>
+                                </DropdownMenu>
+                            </Dropdown>
                         </td>
                         <td>
                             <label for="Time">Tid</label>
@@ -171,15 +171,12 @@
 
         //public category dropdown
         public CategoriesDTO? selectedCategory;
-        public string dropdownCategory = "";
 
         //Public undercategory dropdown
         public UnderCategoriesGetDTO? selectedUnderCategory;
-        public string dropdownUnderCategory = "";
 
         //Public difficulty dropdown
         public DifficultiesDTO? selectedDifficulty;
-        public string dropdownDifficulty = "";
     }
 
     private List<DifficultiesDTO> difficulties = new();
@@ -358,56 +355,23 @@
             default: return 0; //No Answer selected
         }
     }
-
-    //simple drop down menu category
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownCategory(QuestionHandling categoryHandling)
-    {
-        categoryHandling.dropdownCategory = categoryHandling.dropdownCategory == "" ? "show" : "";
-        categoryHandling.dropdownUnderCategory = "";
-        categoryHandling.dropdownDifficulty = "";
-    }
-
+    
     // Set the selected item and close the dropdown
     private void SelectCategory(CategoriesDTO item, QuestionHandling questionHandling)
     {
         questionHandling.selectedCategory = item;
-        questionHandling.dropdownCategory = ""; // Hide the dropdown
-    }
-
-
-    //simple drop down menu for undercategory
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownUnderCategory(QuestionHandling questionHandling)
-    {
-        questionHandling.dropdownUnderCategory = questionHandling.dropdownUnderCategory == "" ? "show" : "";
-        questionHandling.dropdownCategory = "";
-        questionHandling.dropdownDifficulty = "";
     }
 
     // Set the selected item and close the dropdown
     private void SelectUnderCategory(UnderCategoriesGetDTO item1, QuestionHandling underCategoryHandling)
     {
         underCategoryHandling.selectedUnderCategory = item1;
-        underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
-    }
-
-
-
-    //simple drop down menu for difficulties
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownDifficulties(QuestionHandling difficultyHandling)
-    {
-        difficultyHandling.dropdownDifficulty = difficultyHandling.dropdownDifficulty == "" ? "show" : "";
-        difficultyHandling.dropdownCategory = "";
-        difficultyHandling.dropdownUnderCategory = "";
     }
 
     // Set the selected item and close the dropdown
     private void SelectDifficulties(DifficultiesDTO difficulties, QuestionHandling difficultyHandling)
     {
         difficultyHandling.selectedDifficulty = difficulties;
-        difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
 
     //delete button
@@ -420,89 +384,77 @@
     //uploading the excel file to the database
     private async Task UploadExcel(InputFileChangeEventArgs e)
     {
-        //     try
-        //     {
-        //         // Set the license context
-        //         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            try
+            {
+                // Set the license context
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-        //         var file = e.File;
+                var file = e.File;
 
-        //         if (file != null)
-        //         {
-        //             using (var stream = new MemoryStream())
-        //             {
-        //                 await file.OpenReadStream().CopyToAsync(stream);
+                if (file != null)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await file.OpenReadStream().CopyToAsync(stream);
 
-        //                 using (var package = new OfficeOpenXml.ExcelPackage(stream))
-        //                 {
-        //                     var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
+                        using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                        {
+                            var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
 
-        //                     var rowCount = worksheet.Dimension.Rows;
+                            var rowCount = worksheet.Dimension.Rows;
 
-        //                     for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
-        //                     {
-        //                         var question = new QuestionModel
-        //                             {
-        //                                 // Id = nextQuestionId++,
-        //                                 QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
-        //                                 Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
-        //                                 Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
-        //                                 Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
-        //                                 Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
-        //                             };
+                            for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
+                            {
+                                var question = new QuestionModel
+                                    {
+                                        // Id = nextQuestionId++,
+                                        QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                                        Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                                        Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                                        Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                                        Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
+                                    };
 
-        //                         // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
-        //                         var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
-        //                         if (!string.IsNullOrEmpty(correctAnswers))
-        //                         {
-        //                             var correctIndices = correctAnswers.Split(',')
-        //                                 .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
-        //                                 .Where(x => x > 0 && x <= 4)
-        //                                 .ToList();
+                                // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
+                                var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
+                                if (!string.IsNullOrEmpty(correctAnswers))
+                                {
+                                    var correctIndices = correctAnswers.Split(',')
+                                        .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
+                                        .Where(x => x > 0 && x <= 4)
+                                        .ToList();
 
-        //                             for (int i = 0; i < correctIndices.Count; i++)
-        //                             {
-        //                                 if (correctIndices[i] <= 4) // Assuming only 4 answers
-        //                                 {
-        //                                     question.CorrectAnswers[correctIndices[i] - 1] = true;
-        //                                 }
-        //                             }
-        //                         }
+                                    for (int i = 0; i < correctIndices.Count; i++)
+                                    {
+                                        if (correctIndices[i] <= 4) // Assuming only 4 answers
+                                        {
+                                            question.CorrectAnswers[correctIndices[i] - 1] = true;
+                                        }
+                                    }
+                                }
 
-        //                         // Set additional properties from the Excel columns
-        //                         question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
-        //                         question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
-        //                         question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
-        //                         question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
-        //                         question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
-        //                         question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
-        //                         question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
+                                // Set additional properties from the Excel columns
+                                question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                                question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+                                question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
+                                question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
+                                question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
+                                question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
+                                question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
 
 
-        //                         Questions.Add(new()
-        //                             {
-        //                                 questionModel = question
-        //                             });
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         Console.WriteLine($"Error uploading file: {ex.Message}");
-        //     }
+                                questionsHandler.Add(new()
+                                    {
+                                        questionModel = question
+                                    });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading file: {ex.Message}");
+            }
     }
 }
-
-<style>
-    .scrollable-dropdown {
-        max-height: 200px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-        .scrollable-dropdown::-webkit-scrollbar {
-            width: 8px;
-        }
-</style>

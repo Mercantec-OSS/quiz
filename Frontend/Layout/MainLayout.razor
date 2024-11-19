@@ -1,0 +1,81 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@code {
+    private static string jwtToken = string.Empty;
+    private static string userRole = string.Empty;
+
+    public static void GetItems(string jwt, string userRole)
+    {
+        jwtToken = jwt;
+        MainLayout.userRole = userRole;
+    }
+
+    public static void RemoveItems()
+    {
+        jwtToken = string.Empty;
+        userRole = string.Empty;
+    }
+}
+
+<div class="page">
+    <main>
+
+        <div class="top-row px-4">
+            <div class="main-nav"></div>
+
+            @if (!string.IsNullOrEmpty(jwtToken))
+            {
+                <div class="dropdown">
+                    <button class="dropbtn">More</button>
+                    <div class="dropdown-content">
+
+
+                        <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
+                        </NavLink>
+
+                        <NavLink class="nav-link" href="@(userRole == "Teacher" ? "TeacherMyPage" : "MyPage")">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                        </NavLink>
+
+                        <NavLink class="nav-link" href="create">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav spørgsmål
+                        </NavLink>
+
+
+                        <NavLink class="nav-link" href="quiz">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav quiz
+                        </NavLink>
+
+
+                        <NavLink class="nav-link" href="browse">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
+                        </NavLink>
+
+
+                        <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Kategori
+                        </NavLink>
+
+                        <NavLink class="nav-link" href="/logout">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Log ud
+                        </NavLink>
+                    </div>
+                </div>
+            }
+
+            <div class="about">
+                <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
+            </div>
+
+
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

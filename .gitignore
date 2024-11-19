@@ -10,3 +10,5 @@ Frontend/bin/Debug/net8.0/appsettings.json
 /Frontend/bin
 /Frontend/obj
 /API/Properties/launchSettings.json
+/SharedModels/obj
+/SharedModels/bin

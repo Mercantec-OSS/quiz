@@ -1,81 +1,37 @@
-using Frontend.Components;
-using Blazored.LocalStorage;
-using System.Net.Http;
 using Frontend;
-using OfficeOpenXml;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Blazored.SessionStorage;
+using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
 
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Services
+    .AddBlazorise(options =>
+    {
+        options.Immediate = true;
+    })
+    .AddBootstrap5Providers()
+    .AddFontAwesomeIcons();
 
-var builder = WebApplication.CreateBuilder(args);
-
-
-// Set the license context to non-commercial (add this line here if using EPPlus)
-ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-// Add services to the container.
 builder.Services.AddBlazoredSessionStorage();
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-builder.Services.AddRazorComponents();
-builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<HttpClient>(sp => new HttpClient 
+builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri ("https://mercantec-quiz.onrender.com")
+    BaseAddress = new Uri("https://mercantec-quiz.onrender.com")
 });
 
-// In Program.cs (for .NET 6.0 and later):
-builder.Services.AddHttpContextAccessor();
-
-// Add services to the container
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        policy.AllowAnyOrigin()   // Allow requests from any origin
+              .AllowAnyHeader()   // Allow any HTTP headers
+              .AllowAnyMethod();  // Allow any HTTP methods (GET, POST, etc.)
     });
 });
 
-builder.Services.AddControllers();
-
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-
-// Use the CORS policy
-app.UseCors("AllowAll");
-
-app.UseRouting();
-
-//app.UseEndpoints(endpoints =>
-//{
-//    endpoints.MapControllers();
-//});
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
-
-
+await builder.Build().RunAsync();

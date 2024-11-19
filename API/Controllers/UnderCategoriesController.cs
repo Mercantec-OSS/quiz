@@ -129,7 +129,7 @@
         // POST: api/UnderCategories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesDTO underCategoriesDTO)
+        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesCreateDTO underCategoriesDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);

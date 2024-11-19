@@ -1,0 +1,310 @@
+﻿@page "/browse"
+
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@using Microsoft.AspNetCore.WebUtilities;
+@using System.Collections.Generic
+
+<PageTitle>Browse</PageTitle>
+
+<div class="Split">
+    <h2>Browse</h2>
+
+    <div class="MyPageCardGab">
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownCreator()">
+                                @(selectedCreators == null ? "Filter by creators" : selectedCreators)
+                            </button>
+                            <div class="dropdown-menu @dropdownCreator">
+                                <a class="dropdown-item" @onclick="() => SelectCreator(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string creator in creators)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCreator(creator)">
+                                        @creator
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownCategory()">
+                                @(selectedCategory == null ? "Filter by Kategori" : selectedCategory)
+                            </button>
+                            <div class="dropdown-menu @dropdownCategory">
+                                <a class="dropdown-item" @onclick="() => SelectCategory(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string category in categories)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectCategory(category)">
+                                        @category
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="drop-menu">
+            <table>
+                <tr>
+                    <td>
+                        <div class="dropdown-categories">
+                            <button class="btn btn-primary dropdown-toggle dropdown-width"
+                                    @onclick="() => ToggleDropdownDifficulty()">
+                                @(selectedDifficulty == null ? "Filter by difficulty" : selectedDifficulty)
+                            </button>
+                            <div class="dropdown-menu @dropdownDifficuly">
+                                <a class="dropdown-item" @onclick="() => SelectDifficulty(null)">
+                                    Remove filter
+                                </a>
+                                @foreach (string difficulty in difficulties)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectDifficulty(difficulty)">
+                                        @difficulty
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <p>
+        Loading...
+    </p>
+}
+else
+{
+    <div class="row my-1">
+        @foreach (QuizDTO quiz in Sort())
+        {
+            <div class="col-md-4 p-1">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="Split">
+                            <h3 class="card-title">@quiz.Title</h3>
+                            <h4 class="text-end">@quiz.Creator</h4>
+                        </div>
+                        <div class="MyPageCardGab">
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Category: @quiz.Category</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
+                            </div>
+                            <div class="MyPageCustomBox">
+                                <p class="card-text">Questions: @quiz.QestionsAmount</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 MyPageCardGab">
+                            <button class="MyPageCustomBox btn btn-primary" @onclick="() => StartQuiz(quiz.ID ?? 0)">
+                                <p class="card-text">Start</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
+
+@code {
+    [Inject] public HttpClient? Http { get; set; }
+    private List<QuizDTO> allQuizzes = new();
+
+    private List<string> creators = new();
+    private List<string> categories = new();
+    private List<string> difficulties = new();
+
+    private string? selectedCategory;
+    private string? selectedCreators;
+    private string? selectedDifficulty;
+
+    private string dropdownCreator = string.Empty;
+    private string dropdownCategory = string.Empty;
+    private string dropdownDifficuly = string.Empty;
+
+    private bool isLoading = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            if (Http == null) return;
+
+            isLoading = true;
+            StateHasChanged();
+
+            string searchWord = "";
+            Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out var dataValue))
+            {
+                searchWord = dataValue.ToArray()[0] ?? "";
+            }
+
+            Dictionary<string, string> parameters = new()
+            {
+                {"searchWord", searchWord}
+            };
+
+            (HttpStatusCode statusCode, List<QuizDTO>? response) =
+                await HttpHandler.GetAsync<List<QuizDTO>>(
+                    $"/api/Quizs/QuizSearch", parameters, jwt, Http);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                allQuizzes = response ?? new();
+                Dictionary<string, int> creators = new();
+                Dictionary<string, int> categories = new();
+                Dictionary<string, int> difficulty = new();
+                foreach (QuizDTO item in allQuizzes)
+                {
+                    if (!creators.TryAdd(item.Creator, 1))
+                    {
+                        creators[item.Creator]++;
+                    }
+                    if (!categories.TryAdd(item.Category, 1))
+                    {
+                        categories[item.Category]++;
+                    }
+                    if (!difficulty.TryAdd(item.Difficulty, 1))
+                    {
+                        difficulty[item.Difficulty]++;
+                    }
+                }
+
+                this.creators = creators.Keys.ToList();
+                this.categories = categories.Keys.ToList();
+                this.difficulties = difficulty.Keys.ToList();
+            }
+
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleDropdownCreator()
+    {
+        dropdownCreator = dropdownCreator == "" ? "show" : "";
+    }
+
+    private void ToggleDropdownCategory()
+    {
+        dropdownCategory = dropdownCategory == "" ? "show" : "";
+    }
+
+    private void ToggleDropdownDifficulty()
+    {
+        dropdownDifficuly = dropdownDifficuly == "" ? "show" : "";
+    }
+
+    private void SelectCreator(string? creator)
+    {
+        selectedCreators = creator;
+        StateHasChanged();
+    }
+
+    private void SelectCategory(string? category)
+    {
+        selectedCategory = category;
+        StateHasChanged();
+    }
+
+    private void SelectDifficulty(string? difficult)
+    {
+        selectedDifficulty = difficult;
+        StateHasChanged();
+    }
+
+    private List<QuizDTO> Sort()
+    {
+        List<QuizDTO> quizzes = new();
+        foreach (QuizDTO item in allQuizzes)
+        {
+            if (!string.IsNullOrEmpty(selectedCreators))
+            {
+                if (item.Creator != selectedCreators)
+                {
+                    continue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(selectedCategory))
+            {
+                if (item.Category != selectedCategory)
+                {
+                    continue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(selectedDifficulty))
+            {
+                if (item.Difficulty != selectedDifficulty)
+                {
+                    continue;
+                }
+            }
+
+            quizzes.Add(item);
+        }
+
+        return quizzes;
+    }
+
+    private void StartQuiz(int quizID)
+    {
+        if (quizID == 0)
+        {
+            return;
+        }
+
+        NavigationManager.NavigateTo($"/quiz_ui?quiz_id={Uri.EscapeDataString(quizID.ToString())}");
+    }
+
+    private class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}

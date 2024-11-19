@@ -108,7 +108,10 @@ namespace API.Controllers
             {
                 return Unauthorized("Invalid Token");
             }
-
+            if (searchWord != null)
+            {
+                searchWord = searchWord.ToLower();
+            }
             List<QuizDTO> quizs;
             if (userResult.role.Role == "Student")
             {
@@ -120,7 +123,7 @@ namespace API.Controllers
                     .Include(q => q.quiz.difficulty)
                     .Include(q => q.quiz.education)
                     .Where(q => q.user.ID == userResult.ID)
-                    .Where(q => q.quiz.Title.Contains(searchWord ?? ""))
+                    .Where(q => q.quiz.Title.ToLower().Contains(searchWord ?? ""))
                     .Select(q => new QuizDTO()
                     {
                         ID = q.quiz.ID,
@@ -132,6 +135,27 @@ namespace API.Controllers
                     })
                     .ToListAsync();
             }
+            else if (userResult.role.Role == "Teacher")
+            {
+                quizs = await _context.Quizs
+                    .Include(q => q.creator)
+                    .Include(q => q.category)
+                    .Include(q => q.difficulty)
+                    .Include(q => q.education)
+                    .Where(q => q.creator.ID == userResult.ID)
+                    .Where(q => q.Title.ToLower().Contains(searchWord ?? ""))
+                    .Select(q => new QuizDTO()
+                    {
+
+                        ID = q.ID,
+                        Category = q.category.Category,
+                        Creator = q.creator.Username,
+                        Difficulty = q.difficulty.Difficulty,
+                        Education = q.education.Education,
+                        Title = q.Title,
+                    })
+                    .ToListAsync();
+            }
             else
             {
                 quizs = await _context.Quizs
@@ -139,7 +163,7 @@ namespace API.Controllers
                     .Include(q => q.category)
                     .Include(q => q.difficulty)
                     .Include(q => q.education)
-                    .Where(q => q.Title.Contains(searchWord ?? ""))
+                    .Where(q => q.Title.ToLower().Contains(searchWord ?? ""))
                     .Select(q => new QuizDTO()
                     {
 

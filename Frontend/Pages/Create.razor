@@ -39,7 +39,7 @@
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </button>
                                 <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
-                                    @foreach (UnderCategories underCategory in underCategories)
+                                    @foreach (UnderCategoriesGetDTO underCategory in underCategories)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
                                     }
@@ -52,7 +52,7 @@
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </button>
                                 <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
-                                    @foreach (Difficulties difficulty in difficulties)
+                                    @foreach (DifficultiesDTO difficulty in difficulties)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
                                     }

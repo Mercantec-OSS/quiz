@@ -55,7 +55,7 @@
                                 @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                             </button>
                             <div class="dropdown-menu scrollable-dropdown @question.dropdownCategory">
-                                @foreach (Categories category in categories)
+                                @foreach (CategoriesDTO category in categories)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
                                 }
@@ -69,7 +69,7 @@
                                 @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                             </button>
                             <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
-                                @foreach (UnderCategories underCategory in underCategories)
+                                @foreach (UnderCategoriesGetDTO underCategory in underCategories)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
                                 }
@@ -82,7 +82,7 @@
                                 @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                             </button>
                             <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
-                                @foreach (Difficulties difficulty in difficulties)
+                                @foreach (DifficultiesDTO difficulty in difficulties)
                                 {
                                     <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
                                 }

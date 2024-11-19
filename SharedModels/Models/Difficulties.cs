@@ -1,8 +1,7 @@
-﻿namespace API.Models;
+﻿namespace SharedModels.Models;
 
-public class Difficulties
+public class DifficultiesDTO
 {
-    [Key]
     public int ID { get; set; }
     public string Difficulty { get; set; }
 }

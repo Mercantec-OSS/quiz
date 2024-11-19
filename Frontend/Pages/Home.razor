@@ -1,0 +1,81 @@
+﻿@page "/home"
+
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<PageTitle>Home</PageTitle>
+
+<div style="display: flex; align-items: center; flex-direction: column;">
+    <h1>QUIZ</h1>
+    <br><br><br>
+
+    <h2>
+        Search for a quiz
+    </h2>
+
+    <div>
+        <EditForm Model="searchWord" OnValidSubmit="OnSearchClick" FormName="LoginForm">
+            <div class="form-group p-1">
+                <InputText placeholder="Search..." class="form-control" type="text"
+                           @bind-Value="searchWord.word" />
+            </div>
+
+            <div class="form-group d-flex justify-content-center p-1">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </EditForm>
+    </div>
+
+    <div style="gap: 5px; display: flex;">
+        @if (userRole == "Teacher")
+        {
+            <button class="btn btn-primary">Create</button>
+        }
+        <button class="btn btn-primary" @onclick="() => GoToBrowse()">Browse</button>
+    </div>
+</div>
+
+@code {
+    private SearchWord searchWord = new();
+    private string userRole = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            if (userRole == "Teacher")
+            {
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void OnSearchClick()
+    {
+        GoToBrowse(searchWord.word);
+    }
+
+    private void GoToBrowse(string searchWord = "")
+    {
+        const string navigateTo = "/Browse";
+        if (!string.IsNullOrEmpty(searchWord))
+        {
+            NavigationManager.NavigateTo($"{navigateTo}?search={Uri.EscapeDataString(searchWord)}");
+            return;
+        }
+        NavigationManager.NavigateTo(navigateTo);
+    }
+
+    private class SearchWord
+    {
+        public string word = string.Empty;
+    }
+}

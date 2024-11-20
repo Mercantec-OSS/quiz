@@ -3,28 +3,44 @@
 
 <PageTitle>Choose category list</PageTitle>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 mt-2">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">View all</h5>
-                    <p class="card-text">See the full list of categories and sub categories.</p>
-                    <button class="btn btn-primary" @onclick="OpenList">View</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mt-2">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Create new</h5>
-                    <p class="card-text">Categories and sub categories.</p>
-                    <button class="btn btn-primary" @onclick="OpenCreate">Create</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<h3>Categories and under categories</h3>
+
+<Row>
+    <Column ColumnSize="ColumnSize.Is6">
+        <Card>
+            <CardBody>
+                <h5>
+                    <strong>View all</strong>
+                </h5>
+                <Div>
+                    See the full list of categories and sub categories.
+                </Div>
+                <Div Class="mt-1">
+                    <Button Color="Color.Primary" Style="width: 100%" Clicked="OpenCreate">
+                        View
+                    </Button>
+                </Div>
+            </CardBody>
+        </Card>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is6">
+        <Card>
+            <CardBody>
+                <h5>
+                    <strong>Create new</strong>
+                </h5>
+                <Div>
+                    Categories and sub categories.
+                </Div>
+                <Div Class="mt-1">
+                    <Button Color="Color.Primary" Style="width: 100%" Clicked="OpenList">
+                        Create
+                    </Button>
+                </Div>
+            </CardBody>
+        </Card>
+    </Column>
+</Row>
 
 @code {
     private void OpenCreate()

@@ -1,51 +1,49 @@
 ﻿@page "/CategoryList"
+
+@inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Category list</PageTitle>
 
 <h3>CategoryList</h3>
 
-<ul class="list-group my-2">
+<ListGroup Mode="ListGroupMode.Selectable">
     @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
     {
-        <li class="list-group-item @(i % 2 == 1 ? "list-group-item-dark" : "list-group-item-light")"
-            @onclick="() => categoryShowingUnderCategories != category ?
+        <ListGroupItem Name="@category.Category"
+        Clicked="() => categoryShowingUnderCategories != category ?
                 GetSubCategories(category) : ClearSubCategories()">
-            <div>
-                <h4>
-                    @category.Category
-                </h4>
-                @if (categoryShowingUnderCategories == category)
+            <Div Flex="Flex.JustifyContent.Between" Width="Width.Is100">
+                @category.Category
+            </Div>
+            @if (categoryShowingUnderCategories == category)
+            {
+                if (underCategories == null)
                 {
-                    if (underCategories == null)
+                    <Small>
+                        Loading...
+                    </Small>
+                }
+                else
+                {
+                    if (underCategories.Count > 0)
                     {
-                        <p style="border-top: 1px solid gray; padding-top: 10px;">
-                            Loading...
-                        </p>
+                        foreach (UnderCategoriesGetDTO item in underCategories)
+                        {
+                            <Div>
+                                <Small>@item.UnderCategory</Small>
+                            </Div>
+                        }
                     }
                     else
                     {
-                        if (underCategories.Count > 0)
-                        {
-                            foreach (var (item, x) in underCategories.Select((category, index) => (category, index)))
-                            {
-                                <p style="border-top: 1px solid gray; padding-top: 10px;">
-                                    @item.UnderCategory
-                                </p>
-                            }
-                        }
-                        else
-                        {
-                            <p style="border-top: 1px solid gray; padding-top: 10px;">
-                                No Under Category found.
-                            </p>
-                        }
+                        <Small>No Under Category found.</Small>
                     }
                 }
-            </div>
-        </li>
+            }
+        </ListGroupItem>
     }
-</ul>
+</ListGroup>
 
 @if (isLoading)
 {
@@ -61,7 +59,6 @@
     private List<UnderCategoriesGetDTO>? underCategories;
 
     private bool isLoading = false;
-    private string jwt = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -69,8 +66,21 @@
         {
             if (Http == null) return;
             isLoading = true;
+            StateHasChanged();
 
-            jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            if (string.IsNullOrEmpty(userRole) || userRole == "Student")
+            {
+                NavigationManager.NavigateTo("/home");
+                return;
+            }
 
             (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
                 await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
@@ -97,17 +107,16 @@
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
 
+        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         if (Http == null) return;
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
             await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
-                $"api/UnderCategories/CategoryID/{category.ID}",
-                jwt, Http);
+                $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
             underCategories = response ?? new();
         }
-        return;
     }
 }

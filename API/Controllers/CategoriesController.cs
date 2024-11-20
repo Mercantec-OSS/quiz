@@ -1,4 +1,6 @@
-﻿namespace API.Controllers
+﻿using SharedModels.DTO;
+
+namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -16,7 +18,7 @@
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categories>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoriesDTO>>> GetCategories()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -25,12 +27,17 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            return await _context.Categories.ToListAsync();
+            return await _context.Categories.Include(c => c.education).Select(c => new CategoriesDTO
+            {
+                ID = c.ID,
+                Category = c.Category,
+                Education = c.education.Education
+            }).ToListAsync();
         }
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Categories>> GetCategories(int id)
+        public async Task<ActionResult<CategoriesDTO>> GetCategories(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -39,7 +46,15 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            var categories = await _context.Categories.FindAsync(id);
+            var categories = await _context.Categories
+                .Include(c => c.education)
+                .Where(c => c.ID == id)
+                .Select(c => new CategoriesDTO
+                {
+                    ID = c.ID,
+                    Category = c.Category,
+                    Education = c.education.Education
+                }).FirstOrDefaultAsync(); ;
 
             if (categories == null)
             {
@@ -52,7 +67,7 @@
         // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategories(int id, Categories categories)
+        public async Task<IActionResult> PutCategories(int id, CategoriesDTO categories)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -71,7 +86,20 @@
                 return BadRequest();
             }
 
-            _context.Entry(categories).State = EntityState.Modified;
+            var education = await _context.Educations.Where(e => e.Education == categories.Education).FirstOrDefaultAsync();
+            if (education == null)
+            {
+                return NotFound("Education");
+            }
+
+            Categories category = new()
+            {
+                ID = id,
+                Category = categories.Category,
+                education = education,
+            };
+
+            _context.Entry(category).State = EntityState.Modified;
 
             try
             {
@@ -89,7 +117,7 @@
                 }
             }
 
-            return NoContent();
+            return Ok("sucessfully updated");
         }
 
         // POST: api/Categories
@@ -128,7 +156,7 @@
             {
                 ID = categories.ID,
                 Category = categories.Category,
-                EducationID = education.ID,
+                Education = education.Education,
             };
 
             return CreatedAtAction("GetCategories", new { id = categories.ID }, response);

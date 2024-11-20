@@ -16,7 +16,7 @@
 
         // GET: api/Difficulties
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Difficulties>>> GetDifficulties()
+        public async Task<ActionResult<IEnumerable<DifficultiesDTO>>> GetDifficulties()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -25,12 +25,16 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            return await _context.Difficulties.ToListAsync();
+            return await _context.Difficulties.Select(d => new DifficultiesDTO
+            {
+                ID = d.ID,
+                Difficulty = d.Difficulty,
+            }).ToListAsync();
         }
 
         // GET: api/Difficulties/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Difficulties>> GetDifficulties(int id)
+        public async Task<ActionResult<DifficultiesDTO>> GetDifficulties(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -40,7 +44,11 @@
                 return Unauthorized("Invalid Token");
             }
 
-            var difficulties = await _context.Difficulties.FindAsync(id);
+            var difficulties = await _context.Difficulties.Where(d => d.ID == id).Select(d => new DifficultiesDTO
+            {
+                ID = d.ID,
+                Difficulty = d.Difficulty,
+            }).FirstOrDefaultAsync();
 
             if (difficulties == null)
             {
@@ -53,7 +61,7 @@
         // PUT: api/Difficulties/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDifficulties(int id, Difficulties difficulties)
+        public async Task<IActionResult> PutDifficulties(int id, DifficultiesDTO difficulties)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -72,7 +80,13 @@
                 return BadRequest();
             }
 
-            _context.Entry(difficulties).State = EntityState.Modified;
+            Difficulties difficulty = new()
+            {
+                ID = id,
+                Difficulty = difficulties.Difficulty,
+            };
+
+            _context.Entry(difficulty).State = EntityState.Modified;
 
             try
             {
@@ -90,13 +104,13 @@
                 }
             }
 
-            return NoContent();
+            return Ok("sucessfully updated");
         }
 
         // POST: api/Difficulties
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Difficulties>> PostDifficulties(DifficultiesDTO difficultiesDTO)
+        public async Task<ActionResult<DifficultiesDTO>> PostDifficulties(DifficultiesCreateDTO difficultiesCreateDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -112,13 +126,19 @@
 
             Difficulties difficulties = new()
             {
-                Difficulty = difficultiesDTO.Difficulty,
+                Difficulty = difficultiesCreateDTO.Difficulty,
             };
 
             _context.Difficulties.Add(difficulties);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDifficulties", new { id = difficulties.ID }, difficulties);
+            DifficultiesDTO difficultiesDTO = new()
+            {
+                Difficulty = difficulties.Difficulty,
+                ID = difficulties.ID,
+            };
+
+            return CreatedAtAction("GetDifficulties", new { id = difficulties.ID }, difficultiesDTO);
         }
 
         // DELETE: api/Difficulties/5

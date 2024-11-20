@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @code {
@@ -18,56 +17,82 @@
         jwtToken = string.Empty;
         userRole = string.Empty;
     }
+
+    private bool IsUserAllowed()
+    {
+        return userRole == "Teacher";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            jwtToken = await sessionStorage.GetItemAsync<string>("jwt");
+            userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            StateHasChanged();
+        }
+    }
 }
 
 <div class="page">
     <main>
-
-        <div class="top-row px-4">
+        <div class="top-row">
             <div class="main-nav"></div>
 
             @if (!string.IsNullOrEmpty(jwtToken))
             {
-                <div class="dropdown">
-                    <button class="dropbtn">More</button>
-                    <div class="dropdown-content">
+                <Dropdown Direction="Direction.End">
+                    <DropdownToggle Color="Color.Light">Menu</DropdownToggle>
+                    <DropdownMenu Style="z-index: 30;">
+                        <DropdownItem>
+                            <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
+                            </NavLink>
+                        </DropdownItem>
 
+                        <DropdownItem>
+                            <NavLink class="nav-link" href="@(IsUserAllowed() ? "TeacherMyPage" : "MyPage")">
+                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                            </NavLink>
+                        </DropdownItem>
 
-                        <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
-                        </NavLink>
+                        @if (IsUserAllowed())
+                        {
+                            <DropdownItem>
+                                <NavLink class="nav-link" href="create">
+                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav spørgsmål
+                                </NavLink>
+                            </DropdownItem>
 
-                        <NavLink class="nav-link" href="@(userRole == "Teacher" ? "TeacherMyPage" : "MyPage")">
-                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
-                        </NavLink>
+                            <DropdownItem>
+                                <NavLink class="nav-link" href="quiz">
+                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav quiz
+                                </NavLink>
+                            </DropdownItem>
 
-                        <NavLink class="nav-link" href="create">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav spørgsmål
-                        </NavLink>
+                            <DropdownItem>
+                                <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Kategori
+                                </NavLink>
+                            </DropdownItem>
+                        }
 
+                        <DropdownItem>
+                            <NavLink class="nav-link" href="browse">
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
+                            </NavLink>
+                        </DropdownItem>
 
-                        <NavLink class="nav-link" href="quiz">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav quiz
-                        </NavLink>
-
-
-                        <NavLink class="nav-link" href="browse">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
-                        </NavLink>
-
-
-                        <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Kategori
-                        </NavLink>
-
-                        <NavLink class="nav-link" href="/logout">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Log ud
-                        </NavLink>
-                    </div>
-                </div>
+                        <DropdownItem>
+                            <NavLink class="nav-link" href="/logout">
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Log ud
+                            </NavLink>
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             }
 
-            <div class="about">
+            <div class="about mx-2">
                 <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
             </div>
 

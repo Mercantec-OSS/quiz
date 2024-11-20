@@ -1,11 +1,11 @@
-﻿namespace SharedModels.Models;
+﻿namespace SharedModels.DTO;
 
 public class CategoriesDTO
 {
     public int ID { get; set; }
     public string Category { get; set; }
 
-    public int EducationID { get; set; }
+    public string Education { get; set; }
     
 }
 

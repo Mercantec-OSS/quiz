@@ -3,6 +3,7 @@
 @using OfficeOpenXml
 @using System.IO
 
+
 <PageTitle>Create</PageTitle>
 
 <div>
@@ -17,7 +18,6 @@
 
             @* simple drop down menu, very  important *@
             <div class="drop-menu">
-
                 <table>
                     <tr>
                         <td>
@@ -110,9 +110,12 @@
 
 <br />
 
-<div>
-    <h3>Upload spørgsmål fra Excel</h3>
-    <InputFile OnChange="UploadExcel" />
+<div class="button-upload">
+    <h6>Upload spørgsmål fra Excel</h6>
+    <Label for="file-upload" class="upload-button">
+        <i class="fa-solid fa-upload"></i>
+    </Label>
+    <InputFile id="file-upload" style="display: none;" OnChange="UploadExcel" />
 </div>
 
 

@@ -7,15 +7,23 @@
 
 <h3>CategoryList</h3>
 
-<ListGroup Mode="ListGroupMode.Selectable">
+<ListGroup Flush>
     @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
     {
-        <ListGroupItem Name="@category.Category"
-        Clicked="() => categoryShowingUnderCategories != category ?
-                GetSubCategories(category) : ClearSubCategories()">
+        <ListGroupItem >
             <Div Flex="Flex.JustifyContent.Between" Width="Width.Is100">
-                @category.Category
+                <Heading Size="HeadingSize.Is5" Margin="Margin.Is1.FromBottom">
+                    @category.Category
+                </Heading>
+                <Small>
+                    <Button Class="btn" Color="Color.Primary" 
+                        Clicked="() => categoryShowingUnderCategories != category ?
+                            GetSubCategories(category) : ClearSubCategories()">
+                            Show undercategories
+                    </Button>
+                </Small>
             </Div>
+
             @if (categoryShowingUnderCategories == category)
             {
                 if (underCategories == null)

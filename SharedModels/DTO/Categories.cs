@@ -1,4 +1,4 @@
-﻿namespace SharedModels.Models;
+﻿namespace SharedModels.DTO;
 
 public class CategoriesDTO
 {

@@ -4,199 +4,198 @@
 
 <PageTitle>Create Kategori</PageTitle>
 
-<div style="display: flex; align-items: center; flex-direction: column;">
+<Div style="display: flex; align-items: center; flex-direction: column;">
     <h1>Create Kategori</h1>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-        <div class="drop-menu">
-            <table>
-                <tr>
-                    <td>
-                        <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle"
-                                    @onclick="() => ToggleDropdownCategory()">
-                                @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
-                            </button>
-                            <div class="dropdown-menu @dropdownCategory">
-                                <a class="dropdown-item">
-                                    <input type="text" class="form-control" placeholder="Search"
-                                           @oninput="SearchWordChange"
-                                           @bind="searchWord" />
-                                </a>
-                                @foreach (CategoriesDTO category in searchWord == string.Empty
-                                ? categories : categories.Where(c => c.Category.ToLower().Contains(searchWord.ToLower())))
-                                {
-                                    @if (category != selectedCategory)
-                                    {
-                                        <a class="dropdown-item" @onclick="() => SelectCategory(category)">
-                                            @category.Category
-                                        </a>
-                                    }
-                                }
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+    <Div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <Dropdown Display="Display.InlineBlock">
+            <DropdownToggle Color="Color.Primary">
+                @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
+            </DropdownToggle>
+            <DropdownMenu MaxMenuHeight="100px">
+                <DropdownItem>
+                    <input type="text" class="form-control" placeholder="Search"
+                    @oninput="SearchWordChange"
+                    @bind="searchWord" />
+                </DropdownItem>
+                <DropdownDivider />
+                @foreach (CategoriesDTO category in searchWord == string.Empty ?
+                categories : categories.Where(c =>
+                c.Category.ToLower().Contains(searchWord.ToLower())))
+                {
+                    @if (category != selectedCategory)
+                    {
+                        <DropdownItem Clicked="() => SelectCategory(category)">
+                            @category.Category
+                        </DropdownItem>
+                    }
+                }
+            </DropdownMenu>
+        </Dropdown>
 
-        <button class="btn btn-warning" @onclick="() => ToggleEditCategoryModal(selectedCategory)" disabled="@(selectedCategory == null)">
+        <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
+        Clicked="() => ToggleEditCategoryModal(selectedCategory)">
             Edit Kategori
-        </button>
+        </Button>
 
-        <button class="btn btn-success" @onclick="ToggleAddNewCategory">
+        <Button Class="btn btn-success" Clicked="OpenModalAddNewCategory">
             Add Kategori
-        </button>
-    </div>
+        </Button>
+    </Div>
+</Div>
 
-    <div style="min-width: 50%;">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Under Kategori</th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (UnderCategoriesGetDTO underCategory in underCategories)
-                {
-                    <tr>
-                        <td>@underCategory.UnderCategory</td>
-                        <td>
-                            <button class="btn btn-warning"
-                                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
-                                Edit
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn btn-danger"
-                                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                }
-                @if (selectedCategory != null)
-                {
-                    <tr style="border-bottom: hidden">
-                        <td>
-                            <button class="btn btn-primary" @onclick="ToggleAddNewUnderCategory">
-                                Add New Under Category
-                            </button>
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+<Table Striped Resizable ResizeMode="TableResizeMode.Columns">
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>Under Category</TableHeaderCell>
+            <TableHeaderCell>Edit</TableHeaderCell>
+            <TableHeaderCell>Delete</TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+        {
+            <TableRow>
+                <TableRowCell>@underCategory.UnderCategory</TableRowCell>
+                <TableRowCell>
+                    <button class="btn btn-warning"
+                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
+                        Edit
+                    </button>
+                </TableRowCell>
+                <TableRowCell>
+                    <button class="btn btn-danger"
+                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
+                        Delete
+                    </button>
+                </TableRowCell>
+            </TableRow>
+        }
+        @if (selectedCategory != null)
+        {
+            <TableRow>
+                <TableRowCell>
+                    <button class="btn btn-primary" @onclick="OpenModalAddNewUnderCategory">
+                        Add New Under Category
+                    </button>
+                </TableRowCell>
+                <TableRowCell></TableRowCell>
+                <TableRowCell></TableRowCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
 
-@if (addingNewCategories)
-{
-    <div class="model custom-modal">
-        <h4>New kategori</h4>
-        <div class="m-1">
-            <input type="text" @bind="newCategory" />
-        </div>
-        <div class="m-1 Split">
-            <button class="btn btn-primary" @onclick="AddNewCategory">Save</button>
-            <button class="btn btn-outline-dark" @onclick="ToggleAddNewCategory">Close</button>
-        </div>
-    </div>
+<Modal @ref="modalAddNewCategory">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Add new category</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <TextEdit @bind-Text="newCategory" Placeholder="Enter category..." />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalAddNewCategory)">Close</Button>
+            <Button Color="Color.Primary" Clicked="AddNewCategory">Save</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="ToggleAddNewCategory" class="modal-overlay"></div>
-}
+<Modal @ref="modalAddNewUnderCategory">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Add new under category</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <TextEdit @bind-Text="newUnderCategory" Placeholder="Enter under category..." />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalAddNewUnderCategory)">Close</Button>
+            <Button Color="Color.Primary" Clicked="AddNewUnderCategory">Save</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-@if (addingNewUnderCategories)
-{
-    <div class="model custom-modal">
-        <h4>New under kategori</h4>
-        <div class="m-1">
-            <input type="text" @bind="newUnderCategory" />
-        </div>
-        <div class="m-1 Split">
-            <button class="btn btn-primary" @onclick="AddNewUnderCategory">Save</button>
-            <button class="btn btn-outline-dark" @onclick="ToggleAddNewUnderCategory">Close</button>
-        </div>
-    </div>
+<Modal @ref="modalEditCategory">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Edit category</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <TextEdit @bind-Text="editCategoryText" Placeholder="Enter category..." />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalEditCategory)">Close</Button>
+            <Button Color="Color.Primary" Clicked="SaveEditedCategory">Save</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="ToggleAddNewUnderCategory" class="modal-overlay"></div>
-}
+<Modal @ref="modalEditUnderCategory">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Edit under category</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <TextEdit @bind-Text="editUnderCategoryText" Placeholder="Enter under category..." />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalEditUnderCategory)">Close</Button>
+            <Button Color="Color.Primary" Clicked="SaveEditedUnderCategory">Save</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-@if (editCategory != null)
-{
-    <div class="model custom-modal">
-        <h4>Edit kategori</h4>
-        <div class="m-1">
-            <input type="text" @bind="editCategoryText" />
-        </div>
-        <div class="m-1 Split">
-            <button class="btn btn-primary" @onclick="SaveEditedCategory">Save</button>
-            <button class="btn btn-outline-dark" @onclick="() => ToggleEditCategoryModal()">Close</button>
-        </div>
-    </div>
+<Modal @ref="modalDeleteConfirmation">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Are you sure you want to  delete this under kategori?</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            You can't undo this action.
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalDeleteConfirmation)">Cancel</Button>
+            <Button Color="Color.Primary" Clicked="DeleteConfirmed">Delete</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="() => ToggleEditCategoryModal()" class="modal-overlay"></div>
-}
+<Modal @ref="modalErrorHappened">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>An error happened</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalErrorHappened)">Ok</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
-@if (editUnderCategory != null)
-{
-    <div class="model custom-modal">
-        <h4>Edit under kategori</h4>
-        <div class="m-1">
-            <input type="text" @bind="editUnderCategoryText" />
-        </div>
-        <div class="m-1 Split">
-            <button class="btn btn-primary" @onclick="SaveEditedUnderCategory">Save</button>
-            <button class="btn btn-outline-dark" @onclick="() => ToggleEditUnderCategoryModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="() => ToggleEditUnderCategoryModal()" class="modal-overlay"></div>
-}
-
-@if (underCategoryToBeDeleted != null)
-{
-    <div class="model custom-modal">
-        <h4>Are you sure you want to  delete this under kategori?</h4>
-        <p>You can't undo this action.</p>
-        <div class="m-1 Split">
-            <button class="btn btn-primary" @onclick="DeleteConfirmed">Delete</button>
-            <button class="btn btn-outline-dark" @onclick="() => ToggleDeleteConfirmation()">Close</button>
-        </div>
-    </div>
-
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="() => ToggleDeleteConfirmation()" class="modal-overlay"></div>
-}
-
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
 
     private CategoriesDTO? selectedCategory = null;
     private List<CategoriesDTO> categories = new();
-    private string dropdownCategory = string.Empty;
-
     private List<UnderCategoriesGetDTO> underCategories = new();
 
-    private bool addingNewCategories = false;
     private string newCategory = string.Empty;
-
-    private bool addingNewUnderCategories = false;
     private string newUnderCategory = string.Empty;
 
     private string editCategoryText = string.Empty;
@@ -208,8 +207,14 @@
     private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
 
     private string searchWord = string.Empty;
+    private LoadingSpinner? loading;
+    private Modal? modalErrorHappened;
 
-    private bool isLoading = false;
+    private Modal? modalAddNewCategory;
+    private Modal? modalAddNewUnderCategory;
+    private Modal? modalEditCategory;
+    private Modal? modalEditUnderCategory;
+    private Modal? modalDeleteConfirmation;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -219,12 +224,11 @@
             if (string.IsNullOrEmpty(jwt))
             {
                 NavigationManager.NavigateTo("/");
+                return;
             }
 
             if (Http == null) return;
-            isLoading = true;
-            StateHasChanged();
-
+            loading?.Start();
 
             (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
                 await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
@@ -233,9 +237,12 @@
             {
                 categories = response ?? new();
             }
+            else
+            {
+                modalErrorHappened?.Show();
+            }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 
@@ -244,26 +251,29 @@
         searchWord = e.Value?.ToString() ?? string.Empty;
     }
 
-    private void ToggleDropdownCategory()
-    {
-        dropdownCategory = dropdownCategory == "" ? "show" : "";
-    }
+    private void CloseModal(Modal? modal) => modal?.Hide();
 
-    private void ToggleAddNewCategory()
+    private void OpenModalAddNewCategory()
     {
         newCategory = string.Empty;
-        addingNewCategories = !addingNewCategories;
+        modalAddNewCategory?.Show();
     }
 
-    private void ToggleAddNewUnderCategory()
+    private void OpenModalAddNewUnderCategory()
     {
         newUnderCategory = string.Empty;
-        addingNewUnderCategories = !addingNewUnderCategories;
+        modalAddNewUnderCategory?.Show();
     }
 
     private void ToggleDeleteConfirmation(UnderCategoriesGetDTO? underCategory = null)
     {
         underCategoryToBeDeleted = underCategory;
+        if (underCategoryToBeDeleted == null)
+        {
+            modalDeleteConfirmation?.Hide();
+            return;
+        }
+        modalDeleteConfirmation?.Show();
     }
 
     private void ToggleEditCategoryModal(CategoriesDTO? category = null)
@@ -271,6 +281,13 @@
         editCategory = category;
         editCategoryText = editCategory != null
             ? editCategory.Category : string.Empty;
+
+        if (editCategory == null)
+        {
+            modalEditCategory?.Hide();
+            return;
+        }
+        modalEditCategory?.Show();
     }
 
     private void ToggleEditUnderCategoryModal(UnderCategoriesGetDTO? underCategory = null)
@@ -278,15 +295,21 @@
         editUnderCategory = underCategory;
         editUnderCategoryText = editUnderCategory != null
             ? editUnderCategory.UnderCategory : string.Empty;
+
+        if (editUnderCategory == null)
+        {
+            modalEditUnderCategory?.Hide();
+            return;
+        }
+        modalEditUnderCategory?.Show();
     }
 
     private async Task SelectCategory(CategoriesDTO category)
     {
         selectedCategory = category;
-        ToggleDropdownCategory();
 
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
@@ -297,32 +320,47 @@
         {
             underCategories = response ?? new();
         }
+        else
+        {
+            modalErrorHappened?.Show();
+        }
 
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task SaveEditedCategory()
     {
-        if (Http == null || editCategory == null)
+        if (Http == null || this.editCategory == null)
         {
             ToggleEditCategoryModal();
             return;
         }
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-        editCategory.Category = editCategoryText;
-        try
+
+        CategoriesDTO editCategory = new()
+            {
+                ID = this.editCategory.ID,
+                Category = editCategoryText,
+                Education = this.editCategory.Education
+            };
+
+        (HttpStatusCode statusCode, CategoriesDTO? response) =
+           await HttpHandler.PutAsync<CategoriesDTO>(
+               $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
+
+        if (statusCode == HttpStatusCode.OK)
         {
-            (HttpStatusCode statusCode, CategoriesDTO? response) =
-               await HttpHandler.PutAsync<CategoriesDTO>(
-                   $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
+            this.editCategory.Category = editCategoryText;
         }
-        catch (Exception)
-        { }
+        else
+        {
+            modalErrorHappened?.Show();
+        }
 
         ToggleEditCategoryModal();
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task SaveEditedUnderCategory()
@@ -333,20 +371,21 @@
             return;
         }
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         editUnderCategory.UnderCategory = editUnderCategoryText;
-        try
+
+        HttpStatusCode statusCode =
+           await HttpHandler.PutAsync(
+               $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
+
+        if (statusCode != HttpStatusCode.OK)
         {
-            (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
-               await HttpHandler.PutAsync<UnderCategoriesGetDTO>(
-                   $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
+            modalErrorHappened?.Show();
         }
-        catch (Exception)
-        { }
 
         ToggleEditUnderCategoryModal();
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task DeleteConfirmed()
@@ -354,7 +393,7 @@
         if (Http == null || underCategoryToBeDeleted == null)
             return;
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
@@ -363,19 +402,23 @@
         {
             underCategories.Remove(underCategoryToBeDeleted);
         }
+        else
+        {
+            modalErrorHappened?.Show();
+        }
 
-        underCategoryToBeDeleted = null;
-        isLoading = false;
+        ToggleDeleteConfirmation();
+        loading?.Stop();
     }
 
     private async Task AddNewCategory()
     {
-        addingNewCategories = !addingNewCategories;
+        CloseModal(modalAddNewCategory);
         string newCategoryText = this.newCategory;
         this.newCategory = string.Empty;
 
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         CategoryCreateDTO newCategory = new()
@@ -390,29 +433,27 @@
 
         if (statusCode == HttpStatusCode.Created && response != null)
         {
-            CategoriesDTO newCategoryFromDB = new()
-                {
-                    ID = response.ID,
-                    Category = response.Category,
-                    EducationID = response.EducationID
-                };
-
-            selectedCategory = newCategoryFromDB;
-            categories.Add(newCategoryFromDB);
+            selectedCategory = response;
+            categories.Add(response);
             underCategories.Clear();
         }
-        isLoading = false;
+        else
+        {
+            modalErrorHappened?.Show();
+        }
+
+        loading?.Stop();
     }
 
     private async Task AddNewUnderCategory()
     {
-        addingNewUnderCategories = !addingNewUnderCategories;
+        CloseModal(modalAddNewUnderCategory);
         string newUnderCategory = this.newUnderCategory;
         this.newUnderCategory = string.Empty;
 
         if (selectedCategory == null) return;
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         UnderCategoriesCreateDTO newUnderCategories = new()
@@ -421,19 +462,19 @@
                 CategoryID = selectedCategory.ID
             };
 
-        (HttpStatusCode statusCode, string response) =
-                await HttpHandler.PostAsync(
+        (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
+                await HttpHandler.PostAsync<UnderCategoriesGetDTO>(
                     $"api/UnderCategories", newUnderCategories, jwt, Http);
 
-        if (statusCode == HttpStatusCode.Created)
+        if (statusCode == HttpStatusCode.Created && response != null)
         {
-            UnderCategoriesGetDTO? dTO = HttpHandler.Deserialize<UnderCategoriesGetDTO>(response);
-            if (dTO != null)
-            {
-                underCategories.Add(dTO);
-            }
+            underCategories.Add(response);
+        }
+        else
+        {
+            modalErrorHappened?.Show();
         }
 
-        isLoading = false;
+        loading?.Stop();
     }
 }

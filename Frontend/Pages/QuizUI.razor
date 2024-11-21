@@ -69,16 +69,11 @@ else
     }
 }
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
     private string pageTitle = "Quiz ui";
     private bool ready = false;
     private int quizID;
@@ -113,9 +108,7 @@ else
             }
 
             if (Http == null) return;
-
-            isLoading = true;
-            StateHasChanged();
+            loading?.Start();
 
             // Getting the quiz id from the url, if it's invalid redirect to browse.
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -163,8 +156,7 @@ else
                 timer.Elapsed += OnTimedEvent;
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 
@@ -272,7 +264,7 @@ else
             return;
         }
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
@@ -330,7 +322,6 @@ else
             throw new Exception();
         }
 
-        isLoading = false;
-        StateHasChanged();
+        loading?.Stop();
     }
 }

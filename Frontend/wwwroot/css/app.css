@@ -181,7 +181,7 @@ code {
     width: 100vw;
     height: 100vh;
     background-color: rgba(255, 255, 255, 0.7);
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .spinner {

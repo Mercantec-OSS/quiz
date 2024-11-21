@@ -1,0 +1,27 @@
+﻿@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+}
+
+@code {
+    private bool isLoading = false;
+
+    public void Start()
+    {
+        isLoading = true;
+        StateHasChanged();
+    }
+
+    public void Stop()
+    {
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public bool IsLoading()
+    {
+        return isLoading;
+    }
+}

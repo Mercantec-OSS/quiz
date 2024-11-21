@@ -343,7 +343,7 @@
             {
                 ID = this.editCategory.ID,
                 Category = editCategoryText,
-                EducationID = this.editCategory.EducationID
+                Education = this.editCategory.Education
             };
 
         (HttpStatusCode statusCode, CategoriesDTO? response) =
@@ -433,15 +433,8 @@
 
         if (statusCode == HttpStatusCode.Created && response != null)
         {
-            CategoriesDTO newCategoryFromDB = new()
-                {
-                    ID = response.ID,
-                    Category = response.Category,
-                    EducationID = response.EducationID
-                };
-
-            selectedCategory = newCategoryFromDB;
-            categories.Add(newCategoryFromDB);
+            selectedCategory = response;
+            categories.Add(response);
             underCategories.Clear();
         }
         else

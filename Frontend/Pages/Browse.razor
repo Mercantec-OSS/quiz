@@ -68,7 +68,7 @@
     </Column>
 </Row>
 
-@if (isLoading)
+@if (loading?.IsLoading() ?? false)
 {
     <p>
         Loading...
@@ -108,12 +108,7 @@ else
     </Row>
 }
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
@@ -131,7 +126,7 @@ else
     private string dropdownCategory = string.Empty;
     private string dropdownDifficuly = string.Empty;
 
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -146,8 +141,7 @@ else
 
             if (Http == null) return;
 
-            isLoading = true;
-            StateHasChanged();
+            loading?.Start();
 
             string searchWord = "";
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -189,8 +183,7 @@ else
                 this.difficulties = difficulty.Keys.ToList();
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 

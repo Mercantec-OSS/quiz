@@ -128,13 +128,7 @@
     <div @onclick="ToggleCreatedConfirmed" class="modal-overlay"></div>
 }
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
-
+<LoadingSpinner @ref="loading" />
 
 @code {
     public class QuestionModel
@@ -185,9 +179,9 @@
     private List<DifficultiesDTO> difficulties = new();
     private List<CategoriesDTO> categories = new();
     private List<UnderCategoriesGetDTO> underCategories = new();
-    
+
     private bool createdQuestions = false;
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
 
     private const int MaxQuestions = 25;
     // private int nextQuestionId = 1;
@@ -203,6 +197,7 @@
         if (firstRender)
         {
             string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            loading?.Start();
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultiesDTO>? getDifficulties) =
                await HttpHandler.GetAsync<List<DifficultiesDTO>>("api/Difficulties", Jwt, Http);
@@ -228,8 +223,7 @@
                 underCategories.AddRange(getUnderCategories ?? new());
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 
@@ -262,7 +256,7 @@
     // save questions to database, to save for other use
     private async Task SaveQuestions()
     {
-        isLoading = true;
+        loading?.Start();
 
         foreach (QuestionHandling question in questionsHandler)
         {
@@ -339,8 +333,7 @@
         }
         questionsHandler.Clear();
         ToggleCreatedConfirmed();
-        isLoading = false;
-        StateHasChanged();
+        loading?.Stop();
     }
 
 

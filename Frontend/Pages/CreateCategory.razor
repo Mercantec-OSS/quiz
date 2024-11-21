@@ -15,8 +15,8 @@
             <DropdownMenu MaxMenuHeight="100px">
                 <DropdownItem>
                     <input type="text" class="form-control" placeholder="Search"
-                           @oninput="SearchWordChange"
-                           @bind="searchWord" />
+                    @oninput="SearchWordChange"
+                    @bind="searchWord" />
                 </DropdownItem>
                 <DropdownDivider />
                 @foreach (CategoriesDTO category in searchWord == string.Empty ?
@@ -34,7 +34,7 @@
         </Dropdown>
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
-            Clicked="() => ToggleEditCategoryModal(selectedCategory)">
+        Clicked="() => ToggleEditCategoryModal(selectedCategory)">
             Edit Kategori
         </Button>
 
@@ -59,13 +59,13 @@
                 <TableRowCell>@underCategory.UnderCategory</TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-warning"
-                            @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
+                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
                         Edit
                     </button>
                 </TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-danger"
-                            @onclick="() => ToggleDeleteConfirmation(underCategory)">
+                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
                         Delete
                     </button>
                 </TableRowCell>
@@ -186,12 +186,7 @@
     </ModalContent>
 </Modal>
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
@@ -212,7 +207,7 @@
     private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
 
     private string searchWord = string.Empty;
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
     private Modal? modalErrorHappened;
 
     private Modal? modalAddNewCategory;
@@ -233,9 +228,7 @@
             }
 
             if (Http == null) return;
-            isLoading = true;
-            StateHasChanged();
-
+            loading?.Start();
 
             (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
                 await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
@@ -249,8 +242,7 @@
                 modalErrorHappened?.Show();
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 
@@ -317,7 +309,7 @@
         selectedCategory = category;
 
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
@@ -333,7 +325,7 @@
             modalErrorHappened?.Show();
         }
 
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task SaveEditedCategory()
@@ -344,8 +336,7 @@
             return;
         }
 
-        isLoading = true;
-        StateHasChanged();
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         CategoriesDTO editCategory = new()
@@ -369,8 +360,7 @@
         }
 
         ToggleEditCategoryModal();
-        isLoading = false;
-        StateHasChanged();
+        loading?.Stop();
     }
 
     private async Task SaveEditedUnderCategory()
@@ -381,7 +371,7 @@
             return;
         }
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         editUnderCategory.UnderCategory = editUnderCategoryText;
 
@@ -395,7 +385,7 @@
         }
 
         ToggleEditUnderCategoryModal();
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task DeleteConfirmed()
@@ -403,7 +393,7 @@
         if (Http == null || underCategoryToBeDeleted == null)
             return;
 
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
@@ -418,7 +408,7 @@
         }
 
         ToggleDeleteConfirmation();
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task AddNewCategory()
@@ -428,7 +418,7 @@
         this.newCategory = string.Empty;
 
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         CategoryCreateDTO newCategory = new()
@@ -459,7 +449,7 @@
             modalErrorHappened?.Show();
         }
 
-        isLoading = false;
+        loading?.Stop();
     }
 
     private async Task AddNewUnderCategory()
@@ -470,7 +460,7 @@
 
         if (selectedCategory == null) return;
         if (Http == null) return;
-        isLoading = true;
+        loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
         UnderCategoriesCreateDTO newUnderCategories = new()
@@ -492,6 +482,6 @@
             modalErrorHappened?.Show();
         }
 
-        isLoading = false;
+        loading?.Stop();
     }
 }

@@ -17,9 +17,9 @@
                 </Heading>
                 <Small>
                     <Button Class="btn" Color="Color.Primary" 
-                        Clicked="() => categoryShowingUnderCategories != category ?
+                    Clicked="() => categoryShowingUnderCategories != category ?
                             GetSubCategories(category) : ClearSubCategories()">
-                            Show undercategories
+                        Show undercategories
                     </Button>
                 </Small>
             </Div>
@@ -53,28 +53,21 @@
     }
 </ListGroup>
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
     private List<CategoriesDTO> categories = new();
     private CategoriesDTO? categoryShowingUnderCategories;
     private List<UnderCategoriesGetDTO>? underCategories;
-
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             if (Http == null) return;
-            isLoading = true;
-            StateHasChanged();
+            loading?.Start();
 
             string jwt = await sessionStorage.GetItemAsync<string>("jwt");
             if (string.IsNullOrEmpty(jwt))
@@ -98,8 +91,7 @@
                 categories = response ?? new();
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 

@@ -4,10 +4,10 @@
 
 <PageTitle>Create Kategori</PageTitle>
 
-<div style="display: flex; align-items: center; flex-direction: column;">
+<Div style="display: flex; align-items: center; flex-direction: column;">
     <h1>Create Kategori</h1>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+    <Div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
         <Dropdown Display="Display.InlineBlock">
             <DropdownToggle Color="Color.Primary">
                 @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
@@ -33,15 +33,16 @@
             </DropdownMenu>
         </Dropdown>
 
-        <button class="btn btn-warning" @onclick="() => ToggleEditCategoryModal(selectedCategory)" disabled="@(selectedCategory == null)">
+        <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
+            Clicked="() => ToggleEditCategoryModal(selectedCategory)">
             Edit Kategori
-        </button>
+        </Button>
 
-        <button class="btn btn-success" @onclick="OpenModalAddNewCategory">
+        <Button Class="btn btn-success" Clicked="OpenModalAddNewCategory">
             Add Kategori
-        </button>
-    </div>
-</div>
+        </Button>
+    </Div>
+</Div>
 
 <Table Striped Resizable ResizeMode="TableResizeMode.Columns">
     <TableHeader>

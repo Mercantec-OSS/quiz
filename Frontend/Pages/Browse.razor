@@ -8,91 +8,67 @@
 
 <PageTitle>Browse</PageTitle>
 
-<div class="Split">
-    <h2>Browse</h2>
+<Row>
+    <Column ColumnSize="ColumnSize.Is2">
+        <h2>Browse</h2>
+    </Column>
 
-    <div class="MyPageCardGab">
-        <div class="drop-menu">
-            <table>
-                <tr>
-                    <td>
-                        <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle dropdown-width"
-                                    @onclick="() => ToggleDropdownCreator()">
-                                @(selectedCreators == null ? "Filter by creators" : selectedCreators)
-                            </button>
-                            <div class="dropdown-menu @dropdownCreator">
-                                <a class="dropdown-item" @onclick="() => SelectCreator(null)">
-                                    Remove filter
-                                </a>
-                                @foreach (string creator in creators)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectCreator(creator)">
-                                        @creator
-                                    </a>
-                                }
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+    <Column Class="mx-1" ColumnSize="ColumnSize.Is2">
+        <Dropdown Display="Display.InlineBlock">
+            <DropdownToggle Color="Color.Primary">
+                @(selectedCreators == null ? "Filter by creators" : selectedCreators)
+            </DropdownToggle>
+            <DropdownMenu MaxMenuHeight="100px">
+                <DropdownItem Clicked="() => SelectCreator(null)">Remove filter</DropdownItem>
+                <DropdownDivider />
+                @foreach (string creator in creators)
+                {
+                    <DropdownItem Clicked="() => SelectCreator(creator)">
+                        @creator
+                    </DropdownItem>
+                }
+            </DropdownMenu>
+        </Dropdown>
+    </Column>
 
-        <div class="drop-menu">
-            <table>
-                <tr>
-                    <td>
-                        <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle dropdown-width"
-                                    @onclick="() => ToggleDropdownCategory()">
-                                @(selectedCategory == null ? "Filter by Kategori" : selectedCategory)
-                            </button>
-                            <div class="dropdown-menu @dropdownCategory">
-                                <a class="dropdown-item" @onclick="() => SelectCategory(null)">
-                                    Remove filter
-                                </a>
-                                @foreach (string category in categories)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectCategory(category)">
-                                        @category
-                                    </a>
-                                }
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+    <Column Class="mx-1" ColumnSize="ColumnSize.Is2">
+        <Dropdown Display="Display.InlineBlock">
+            <DropdownToggle Color="Color.Primary">
+                @(selectedCategory == null ? "Filter by Kategori" : selectedCategory)
+            </DropdownToggle>
+            <DropdownMenu MaxMenuHeight="100px">
+                <DropdownItem Clicked="() => SelectCategory(null)">Remove filter</DropdownItem>
+                <DropdownDivider />
+                @foreach (string category in categories)
+                {
+                    <DropdownItem Clicked="() => SelectCategory(category)">
+                        @category
+                    </DropdownItem>
+                }
+            </DropdownMenu>
+        </Dropdown>
+    </Column>
 
-        <div class="drop-menu">
-            <table>
-                <tr>
-                    <td>
-                        <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle dropdown-width"
-                                    @onclick="() => ToggleDropdownDifficulty()">
-                                @(selectedDifficulty == null ? "Filter by difficulty" : selectedDifficulty)
-                            </button>
-                            <div class="dropdown-menu @dropdownDifficuly">
-                                <a class="dropdown-item" @onclick="() => SelectDifficulty(null)">
-                                    Remove filter
-                                </a>
-                                @foreach (string difficulty in difficulties)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectDifficulty(difficulty)">
-                                        @difficulty
-                                    </a>
-                                }
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
+    <Column Class="mx-1" ColumnSize="ColumnSize.Is2">
+        <Dropdown Display="Display.InlineBlock">
+            <DropdownToggle Color="Color.Primary">
+                @(selectedDifficulty == null ? "Filter by difficulty" : selectedDifficulty)
+            </DropdownToggle>
+            <DropdownMenu MaxMenuHeight="100px">
+                <DropdownItem Clicked="() => SelectDifficulty(null)">Remove filter</DropdownItem>
+                <DropdownDivider />
+                @foreach (string difficulty in difficulties)
+                {
+                    <DropdownItem Clicked="() => SelectDifficulty(difficulty)">
+                        @difficulty
+                    </DropdownItem>
+                }
+            </DropdownMenu>
+        </Dropdown>
+    </Column>
+</Row>
 
-@if (isLoading)
+@if (loading?.IsLoading() ?? false)
 {
     <p>
         Loading...
@@ -100,45 +76,39 @@
 }
 else
 {
-    <div class="row my-1">
+    <Row HorizontalGutter="10" VerticalGutter="10">
         @foreach (QuizDTO quiz in Sort())
         {
-            <div class="col-md-4 p-1">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <div class="Split">
-                            <h3 class="card-title">@quiz.Title</h3>
-                            <h4 class="text-end">@quiz.Creator</h4>
-                        </div>
-                        <div class="MyPageCardGab">
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Category: @quiz.Category</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Difficulty: @quiz.Difficulty</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Questions: @quiz.QestionsAmount</p>
-                            </div>
-                        </div>
-                        <div class="pt-2 MyPageCardGab">
-                            <button class="MyPageCustomBox btn btn-primary" @onclick="() => StartQuiz(quiz.ID ?? 0)">
-                                <p class="card-text">Start</p>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Column ColumnSize="ColumnSize.Is4">
+                <Card>
+                    <CardHeader>
+                        <strong>@quiz.Title</strong>
+                    </CardHeader>
+                    <CardBody>
+                        <Row>
+                            <Column>
+                                Category: @quiz.Category
+                            </Column>
+                            <Column>
+                                Difficulty: @quiz.Difficulty
+                            </Column>
+                            <Column>
+                                Questions: @quiz.QestionsAmount
+                            </Column>
+                        </Row>
+                    </CardBody>
+                    <CardFooter>
+                        <Button Color="Color.Primary" Style="width: 100%" Clicked="() => StartQuiz(quiz.ID ?? 0)">
+                            Start
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </Column>
         }
-    </div>
+    </Row>
 }
 
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
@@ -156,7 +126,7 @@ else
     private string dropdownCategory = string.Empty;
     private string dropdownDifficuly = string.Empty;
 
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -171,8 +141,7 @@ else
 
             if (Http == null) return;
 
-            isLoading = true;
-            StateHasChanged();
+            loading?.Start();
 
             string searchWord = "";
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -181,10 +150,7 @@ else
                 searchWord = dataValue.ToArray()[0] ?? "";
             }
 
-            Dictionary<string, string> parameters = new()
-            {
-                {"searchWord", searchWord}
-            };
+            Dictionary<string, string> parameters = new() { {"searchWord", searchWord} };
 
             (HttpStatusCode statusCode, List<QuizDTO>? response) =
                 await HttpHandler.GetAsync<List<QuizDTO>>(
@@ -217,44 +183,14 @@ else
                 this.difficulties = difficulty.Keys.ToList();
             }
 
-            isLoading = false;
-            StateHasChanged();
+            loading?.Stop();
         }
     }
 
-    private void ToggleDropdownCreator()
-    {
-        dropdownCreator = dropdownCreator == "" ? "show" : "";
-    }
-
-    private void ToggleDropdownCategory()
-    {
-        dropdownCategory = dropdownCategory == "" ? "show" : "";
-    }
-
-    private void ToggleDropdownDifficulty()
-    {
-        dropdownDifficuly = dropdownDifficuly == "" ? "show" : "";
-    }
-
-    private void SelectCreator(string? creator)
-    {
-        selectedCreators = creator;
-        StateHasChanged();
-    }
-
-    private void SelectCategory(string? category)
-    {
-        selectedCategory = category;
-        StateHasChanged();
-    }
-
-    private void SelectDifficulty(string? difficult)
-    {
-        selectedDifficulty = difficult;
-        StateHasChanged();
-    }
-
+    private void SelectCreator(string? creator) => selectedCreators = creator;
+    private void SelectCategory(string? category) => selectedCategory = category;
+    private void SelectDifficulty(string? difficult) => selectedDifficulty = difficult;
+    
     private List<QuizDTO> Sort()
     {
         List<QuizDTO> quizzes = new();
@@ -298,13 +234,5 @@ else
         }
 
         NavigationManager.NavigateTo($"/quiz_ui?quiz_id={Uri.EscapeDataString(quizID.ToString())}");
-    }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
 }

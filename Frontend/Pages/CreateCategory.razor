@@ -190,6 +190,7 @@
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
 
     private CategoriesDTO? selectedCategory = null;
     private List<CategoriesDTO> categories = new();
@@ -220,14 +221,11 @@
     {
         if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
+
+            string jwt = await jWTokenHandler.GetToken();
+
             loading?.Start();
 
             (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
@@ -365,7 +363,7 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || editUnderCategory == null)
+        if (Http == null || this.editUnderCategory == null)
         {
             ToggleEditUnderCategoryModal();
             return;
@@ -373,13 +371,22 @@
 
         loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-        editUnderCategory.UnderCategory = editUnderCategoryText;
+
+        UnderCategoriesGetDTO editUnderCategory = new()
+            {
+                ID = this.editUnderCategory.ID,
+                UnderCategory = this.editUnderCategory.UnderCategory,
+            };
 
         HttpStatusCode statusCode =
            await HttpHandler.PutAsync(
                $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
 
-        if (statusCode != HttpStatusCode.OK)
+        if (statusCode == HttpStatusCode.OK)
+        {
+            this.editUnderCategory.UnderCategory = editUnderCategory.UnderCategory;
+        }
+        else
         {
             modalErrorHappened?.Show();
         }

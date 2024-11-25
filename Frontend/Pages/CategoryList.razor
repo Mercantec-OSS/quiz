@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Category list</PageTitle>
 
 <h3>CategoryList</h3>
@@ -57,6 +58,7 @@
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
     private List<CategoriesDTO> categories = new();
     private CategoriesDTO? categoryShowingUnderCategories;
     private List<UnderCategoriesGetDTO>? underCategories;
@@ -67,16 +69,12 @@
         if (firstRender)
         {
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
+
             loading?.Start();
-
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
+            string jwt = await jWTokenHandler.GetToken();
             string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            
             if (string.IsNullOrEmpty(userRole) || userRole == "Student")
             {
                 NavigationManager.NavigateTo("/home");
@@ -107,8 +105,9 @@
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
 
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+        string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
             await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(

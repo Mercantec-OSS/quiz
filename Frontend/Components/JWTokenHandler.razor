@@ -1,0 +1,23 @@
+﻿@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
+
+@code {
+    private string jwt = string.Empty;
+
+    public async Task<string> GetToken()
+    {
+        // If jwt is empty, fetch it from sessionStorage
+        if (string.IsNullOrEmpty(jwt))
+        {
+            jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            if (string.IsNullOrEmpty(jwt))
+            {
+                // If no JWT exists, navigate to the login page
+                NavigationManager.NavigateTo("/");
+                return string.Empty; // Return empty string as a fallback
+            }
+        }
+
+        return jwt; // Return the valid JWT
+    }
+}

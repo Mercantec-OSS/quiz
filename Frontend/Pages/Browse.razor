@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.WebUtilities;
 @using System.Collections.Generic
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Browse</PageTitle>
 
 <Row>
@@ -112,6 +113,7 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
     private List<QuizDTO> allQuizzes = new();
 
     private List<string> creators = new();
@@ -132,18 +134,13 @@ else
     {
         if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
 
+            string jwt = await jWTokenHandler.GetToken();
+            string searchWord = "";
             loading?.Start();
 
-            string searchWord = "";
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out var dataValue))
             {
@@ -181,6 +178,7 @@ else
                 this.creators = creators.Keys.ToList();
                 this.categories = categories.Keys.ToList();
                 this.difficulties = difficulty.Keys.ToList();
+                StateHasChanged();
             }
 
             loading?.Stop();

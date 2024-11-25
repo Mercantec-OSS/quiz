@@ -1,6 +1,6 @@
 ﻿namespace SharedModels.DTO;
 
-public class RolesDTO
+public class RoleDTO
 {
     public string Role { get; set; }
 }

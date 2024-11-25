@@ -18,7 +18,7 @@ namespace API.Controllers
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoriesDTO>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -27,7 +27,7 @@ namespace API.Controllers
             {
                 return Unauthorized("Invalid Token");
             }
-            return await _context.Categories.Include(c => c.education).Select(c => new CategoriesDTO
+            return await _context.Categories.Include(c => c.education).Select(c => new CategoryDTO
             {
                 ID = c.ID,
                 Category = c.Category,
@@ -37,7 +37,7 @@ namespace API.Controllers
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CategoriesDTO>> GetCategories(int id)
+        public async Task<ActionResult<CategoryDTO>> GetCategories(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -49,7 +49,7 @@ namespace API.Controllers
             var categories = await _context.Categories
                 .Include(c => c.education)
                 .Where(c => c.ID == id)
-                .Select(c => new CategoriesDTO
+                .Select(c => new CategoryDTO
                 {
                     ID = c.ID,
                     Category = c.Category,
@@ -67,7 +67,7 @@ namespace API.Controllers
         // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategories(int id, CategoriesDTO categories)
+        public async Task<IActionResult> PutCategories(int id, CategoryDTO categories)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -123,7 +123,7 @@ namespace API.Controllers
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CategoriesDTO>> PostCategories(CategoryCreateDTO categoriesDTO)
+        public async Task<ActionResult<CategoryDTO>> PostCategories(CategoryCreateDTO categoriesDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -152,7 +152,7 @@ namespace API.Controllers
             _context.Categories.Add(categories);
             await _context.SaveChangesAsync();
 
-            CategoriesDTO response = new()
+            CategoryDTO response = new()
             {
                 ID = categories.ID,
                 Category = categories.Category,

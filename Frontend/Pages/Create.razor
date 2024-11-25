@@ -25,7 +25,7 @@
                                     @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                                 </button>
                                 <div class="dropdown-menu scrollable-dropdown @question.dropdownCategory">
-                                    @foreach (CategoriesDTO category in categories)
+                                    @foreach (CategoryDTO category in categories)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
                                     }
@@ -39,7 +39,7 @@
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </button>
                                 <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
-                                    @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
                                     }
@@ -52,7 +52,7 @@
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </button>
                                 <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
-                                    @foreach (DifficultiesDTO difficulty in difficulties)
+                                    @foreach (DifficultyDTO difficulty in difficulties)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
                                     }
@@ -164,22 +164,22 @@
         public QuestionModel? questionModel;
 
         //public category dropdown
-        public CategoriesDTO? selectedCategory;
+        public CategoryDTO? selectedCategory;
         public string dropdownCategory = "";
 
         //Public undercategory dropdown
-        public UnderCategoriesGetDTO? selectedUnderCategory;
+        public UnderCategoryGetDTO? selectedUnderCategory;
         public string dropdownUnderCategory = "";
 
         //Public difficulty dropdown
-        public DifficultiesDTO? selectedDifficulty;
+        public DifficultyDTO? selectedDifficulty;
         public string dropdownDifficulty = "";
     }
 
-    private List<DifficultiesDTO> difficulties = new();
-    private List<CategoriesDTO> categories = new();
-    private List<UnderCategoriesGetDTO> underCategories = new();
-
+    private List<DifficultyDTO> difficulties = new();
+    private List<CategoryDTO> categories = new();
+    private List<UnderCategoryGetDTO> underCategories = new();
+    
     private bool createdQuestions = false;
     private LoadingSpinner? loading;
 
@@ -199,24 +199,24 @@
             string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
             loading?.Start();
 
-            (HttpStatusCode statusCodeDifficulties, List<DifficultiesDTO>? getDifficulties) =
-               await HttpHandler.GetAsync<List<DifficultiesDTO>>("api/Difficulties", Jwt, Http);
+            (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
+               await HttpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
                 difficulties.AddRange(getDifficulties ?? new());
             }
 
-            (HttpStatusCode statusCodeCategories, List<CategoriesDTO>? getCategories) =
-               await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", Jwt, Http);
+            (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
+               await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
 
             if (statusCodeCategories == HttpStatusCode.OK)
             {
                 categories.AddRange(getCategories ?? new());
             }
 
-            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoriesGetDTO>? getUnderCategories) =
-               await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>("api/UnderCategories", Jwt, Http);
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
+               await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt, Http);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
@@ -362,7 +362,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectCategory(CategoriesDTO item, QuestionHandling questionHandling)
+    private void SelectCategory(CategoryDTO item, QuestionHandling questionHandling)
     {
         questionHandling.selectedCategory = item;
         questionHandling.dropdownCategory = ""; // Hide the dropdown
@@ -379,7 +379,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectUnderCategory(UnderCategoriesGetDTO item1, QuestionHandling underCategoryHandling)
+    private void SelectUnderCategory(UnderCategoryGetDTO item1, QuestionHandling underCategoryHandling)
     {
         underCategoryHandling.selectedUnderCategory = item1;
         underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
@@ -397,7 +397,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectDifficulties(DifficultiesDTO difficulties, QuestionHandling difficultyHandling)
+    private void SelectDifficulties(DifficultyDTO difficulties, QuestionHandling difficultyHandling)
     {
         difficultyHandling.selectedDifficulty = difficulties;
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown

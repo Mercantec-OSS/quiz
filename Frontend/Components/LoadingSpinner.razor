@@ -1,4 +1,4 @@
-﻿@if (isLoading)
+﻿@if (loading)
 {
     <div class="spinner-container">
         <div class="spinner"></div>
@@ -6,22 +6,28 @@
 }
 
 @code {
-    private bool isLoading = false;
+    private bool loading = false;
+    public bool isLoading 
+    {
+        private set 
+        {
+            loading = value;
+        }
+        get 
+        {
+            return loading;
+        } 
+    }
 
     public void Start()
     {
-        isLoading = true;
+        loading = true;
         StateHasChanged();
     }
 
     public void Stop()
     {
-        isLoading = false;
+        loading = false;
         StateHasChanged();
-    }
-
-    public bool IsLoading()
-    {
-        return isLoading;
     }
 }

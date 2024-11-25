@@ -1,7 +1,6 @@
 ﻿@page "/createCategory"
-@inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Create Kategori</PageTitle>
 
 <Div style="display: flex; align-items: center; flex-direction: column;">
@@ -308,8 +307,10 @@
         selectedCategory = category;
 
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
                 await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
@@ -329,14 +330,14 @@
 
     private async Task SaveEditedCategory()
     {
-        if (Http == null || this.editCategory == null)
+        if (Http == null || this.editCategory == null || jWTokenHandler == null)
         {
             ToggleEditCategoryModal();
             return;
         }
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         CategoryDTO editCategory = new()
             {
@@ -364,14 +365,14 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || this.editUnderCategory == null)
+        if (Http == null || this.editUnderCategory == null || jWTokenHandler == null)
         {
             ToggleEditUnderCategoryModal();
             return;
         }
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         UnderCategoryGetDTO editUnderCategory = new()
             {
@@ -398,11 +399,11 @@
 
     private async Task DeleteConfirmed()
     {
-        if (Http == null || underCategoryToBeDeleted == null)
+        if (Http == null || underCategoryToBeDeleted == null || jWTokenHandler == null)
             return;
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
 
@@ -426,8 +427,10 @@
         this.newCategory = string.Empty;
 
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         CategoryCreateDTO newCategory = new()
             {
@@ -461,8 +464,10 @@
 
         if (selectedCategory == null) return;
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         UnderCategoryCreateDTO newUnderCategories = new()
             {

@@ -192,20 +192,21 @@
     [Inject] public HttpClient? Http { get; set; }
     private JWTokenHandler? jWTokenHandler;
 
-    private CategoriesDTO? selectedCategory = null;
-    private List<CategoriesDTO> categories = new();
-    private List<UnderCategoriesGetDTO> underCategories = new();
+    private CategoryDTO? selectedCategory = null;
+    private List<CategoryDTO> categories = new();
+
+    private List<UnderCategoryGetDTO> underCategories = new();
 
     private string newCategory = string.Empty;
     private string newUnderCategory = string.Empty;
 
     private string editCategoryText = string.Empty;
-    private CategoriesDTO? editCategory = null;
+    private CategoryDTO? editCategory = null;
 
     private string editUnderCategoryText = string.Empty;
-    private UnderCategoriesGetDTO? editUnderCategory = null;
+    private UnderCategoryGetDTO? editUnderCategory = null;
 
-    private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
+    private UnderCategoryGetDTO? underCategoryToBeDeleted = null;
 
     private string searchWord = string.Empty;
     private LoadingSpinner? loading;
@@ -228,8 +229,8 @@
 
             loading?.Start();
 
-            (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
-                await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
+            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
+                await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -263,7 +264,7 @@
         modalAddNewUnderCategory?.Show();
     }
 
-    private void ToggleDeleteConfirmation(UnderCategoriesGetDTO? underCategory = null)
+    private void ToggleDeleteConfirmation(UnderCategoryGetDTO? underCategory = null)
     {
         underCategoryToBeDeleted = underCategory;
         if (underCategoryToBeDeleted == null)
@@ -274,7 +275,7 @@
         modalDeleteConfirmation?.Show();
     }
 
-    private void ToggleEditCategoryModal(CategoriesDTO? category = null)
+    private void ToggleEditCategoryModal(CategoryDTO? category = null)
     {
         editCategory = category;
         editCategoryText = editCategory != null
@@ -288,7 +289,7 @@
         modalEditCategory?.Show();
     }
 
-    private void ToggleEditUnderCategoryModal(UnderCategoriesGetDTO? underCategory = null)
+    private void ToggleEditUnderCategoryModal(UnderCategoryGetDTO? underCategory = null)
     {
         editUnderCategory = underCategory;
         editUnderCategoryText = editUnderCategory != null
@@ -302,7 +303,7 @@
         modalEditUnderCategory?.Show();
     }
 
-    private async Task SelectCategory(CategoriesDTO category)
+    private async Task SelectCategory(CategoryDTO category)
     {
         selectedCategory = category;
 
@@ -310,8 +311,8 @@
         loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
-                await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+                await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
                     $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -434,8 +435,8 @@
                 EducationID = 1,
             };
 
-        (HttpStatusCode statusCode, CategoriesDTO? response) =
-           await HttpHandler.PostAsync<CategoriesDTO>(
+        (HttpStatusCode statusCode, CategoryDTO? response) =
+           await HttpHandler.PostAsync<CategoryDTO>(
                $"api/Categories", newCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)
@@ -463,7 +464,7 @@
         loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        UnderCategoriesCreateDTO newUnderCategories = new()
+        UnderCategoryCreateDTO newUnderCategories = new()
             {
                 UnderCategory = newUnderCategory,
                 CategoryID = selectedCategory.ID

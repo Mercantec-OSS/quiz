@@ -16,7 +16,7 @@
 
         // GET: api/Difficulties
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DifficultiesDTO>>> GetDifficulties()
+        public async Task<ActionResult<IEnumerable<DifficultyDTO>>> GetDifficulties()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -25,7 +25,7 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            return await _context.Difficulties.Select(d => new DifficultiesDTO
+            return await _context.Difficulties.Select(d => new DifficultyDTO
             {
                 ID = d.ID,
                 Difficulty = d.Difficulty,
@@ -34,7 +34,7 @@
 
         // GET: api/Difficulties/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DifficultiesDTO>> GetDifficulties(int id)
+        public async Task<ActionResult<DifficultyDTO>> GetDifficulties(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -44,7 +44,7 @@
                 return Unauthorized("Invalid Token");
             }
 
-            var difficulties = await _context.Difficulties.Where(d => d.ID == id).Select(d => new DifficultiesDTO
+            var difficulties = await _context.Difficulties.Where(d => d.ID == id).Select(d => new DifficultyDTO
             {
                 ID = d.ID,
                 Difficulty = d.Difficulty,
@@ -61,7 +61,7 @@
         // PUT: api/Difficulties/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDifficulties(int id, DifficultiesDTO difficulties)
+        public async Task<IActionResult> PutDifficulties(int id, DifficultyDTO difficulties)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -110,7 +110,7 @@
         // POST: api/Difficulties
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DifficultiesDTO>> PostDifficulties(DifficultiesCreateDTO difficultiesCreateDTO)
+        public async Task<ActionResult<DifficultyDTO>> PostDifficulties(DifficultyCreateDTO difficultiesCreateDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -132,7 +132,7 @@
             _context.Difficulties.Add(difficulties);
             await _context.SaveChangesAsync();
 
-            DifficultiesDTO difficultiesDTO = new()
+            DifficultyDTO difficultiesDTO = new()
             {
                 Difficulty = difficulties.Difficulty,
                 ID = difficulties.ID,

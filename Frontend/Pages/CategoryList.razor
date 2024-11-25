@@ -59,9 +59,9 @@
 @code {
     [Inject] public HttpClient? Http { get; set; }
     private JWTokenHandler? jWTokenHandler;
-    private List<CategoriesDTO> categories = new();
-    private CategoriesDTO? categoryShowingUnderCategories;
-    private List<UnderCategoriesGetDTO>? underCategories;
+    private List<CategoryDTO> categories = new();
+    private CategoryDTO? categoryShowingUnderCategories;
+    private List<UnderCategoryGetDTO>? underCategories;
     private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -81,8 +81,8 @@
                 return;
             }
 
-            (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
-                await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
+            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
+                await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -100,7 +100,7 @@
         return Task.CompletedTask;
     }
 
-    private async Task GetSubCategories(CategoriesDTO category)
+    private async Task GetSubCategories(CategoryDTO category)
     {
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
@@ -109,9 +109,10 @@
         if (jWTokenHandler == null) return;
         string jwt = await jWTokenHandler.GetToken();
 
-        (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
-            await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
-                $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+            await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
+                $"api/UnderCategories/CategoryID/{category.ID}",
+                jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {

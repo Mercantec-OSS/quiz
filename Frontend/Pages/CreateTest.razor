@@ -25,7 +25,7 @@
                                     @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownCategory">
-                                    @foreach (CategoriesDTO category in categories)
+                                    @foreach (CategoryDTO category in categories)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
                                     }
@@ -39,7 +39,7 @@
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownUnderCategory">
-                                    @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
                                     }
@@ -52,7 +52,7 @@
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </button>
                                 <div class="dropdown-menu @question.dropdownDifficulty">
-                                    @foreach (DifficultiesDTO difficulty in difficulties)
+                                    @foreach (DifficultyDTO difficulty in difficulties)
                                     {
                                         <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
                                     }
@@ -179,24 +179,24 @@
         public QuestionModel? questionModel;
 
         //public category dropdown
-        public CategoriesDTO? selectedCategory;
+        public CategoryDTO? selectedCategory;
         public string dropdownCategory = "";
 
         //Public undercategory dropdown
-        public UnderCategoriesGetDTO? selectedUnderCategory;
+        public UnderCategoryGetDTO? selectedUnderCategory;
         public string dropdownUnderCategory = "";
 
         //Public difficulty dropdown
-        public DifficultiesDTO? selectedDifficulty;
+        public DifficultyDTO? selectedDifficulty;
         public string dropdownDifficulty = "";
     }
 
     private readonly HttpClient _httpClient = new();
 
 
-    private List<DifficultiesDTO> difficulties = new();
-    private List<CategoriesDTO> categories = new();
-    private List<UnderCategoriesGetDTO> underCategories = new();
+    private List<DifficultyDTO> difficulties = new();
+    private List<CategoryDTO> categories = new();
+    private List<UnderCategoryGetDTO> underCategories = new();
 
     private const int MaxQuestions = 25;
     // private int nextQuestionId = 1;
@@ -208,19 +208,19 @@
     //getting info from API/DB
     protected override async Task OnInitializedAsync()
     {
-        var getDifficulties = await _httpClient.GetFromJsonAsync<List<DifficultiesDTO>>($"https://mercantec-quiz.onrender.com/api/Difficulties");
+        var getDifficulties = await _httpClient.GetFromJsonAsync<List<DifficultyDTO>>($"https://mercantec-quiz.onrender.com/api/Difficulties");
         if (getDifficulties != null)
         {
             difficulties.AddRange(getDifficulties);
         }
 
-        var getCategories = await _httpClient.GetFromJsonAsync<List<CategoriesDTO>>($"https://mercantec-quiz.onrender.com/api/Categories");
+        var getCategories = await _httpClient.GetFromJsonAsync<List<CategoryDTO>>($"https://mercantec-quiz.onrender.com/api/Categories");
         if (getCategories != null)
         {
             categories.AddRange(getCategories);
         }
 
-        var getUnderCategories = await _httpClient.GetFromJsonAsync<List<UnderCategoriesGetDTO>>($"https://mercantec-quiz.onrender.com/api/UnderCategories");
+        var getUnderCategories = await _httpClient.GetFromJsonAsync<List<UnderCategoryGetDTO>>($"https://mercantec-quiz.onrender.com/api/UnderCategories");
         if (getUnderCategories != null)
         {
             underCategories.AddRange(getUnderCategories);
@@ -350,7 +350,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectCategory(CategoriesDTO item, QuestionHandling questionHandling)
+    private void SelectCategory(CategoryDTO item, QuestionHandling questionHandling)
     {
         questionHandling.selectedCategory = item;
         questionHandling.dropdownCategory = ""; // Hide the dropdown
@@ -367,7 +367,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectUnderCategory(UnderCategoriesGetDTO item1, QuestionHandling underCategoryHandling)
+    private void SelectUnderCategory(UnderCategoryGetDTO item1, QuestionHandling underCategoryHandling)
     {
         underCategoryHandling.selectedUnderCategory = item1;
         underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
@@ -385,7 +385,7 @@
     }
 
     // Set the selected item and close the dropdown
-    private void SelectDifficulties(DifficultiesDTO difficulties, QuestionHandling difficultyHandling)
+    private void SelectDifficulties(DifficultyDTO difficulties, QuestionHandling difficultyHandling)
     {
         difficultyHandling.selectedDifficulty = difficulties;
         difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown

@@ -1,6 +1,6 @@
 ﻿namespace SharedModels.DTO;
 
-public class EducationsDTO
+public class EducationDTO
 {
     public string Education { get; set; }
 }

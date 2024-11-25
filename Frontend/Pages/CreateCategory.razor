@@ -23,7 +23,7 @@
                                            @oninput="SearchWordChange"
                                            @bind="searchWord" />
                                 </a>
-                                @foreach (CategoriesDTO category in searchWord == string.Empty
+                                @foreach (CategoryDTO category in searchWord == string.Empty
                                 ? categories : categories.Where(c => c.Category.ToLower().Contains(searchWord.ToLower())))
                                 {
                                     @if (category != selectedCategory)
@@ -59,7 +59,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+                @foreach (UnderCategoryGetDTO underCategory in underCategories)
                 {
                     <tr>
                         <td>@underCategory.UnderCategory</td>
@@ -187,11 +187,11 @@
 @code {
     [Inject] public HttpClient? Http { get; set; }
 
-    private CategoriesDTO? selectedCategory = null;
-    private List<CategoriesDTO> categories = new();
+    private CategoryDTO? selectedCategory = null;
+    private List<CategoryDTO> categories = new();
     private string dropdownCategory = string.Empty;
 
-    private List<UnderCategoriesGetDTO> underCategories = new();
+    private List<UnderCategoryGetDTO> underCategories = new();
 
     private bool addingNewCategories = false;
     private string newCategory = string.Empty;
@@ -200,12 +200,12 @@
     private string newUnderCategory = string.Empty;
 
     private string editCategoryText = string.Empty;
-    private CategoriesDTO? editCategory = null;
+    private CategoryDTO? editCategory = null;
 
     private string editUnderCategoryText = string.Empty;
-    private UnderCategoriesGetDTO? editUnderCategory = null;
+    private UnderCategoryGetDTO? editUnderCategory = null;
 
-    private UnderCategoriesGetDTO? underCategoryToBeDeleted = null;
+    private UnderCategoryGetDTO? underCategoryToBeDeleted = null;
 
     private string searchWord = string.Empty;
 
@@ -226,8 +226,8 @@
             StateHasChanged();
 
 
-            (HttpStatusCode statusCode, List<CategoriesDTO>? response) =
-                await HttpHandler.GetAsync<List<CategoriesDTO>>("api/Categories", jwt, Http);
+            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
+                await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -261,26 +261,26 @@
         addingNewUnderCategories = !addingNewUnderCategories;
     }
 
-    private void ToggleDeleteConfirmation(UnderCategoriesGetDTO? underCategory = null)
+    private void ToggleDeleteConfirmation(UnderCategoryGetDTO? underCategory = null)
     {
         underCategoryToBeDeleted = underCategory;
     }
 
-    private void ToggleEditCategoryModal(CategoriesDTO? category = null)
+    private void ToggleEditCategoryModal(CategoryDTO? category = null)
     {
         editCategory = category;
         editCategoryText = editCategory != null
             ? editCategory.Category : string.Empty;
     }
 
-    private void ToggleEditUnderCategoryModal(UnderCategoriesGetDTO? underCategory = null)
+    private void ToggleEditUnderCategoryModal(UnderCategoryGetDTO? underCategory = null)
     {
         editUnderCategory = underCategory;
         editUnderCategoryText = editUnderCategory != null
             ? editUnderCategory.UnderCategory : string.Empty;
     }
 
-    private async Task SelectCategory(CategoriesDTO category)
+    private async Task SelectCategory(CategoryDTO category)
     {
         selectedCategory = category;
         ToggleDropdownCategory();
@@ -289,8 +289,8 @@
         isLoading = true;
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        (HttpStatusCode statusCode, List<UnderCategoriesGetDTO>? response) =
-                await HttpHandler.GetAsync<List<UnderCategoriesGetDTO>>(
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+                await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
                     $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -314,8 +314,8 @@
         editCategory.Category = editCategoryText;
         try
         {
-            (HttpStatusCode statusCode, CategoriesDTO? response) =
-               await HttpHandler.PutAsync<CategoriesDTO>(
+            (HttpStatusCode statusCode, CategoryDTO? response) =
+               await HttpHandler.PutAsync<CategoryDTO>(
                    $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
         }
         catch (Exception)
@@ -338,8 +338,8 @@
         editUnderCategory.UnderCategory = editUnderCategoryText;
         try
         {
-            (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
-               await HttpHandler.PutAsync<UnderCategoriesGetDTO>(
+            (HttpStatusCode statusCode, UnderCategoryGetDTO? response) =
+               await HttpHandler.PutAsync<UnderCategoryGetDTO>(
                    $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
         }
         catch (Exception)
@@ -384,13 +384,13 @@
                 EducationID = 1,
             };
 
-        (HttpStatusCode statusCode, CategoriesDTO? response) =
-           await HttpHandler.PostAsync<CategoriesDTO>(
+        (HttpStatusCode statusCode, CategoryDTO? response) =
+           await HttpHandler.PostAsync<CategoryDTO>(
                $"api/Categories", newCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)
         {
-            CategoriesDTO newCategoryFromDB = new()
+            CategoryDTO newCategoryFromDB = new()
                 {
                     ID = response.ID,
                     Category = response.Category,
@@ -415,7 +415,7 @@
         isLoading = true;
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        UnderCategoriesCreateDTO newUnderCategories = new()
+        UnderCategoryCreateDTO newUnderCategories = new()
             {
                 UnderCategory = newUnderCategory,
                 CategoryID = selectedCategory.ID
@@ -427,7 +427,7 @@
 
         if (statusCode == HttpStatusCode.Created)
         {
-            UnderCategoriesGetDTO? dTO = HttpHandler.Deserialize<UnderCategoriesGetDTO>(response);
+            UnderCategoryGetDTO? dTO = HttpHandler.Deserialize<UnderCategoryGetDTO>(response);
             if (dTO != null)
             {
                 underCategories.Add(dTO);

@@ -56,7 +56,7 @@
         }
 
         [HttpGet("CategoryID/{id}")]
-        public async Task<ActionResult<IEnumerable<UnderCategoriesGetDTO>>> GetUnderCategoriesByCategoryID(int id)
+        public async Task<ActionResult<IEnumerable<UnderCategoryGetDTO>>> GetUnderCategoriesByCategoryID(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -69,7 +69,7 @@
             var underCategories = await _context.UnderCategories
                 .Include(u => u.category)
                 .Where(u => u.category.ID == id)
-                .Select(u => new UnderCategoriesGetDTO
+                .Select(u => new UnderCategoryGetDTO
                 {
                     ID = u.ID,
                     UnderCategory = u.UnderCategory,
@@ -129,7 +129,7 @@
         // POST: api/UnderCategories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoriesCreateDTO underCategoriesDTO)
+        public async Task<ActionResult<UnderCategories>> PostUnderCategories(UnderCategoryCreateDTO underCategoriesDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);

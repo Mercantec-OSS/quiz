@@ -276,8 +276,8 @@ else
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
-        (HttpStatusCode statusCodeDifficulties, List<DifficultiesDTO>? difficulties) =
-                await HttpHandler.GetAsync<List<DifficultiesDTO>>(
+        (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
+                await HttpHandler.GetAsync<List<DifficultyDTO>>(
                     $"/api/Difficulties", jwt, Http);
         if (statusCodeDifficulties != HttpStatusCode.OK)
         {
@@ -285,7 +285,7 @@ else
             return;
         }
 
-        DifficultiesDTO? quizDifficulty = difficulties?.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
+        DifficultyDTO? quizDifficulty = difficulties?.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
         if (quizDifficulty == null)
         {
             NavigationManager.NavigateTo("/home");
@@ -296,7 +296,7 @@ else
         {
             if (answeredCorrectly[i] ?? false)
             {
-                DifficultiesDTO? questionDifficulty = difficulties?
+                DifficultyDTO? questionDifficulty = difficulties?
                     .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
 
                 if (questionDifficulty == null)

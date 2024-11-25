@@ -22,14 +22,14 @@
 
         <div class="form-group p-1">
             <InputText placeholder="Enter your Username" class="form-control"
-                       @bind-Value="loginRequest.username" @oninput="ClearErrorMessage" />
+            @bind-Value="loginRequest.username" @oninput="ClearErrorMessage" />
 
             <ValidationMessage For="@(() => loginRequest.username)" />
         </div>
 
         <div class="form-group p-1">
             <InputText placeholder="Enter your password" class="form-control" type="password"
-                       @bind-Value="loginRequest.password" @oninput="ClearErrorMessage" />
+            @bind-Value="loginRequest.password" @oninput="ClearErrorMessage" />
 
             <ValidationMessage For="@(() => loginRequest.password)" />
         </div>
@@ -40,34 +40,18 @@
     </EditForm>
 </div>
 
-<Dropdown>
-    <DropdownToggle Color="Color.Primary">
-        Dropdown
-    </DropdownToggle>
-    <DropdownMenu>
-        <DropdownItem>Action</DropdownItem>
-        <DropdownDivider />
-        <DropdownItem>Another Action</DropdownItem>
-    </DropdownMenu>
-</Dropdown>
-
-@if (isLoading)
-{
-    <div class="spinner-container">
-        <div class="spinner"></div>
-    </div>
-}
+<LoadingSpinner @ref="loading" />
 
 @code {
     private LoginModel loginRequest = new();
-    private bool isLoading = false;
     private string ErrorMessage = string.Empty;
     [Inject] public HttpClient? Http { get; set; }
+    private LoadingSpinner? loading;
 
     // Method to handle login
     private async Task HandleLogin()
     {
-        isLoading = true;
+        loading?.Start();
         try
         {
             if (Http == null) return;
@@ -114,7 +98,7 @@
         }
         finally
         {
-            isLoading = false;
+            loading?.Stop();
         }
     }
 

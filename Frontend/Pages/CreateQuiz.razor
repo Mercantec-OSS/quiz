@@ -122,8 +122,6 @@
         @* this is where the list is being displayed/made *@
         @if (question.Questions != null && question.Questions.Any())
         {
-            Console.WriteLine($"Questions Count: {Questions.Count}");
-
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -344,8 +342,6 @@
         if (statusCode == HttpStatusCode.Created)
         {
             //successfully made quiz
-            Console.WriteLine("Quiz created correctly");
-
             //Retrive the quiz details if returned in the response
             SaveQuizMessage = "Quiz gemt succesfuldt";
         }

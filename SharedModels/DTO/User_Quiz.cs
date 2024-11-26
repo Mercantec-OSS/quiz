@@ -57,7 +57,7 @@ public class User_QuizQuizInfoDTO
 {
     public DateTime QuizEndDate { get; set; }
 
-    // This is used to flag indicate if the quiz is completed
+    // This is used to indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
     // This is used to check the results of the quiz's

@@ -22,7 +22,7 @@
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RolesDTO>> GetRoles(int id)
+        public async Task<ActionResult<RoleDTO>> GetRoles(int id)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -42,7 +42,7 @@
             {
                 return NotFound();
             }
-            RolesDTO rolesDTO = new RolesDTO()
+            RoleDTO rolesDTO = new RoleDTO()
             {
                 Role = roles.Role
             };
@@ -53,7 +53,7 @@
         // PUT: api/Roles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRoles(int id, RolesDTO roles)
+        public async Task<IActionResult> PutRoles(int id, RoleDTO roles)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -91,7 +91,7 @@
         // POST: api/Roles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Roles>> PostRoles(RolesDTO rolesDTO)
+        public async Task<ActionResult<Roles>> PostRoles(RoleDTO rolesDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);

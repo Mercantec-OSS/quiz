@@ -1,6 +1,6 @@
 ﻿namespace SharedModels.DTO;
 
-public class CategoriesDTO
+public class CategoryDTO
 {
     public int ID { get; set; }
     public string Category { get; set; }

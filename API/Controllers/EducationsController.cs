@@ -96,7 +96,7 @@
         // POST: api/Educations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Educations>> PostEducations(EducationsDTO educationsDTO)
+        public async Task<ActionResult<Educations>> PostEducations(EducationDTO educationsDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);

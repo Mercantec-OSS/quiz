@@ -1,6 +1,7 @@
 ﻿@page "/quiz"
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+
 <h3>Quiz</h3>
 
 <div>
@@ -63,7 +64,7 @@
                                     @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (CategoriesDTO category in categories)
+                                    @foreach (CategoryDTO category in categories)
                                     {
                                         <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
                                     }
@@ -78,7 +79,7 @@
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
                                     {
                                         <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
                                     }
@@ -93,7 +94,7 @@
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (DifficultiesDTO difficulty in difficulties)
+                                    @foreach (DifficultyDTO difficulty in difficulties)
                                     {
                                         <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
                                     }

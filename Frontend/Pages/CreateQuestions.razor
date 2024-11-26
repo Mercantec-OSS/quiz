@@ -26,7 +26,7 @@
                                     @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (CategoriesDTO category in categories)
+                                    @foreach (CategoryDTO category in categories)
                                     {
                                         <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
                                     }
@@ -39,7 +39,7 @@
                                     @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
                                 </DropdownToggle>
                                 <DropdownMenu  MaxMenuHeight="100px">
-                                    @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
                                     {
                                         <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
                                     }
@@ -52,7 +52,7 @@
                                     @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (DifficultiesDTO difficulty in difficulties)
+                                    @foreach (DifficultyDTO difficulty in difficulties)
                                     {
                                         <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
                                     }
@@ -167,13 +167,13 @@
         public QuestionModel? questionModel;
 
         //public category dropdown
-        public CategoriesDTO? selectedCategory;
+        public CategoryDTO? selectedCategory;
 
         //Public undercategory dropdown
-        public UnderCategoriesGetDTO? selectedUnderCategory;
+        public UnderCategoryGetDTO? selectedUnderCategory;
 
         //Public difficulty dropdown
-        public DifficultiesDTO? selectedDifficulty;
+        public DifficultyDTO? selectedDifficulty;
     }
 
     private List<DifficultyDTO> difficulties = new();

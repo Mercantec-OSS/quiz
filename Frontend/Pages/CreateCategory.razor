@@ -19,7 +19,7 @@
                     @bind="searchWord" />
                 </DropdownItem>
                 <DropdownDivider />
-                @foreach (CategoriesDTO category in searchWord == string.Empty ?
+                @foreach (CategoryDTO category in searchWord == string.Empty ?
                 categories : categories.Where(c =>
                 c.Category.ToLower().Contains(searchWord.ToLower())))
                 {
@@ -53,7 +53,7 @@
         </TableRow>
     </TableHeader>
     <TableBody>
-        @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+        @foreach (UnderCategoryGetDTO underCategory in underCategories)
         {
             <TableRow>
                 <TableRowCell>@underCategory.UnderCategory</TableRowCell>
@@ -340,15 +340,15 @@
         loading?.Start();
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
-        CategoriesDTO editCategory = new()
+        CategoryDTO editCategory = new()
             {
                 ID = this.editCategory.ID,
                 Category = editCategoryText,
                 Education = this.editCategory.Education
             };
 
-        (HttpStatusCode statusCode, CategoriesDTO? response) =
-           await HttpHandler.PutAsync<CategoriesDTO>(
+        (HttpStatusCode statusCode, CategoryDTO? response) =
+           await HttpHandler.PutAsync<CategoryDTO>(
                $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -463,8 +463,8 @@
                 CategoryID = selectedCategory.ID
             };
 
-        (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
-                await HttpHandler.PostAsync<UnderCategoriesGetDTO>(
+        (HttpStatusCode statusCode, UnderCategoryGetDTO? response) =
+                await HttpHandler.PostAsync<UnderCategoryGetDTO>(
                     $"api/UnderCategories", newUnderCategories, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)

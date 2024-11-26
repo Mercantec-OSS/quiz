@@ -36,7 +36,7 @@
                 {
                     if (underCategories.Count > 0)
                     {
-                        foreach (UnderCategoriesGetDTO item in underCategories)
+                        foreach (UnderCategoryGetDTO item in underCategories)
                         {
                             <Div>
                                 <Small>@item.UnderCategory</Small>
@@ -61,7 +61,7 @@
     private CategoryDTO? categoryShowingUnderCategories;
     private List<UnderCategoryGetDTO>? underCategories;
 
-    private bool isLoading = false;
+    private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

@@ -218,3 +218,34 @@ code {
         border-radius: 8px;
         background-color: #f9f9f9;
     }
+
+.scrollable-dropdown {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+    .scrollable-dropdown::-webkit-scrollbar {
+        width: 8px;
+    }
+
+.upload-button {
+    display: inline-block;
+    cursor: pointer;
+    width: 100px;
+    background-color: #0B6EC2;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+    .upload-button:hover {
+        background-color: #0A58CA;
+    }
+
+    .upload-button i {
+        margin-right: 5px;
+    }

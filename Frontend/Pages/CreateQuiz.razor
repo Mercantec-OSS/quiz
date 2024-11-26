@@ -1,6 +1,7 @@
 ﻿@page "/quiz"
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+
 <h3>Quiz</h3>
 
 <div>
@@ -8,39 +9,46 @@
     <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%" />
 </div>
 
+
+
 <table>
     <tr>
         <td>
             <div>
                 <label for="mainCategory"></label>
-                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainCategoryDropdown">
-                    @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
-                </button>
-                <div class="dropdown-menu scrollable-dropdown @(mainCategoryDropdownVisible ? "show" : "")">
-                    @foreach (var category in categories)
-                    {
-                        <a class="dropdown-item" @onclick="() => SelectMainCategory(category)">@category.Category</a>
-                    }
-                </div>
+                <Dropdown Display="Display.InlineBlock">
+                    <DropdownToggle Color="Color.Primary">
+                        @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
+                    </DropdownToggle>
+                    <DropdownMenu MaxMenuHeight="100px">
+                        @foreach (var category in categories)
+                        {
+                            <DropdownItem @onclick="() => SelectMainCategory(category)">@category.Category</DropdownItem>
+                        }
+                    </DropdownMenu>
+                </Dropdown>
             </div>
         </td>
 
         <td>
             <div>
                 <label for="mainDifficulty"></label>
-                <button class="btn btn-primary dropdown-toggle" @onclick="ToggleMainDifficultyDropdown">
-                    @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
-                </button>
-                <div class="dropdown-menu scrollable-dropdown @(mainDifficultyDropdownVisible ? "show" : "")">
-                    @foreach (var difficulty in difficulties)
-                    {
-                        <a class="dropdown-item" @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</a>
-                    }
-                </div>
+                <Dropdown Display="Display.InlineBlock">
+                    <DropdownToggle Color="Color.Primary">
+                        @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+                    </DropdownToggle>
+                    <DropdownMenu MaxMenuHeight="100px">
+                        @foreach (var difficulty in difficulties)
+                        {
+                            <DropdownItem @onclick="() => SelectMainDifficulty(difficulty)">@difficulty.Difficulty</DropdownItem>
+                        }
+                    </DropdownMenu>
+                </Dropdown>
             </div>
         </td>
     </tr>
 </table>
+
 
 <div>
     @foreach (var question in CategoriesHandler)
@@ -51,42 +59,47 @@
                 <tr>
                     <td>
                         <div class="dropdown-categories">
-                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownCategory (question)">
-                                @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
-                            </button>
-                            <div class="dropdown-menu scrollable-dropdown @question.dropdownCategory">
-                                @foreach (CategoryDTO category in categories)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectCategory(category, question)">@category.Category</a>
-                                }
-                            </div>
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
+                                    @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
+                                </DropdownToggle>
+                                <DropdownMenu MaxMenuHeight="100px">
+                                    @foreach (CategoryDTO category in categories)
+                                    {
+                                        <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
+                                    }
+                                </DropdownMenu>
+                            </Dropdown>
                         </div>
                     </td>
                     <td>
-
                         <div class="dropdown-underCategories">
-                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownUnderCategory (question)">
-                                @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
-                            </button>
-                            <div class="dropdown-menu scrollable-dropdown @question.dropdownUnderCategory">
-                                @foreach (UnderCategoryGetDTO underCategory in underCategories)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</a>
-                                }
-                            </div>
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
+                                    @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
+                                </DropdownToggle>
+                                <DropdownMenu MaxMenuHeight="100px">
+                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
+                                    {
+                                        <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
+                                    }
+                                </DropdownMenu>
+                            </Dropdown>
                         </div>
                     </td>
                     <td>
                         <div class="dropdown-difficulties">
-                            <button class="btn btn-primary dropdown-toggle" @onclick="() => ToggleDropdownDifficulties (question)">
-                                @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
-                            </button>
-                            <div class="dropdown-menu scrollable-dropdown @question.dropdownDifficulty">
-                                @foreach (DifficultyDTO difficulty in difficulties)
-                                {
-                                    <a class="dropdown-item" @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</a>
-                                }
-                            </div>
+                            <Dropdown Display="Display.InlineBlock">
+                                <DropdownToggle Color="Color.Primary">
+                                    @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
+                                </DropdownToggle>
+                                <DropdownMenu MaxMenuHeight="100px">
+                                    @foreach (DifficultyDTO difficulty in difficulties)
+                                    {
+                                        <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
+                                    }
+                                </DropdownMenu>
+                            </Dropdown>
                         </div>
                     </td>
                     <td>
@@ -110,8 +123,6 @@
         @* this is where the list is being displayed/made *@
         @if (question.Questions != null && question.Questions.Any())
         {
-            Console.WriteLine($"Questions Count: {Questions.Count}");
-
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -332,8 +343,6 @@
         if (statusCode == HttpStatusCode.Created)
         {
             //successfully made quiz
-            Console.WriteLine("Quiz created correctly");
-
             //Retrive the quiz details if returned in the response
             SaveQuizMessage = "Quiz gemt succesfuldt";
         }
@@ -492,14 +501,3 @@
     }
 }
 
-<style>
-    .scrollable-dropdown {
-        max-height: 200px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-        .scrollable-dropdown::-webkit-scrollbar {
-            width: 8px;
-        }
-</style>

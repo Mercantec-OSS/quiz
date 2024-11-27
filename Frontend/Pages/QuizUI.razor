@@ -50,7 +50,7 @@ else
             <h3 class="card-title">@quiz.Title</h3>
         </Div>
 
-        <Column Class="w-100">
+        <Column Class="w-100 my-2">
             <Card>
                 <CardHeader>
                     <h3 class="card-title">@quiz.Title</h3>
@@ -58,10 +58,10 @@ else
                 <CardBody>
                     <Row>
                         <Column>
-                            @answeredCorrectly.Count(a => a == true) / @questions.Count
+                            @answeredCorrectly.Count(a => a.AnsweredCorrect) / @questions.Count
                         </Column>
                         <Column>
-                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect ?? false) / questions.Count * 100, 2))%
+                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect.AnsweredCorrect) / questions.Count * 100, 2))%
                         </Column>
                         <Column>
                             Points: @pointsGained
@@ -71,14 +71,14 @@ else
             </Card>
         </Column>
 
-        <Button Color="Color.Primary" Clicked="@(async () => await HandleRedraw())">Redraw</Button>
-
-        <LineChart Class="w-100" @ref="lineChart" TItem="double" />
+        <BarChart Class="w-100 my-2" @ref="barChartProcent" TItem="double" Options="barChartProcentOptions" />
+        <BarChart Class="w-100 my-2" @ref="barChartNumber" TItem="double" Options="barChartNumberOptions" />
     }
 }
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private const string noCategory = "No category";
     private JWTokenHandler? jWTokenHandler;
     private LoadingSpinner? loading;
     private string pageTitle = "Quiz ui";
@@ -92,33 +92,37 @@ else
     private QuestionDTO? correctlyQuestion = null;
     private DateTime currentTime = new DateTime();
 
-    private List<bool?> answeredCorrectly = new();
+    private List<QuizInfo> answeredCorrectly = new();
     private List<QuestionDTO> questions = new();
 
     private User_QuizDTO userQuiz = new();
+
+    private readonly string[] ChartBackgroundColors = new string[] { "#ff6384", "#36a2eb", "#cc65fe", "#ffce56" };
+
+    private BarChart<double>? barChartProcent;
+    private BarChart<double>? barChartNumber;
+
+    private BarChartOptions barChartProcentOptions = new()
+        {
+            Responsive = true,
+            Plugins = new ChartPlugins
+            {
+                Legend = new ChartLegend
+                {
+                    Display = false  // Hides the legend
+                }
+            }
+        };
+
+    private BarChartOptions barChartNumberOptions = new()
+        {
+            Responsive = true,
+        };
 
     private Timer timer = new(1000)
         {
             AutoReset = true,
         };
-
-    LineChart<double> lineChart;
-    string[] Labels = { "Red", "Blue", "Yellow", "Green", "Purple", "Orange" };
-    List<string> backgroundColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 0.2f), ChartColor.FromRgba(54, 162, 235, 0.2f), ChartColor.FromRgba(255, 206, 86, 0.2f), ChartColor.FromRgba(75, 192, 192, 0.2f), ChartColor.FromRgba(153, 102, 255, 0.2f), ChartColor.FromRgba(255, 159, 64, 0.2f) };
-    List<string> borderColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 1f), ChartColor.FromRgba(54, 162, 235, 1f), ChartColor.FromRgba(255, 206, 86, 1f), ChartColor.FromRgba(75, 192, 192, 1f), ChartColor.FromRgba(153, 102, 255, 1f), ChartColor.FromRgba(255, 159, 64, 1f) };
-
-    List<double> RandomizeData()
-    {
-        var r = new Random(DateTime.Now.Millisecond);
-
-        return new List<double> {
-            r.Next( 3, 50 ) * r.NextDouble(),
-            r.Next( 3, 50 ) * r.NextDouble(),
-            r.Next( 3, 50 ) * r.NextDouble(),
-            r.Next( 3, 50 ) * r.NextDouble(),
-            r.Next( 3, 50 ) * r.NextDouble(),
-            r.Next( 3, 50 ) * r.NextDouble() };
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -224,14 +228,19 @@ else
                 break;
             }
         }
-        this.answeredCorrectly.Add(answeredCorrectly);
+        Answer(answeredCorrectly);
         OpenNextQuestion(false);
     }
 
     private void SkipQuestion()
     {
-        answeredCorrectly.Add(null);
+        Answer(false);
         OpenNextQuestion(true);
+    }
+
+    private void Answer(bool correct)
+    {
+        answeredCorrectly.Add(new(correctlyQuestion?.Category ?? noCategory, correct));
     }
 
     private async void OpenNextQuestion(bool asyncReload)
@@ -316,7 +325,7 @@ else
 
         for (int i = 0; i < questions.Count; i++)
         {
-            if (answeredCorrectly[i] ?? false)
+            if (answeredCorrectly[i].AnsweredCorrect)
             {
                 DifficultyDTO? questionDifficulty = difficulties?
                     .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
@@ -336,7 +345,7 @@ else
 
         StateHasChanged();
 
-        await HandleRedraw();
+        GetSummeryChartDataAndUpdate();
 
         string userRole = await sessionStorage.GetItemAsync<string>("userRole");
         if (userRole == "Teacher")
@@ -366,25 +375,62 @@ else
         loading?.Stop();
     }
 
-    private async Task HandleRedraw()
+    private async void GetSummeryChartDataAndUpdate()
     {
-        await lineChart.Clear();
+        if (barChartProcent == null) return;
+        if (barChartNumber == null) return;
 
-        await lineChart.AddLabelsDatasetsAndUpdate(Labels, GetLineChartDataset());
-    }
-
-    private LineChartDataset<double> GetLineChartDataset()
-    {
-        return new LineChartDataset<double>
+        var categoryPercentages = answeredCorrectly
+            .GroupBy(q => q.Category)
+            .Select(group => new
             {
-                Label = "# of randoms",
-                Data = RandomizeData(),
-                BackgroundColor = backgroundColors,
-                BorderColor = borderColors,
-                Fill = true,
-                PointRadius = 3,
-                CubicInterpolationMode = "monotone",
-            };
+                Category = group.Key,
+                CorrectPercentage = group.Count(q => q.AnsweredCorrect) * 100.0 / group.Count(),
+                Total = (double)group.Count(),
+                CorrectAnwsered = (double)group.Count(q => q.AnsweredCorrect)
+            })
+            .ToList();
+
+        await barChartNumber.AddLabelsDatasetsAndUpdate(
+            categoryPercentages.Select(c => c.Category).ToArray(),
+            GetBarChartDataset(["Total", "Correct"],
+                [
+                    categoryPercentages.Select(c => c.Total).ToList(),
+    categoryPercentages.Select(c => c.CorrectAnwsered).ToList()
+                ]
+            )
+        );
+
+        await barChartProcent.AddLabelsDatasetsAndUpdate(
+            categoryPercentages.Select(c => c.Category).ToArray(),
+            GetBarChartDataset(["% Correct"], [categoryPercentages.Select(c => c.CorrectPercentage).ToList()]));
     }
 
+    private BarChartDataset<double>[] GetBarChartDataset(List<string> labels, List<List<double>> data)
+    {
+        // All data needs a label...
+        if (labels.Count != data.Count)
+        {
+            return Array.Empty<BarChartDataset<double>>();
+        }
+
+        // Free Blazorise chart has a limit of columns it can show.
+        while (data.Count > 10)
+        {
+            data.RemoveAt(data.Count -1);
+        }
+
+        return data.Select((dataSet, index) => new BarChartDataset<double>
+            {
+                Label = labels[index],
+                Data = dataSet,
+                BackgroundColor = new List<string> { ChartBackgroundColors[index % ChartBackgroundColors.Length] }
+            }).ToArray();
+    }
+
+    private class QuizInfo(string category, bool answeredCorrect)
+    {
+        public string Category = category;
+        public bool AnsweredCorrect = answeredCorrect;
+    }
 }

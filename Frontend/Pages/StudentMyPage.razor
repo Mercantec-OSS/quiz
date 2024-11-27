@@ -20,7 +20,7 @@
             else
             {
                 <span>
-                    @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Average(ql => ql.Results)) : "0")
+                    @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Where(ql => ql.Completed).Average(ql => ql.Results), 2) : 0)
                 </span>
             }
         </h2>

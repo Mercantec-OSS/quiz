@@ -3,76 +3,83 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-@using System.Timers
+<JWTokenHandler @ref="jWTokenHandler" />
+<LoadingSpinner @ref="loading" />
 
 <PageTitle>@pageTitle</PageTitle>
 
 @if (!ready)
 {
     <h3>Quiz UI</h3>
-    <div>
+    <Div>
         Are you ready?
-        <buton class="btn btn-primary" @onclick="Start">Start</buton>
-    </div>
+        <Button Class="btn btn-primary" Clicked="Start">Start</Button>
+    </Div>
 }
 else
 {
     if (questions.Count > correctlyQuestionAnswering && correctlyQuestion != null)
     {
-        <div class="Split">
-            <h3>@correctlyQuestion.Title</h3>
-            <h2>@currentTime.ToString(currentTime.Hour > 0 ? "HH:mm:ss" : "mm:ss")</h2>
-        </div>
+        <Row>
+            <Column>
+                <h3>@correctlyQuestion.Title</h3>
+            </Column>
+            <Column>
+                <h2>@currentTime.ToString(currentTime.Hour > 0 ? "HH:mm:ss" : "mm:ss")</h2>
+            </Column>
+        </Row>
 
-        <div class="row flex-fill d-flex flex-wrap" style="height: 40vh;">
+        <Row class="flex-fill d-flex flex-wrap" style="height: 40vh;">
             @foreach (var (cardText, i) in correctlyQuestion.PossibleAnswers.Select((category, index) => (category, index)))
             {
-                <div class="col-6 d-flex p-2" @onclick="() => SelectAnswer(i)">
-                    <div class="card flex-fill text-center @(selectedAnswers[i] ? "bg-success" : null)">
-                        <div class="card-body" style="max-height: 175px; overflow-y: auto;">
+                <Column ColumnSize="ColumnSize.Is6" @onclick="() => SelectAnswer(i)">
+                    <Div Class="card flex-fill text-center" Background="@(selectedAnswers[i] ? Background.Success : "")">
+                        <Div class="card-body" style="max-height: 175px; overflow-y: auto;">
                             <h5 class="card-title">@cardText</h5>
-                            <p class="card-text">
-                                This is a dynamically generated card. This content can be very long, so I am adding more text here to simulate a longer description. The content should scroll when it overflows the available space.
-                                Keep adding more content here to see the scrolling effect.
-                                Keep adding more content here to see the scrolling effect. Keep adding more content here to see the scrolling effect.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                        </Div>
+                    </Div>
+                </Column>
             }
-            <button class="btn btn-primary" @onclick="AnswerQuestion">Answer</button>
-        </div>
+            <Button Class="btn btn-primary" Clicked="AnswerQuestion">Answer</Button>
+        </Row>
     }
     else if (questions.Count <= correctlyQuestionAnswering && quiz != null)
     {
-        <h3>Summery</h3>
-        <div class="card bg-light">
-            <div class="card-body">
-                <div>
+        <h3 class="w-100">Summery</h3>
+        <Div Class="w-100">
+            <h3 class="card-title">@quiz.Title</h3>
+        </Div>
+
+        <Column Class="w-100 my-2">
+            <Card>
+                <CardHeader>
                     <h3 class="card-title">@quiz.Title</h3>
-                </div>
-                <div class="MyPageCardGab">
-                    <div class="MyPageCustomBox">
-                        <p class="card-text">@answeredCorrectly.Count(a => a == true) / @questions.Count</p>
-                    </div>
-                    <div class="MyPageCustomBox">
-                        <p class="card-text">
-                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect ?? false) / questions.Count * 100, 2))%
-                        </p>
-                    </div>
-                    <div class="MyPageCustomBox">
-                        <p class="card-text">Points: @pointsGained</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </CardHeader>
+                <CardBody>
+                    <Row>
+                        <Column>
+                            @answeredCorrectly.Count(a => a.AnsweredCorrect) / @questions.Count
+                        </Column>
+                        <Column>
+                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect.AnsweredCorrect) / questions.Count * 100, 2))%
+                        </Column>
+                        <Column>
+                            Points: @pointsGained
+                        </Column>
+                    </Row>
+                </CardBody>
+            </Card>
+        </Column>
+
+        <BarChart Class="w-100 my-2" @ref="barChartProcent" TItem="double" Options="barChartProcentOptions" />
+        <BarChart Class="w-100 my-2" @ref="barChartNumber" TItem="double" Options="barChartNumberOptions" />
     }
 }
 
-<LoadingSpinner @ref="loading" />
-
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private const string noCategory = "No category";
+    private JWTokenHandler? jWTokenHandler;
     private LoadingSpinner? loading;
     private string pageTitle = "Quiz ui";
     private bool ready = false;
@@ -85,10 +92,32 @@ else
     private QuestionDTO? correctlyQuestion = null;
     private DateTime currentTime = new DateTime();
 
-    private List<bool?> answeredCorrectly = new();
+    private List<QuizInfo> answeredCorrectly = new();
     private List<QuestionDTO> questions = new();
 
     private User_QuizDTO userQuiz = new();
+
+    private readonly string[] ChartBackgroundColors = new string[] { "#ff6384", "#36a2eb", "#cc65fe", "#ffce56" };
+
+    private BarChart<double>? barChartProcent;
+    private BarChart<double>? barChartNumber;
+
+    private BarChartOptions barChartProcentOptions = new()
+        {
+            Responsive = true,
+            Plugins = new ChartPlugins
+            {
+                Legend = new ChartLegend
+                {
+                    Display = false  // Hides the legend
+                }
+            }
+        };
+
+    private BarChartOptions barChartNumberOptions = new()
+        {
+            Responsive = true,
+        };
 
     private Timer timer = new(1000)
         {
@@ -100,14 +129,11 @@ else
         if (firstRender)
         {
             timer.Stop();
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
 
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
+
+            string jwt = await jWTokenHandler.GetToken();
             loading?.Start();
 
             // Getting the quiz id from the url, if it's invalid redirect to browse.
@@ -118,6 +144,7 @@ else
                 return;
             }
 
+            // Invalid quiz id.
             if (!int.TryParse(dataValue[0], out quizID))
             {
                 NavigationManager.NavigateTo("/browse");
@@ -129,13 +156,17 @@ else
                 await HttpHandler.GetAsync<User_QuizDTO>(
                     $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
 
-            if (statusCodeUserQuiz != HttpStatusCode.OK || userQuiz == null || userQuiz.Completed)
+            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            if (statusCodeUserQuiz != HttpStatusCode.OK || (userRole == "Student" && userQuiz == null))
             {
                 // Isn't invited to this quiz or has completed it before.
                 NavigationManager.NavigateTo("/browse");
                 return;
             }
-            else this.userQuiz = userQuiz ?? new();
+            else
+            {
+                this.userQuiz = userQuiz ?? new();
+            }
 
             (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
                await HttpHandler.GetAsync<QuizDTO>(
@@ -197,14 +228,19 @@ else
                 break;
             }
         }
-        this.answeredCorrectly.Add(answeredCorrectly);
+        Answer(answeredCorrectly);
         OpenNextQuestion(false);
     }
 
     private void SkipQuestion()
     {
-        answeredCorrectly.Add(null);
+        Answer(false);
         OpenNextQuestion(true);
+    }
+
+    private void Answer(bool correct)
+    {
+        answeredCorrectly.Add(new(correctlyQuestion?.Category ?? noCategory, correct));
     }
 
     private async void OpenNextQuestion(bool asyncReload)
@@ -258,14 +294,17 @@ else
     private async Task OpenSummery()
     {
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
         if (quiz == null)
         {
             NavigationManager.NavigateTo("/home");
             return;
         }
 
+        StateHasChanged();
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
         (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
@@ -286,7 +325,7 @@ else
 
         for (int i = 0; i < questions.Count; i++)
         {
-            if (answeredCorrectly[i] ?? false)
+            if (answeredCorrectly[i].AnsweredCorrect)
             {
                 DifficultyDTO? questionDifficulty = difficulties?
                     .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
@@ -302,6 +341,17 @@ else
                 int difficultyAddition = (1 + difference / 10);
                 pointsGained += 100 * difficultyAddition;
             }
+        }
+
+        StateHasChanged();
+
+        GetSummeryChartDataAndUpdate();
+
+        string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+        if (userRole == "Teacher")
+        {
+            loading?.Stop();
+            return;
         }
 
         User_QuizDTO updateUserQuiz = new()
@@ -323,5 +373,64 @@ else
         }
 
         loading?.Stop();
+    }
+
+    private async void GetSummeryChartDataAndUpdate()
+    {
+        if (barChartProcent == null) return;
+        if (barChartNumber == null) return;
+
+        var categoryPercentages = answeredCorrectly
+            .GroupBy(q => q.Category)
+            .Select(group => new
+            {
+                Category = group.Key,
+                CorrectPercentage = group.Count(q => q.AnsweredCorrect) * 100.0 / group.Count(),
+                Total = (double)group.Count(),
+                CorrectAnwsered = (double)group.Count(q => q.AnsweredCorrect)
+            })
+            .ToList();
+
+        await barChartNumber.AddLabelsDatasetsAndUpdate(
+            categoryPercentages.Select(c => c.Category).ToArray(),
+            GetBarChartDataset(["Total", "Correct"],
+                [
+                    categoryPercentages.Select(c => c.Total).ToList(),
+    categoryPercentages.Select(c => c.CorrectAnwsered).ToList()
+                ]
+            )
+        );
+
+        await barChartProcent.AddLabelsDatasetsAndUpdate(
+            categoryPercentages.Select(c => c.Category).ToArray(),
+            GetBarChartDataset(["% Correct"], [categoryPercentages.Select(c => c.CorrectPercentage).ToList()]));
+    }
+
+    private BarChartDataset<double>[] GetBarChartDataset(List<string> labels, List<List<double>> data)
+    {
+        // All data needs a label...
+        if (labels.Count != data.Count)
+        {
+            return Array.Empty<BarChartDataset<double>>();
+        }
+
+        // Free Blazorise chart has a limit of columns it can show.
+        while (data.Count > 10)
+        {
+            data.RemoveAt(data.Count -1);
+        }
+
+        return data.Select((dataSet, index) => new BarChartDataset<double>
+            {
+                Label = labels[index],
+                Data = dataSet,
+                BackgroundColor = new List<string> { ChartBackgroundColors[index % ChartBackgroundColors.Length] }
+            }).ToArray();
+    }
+
+    private class QuizInfo(string category, bool answeredCorrect)
+    {
+        public string Category = category;
+        public bool AnsweredCorrect = answeredCorrect;
     }
 }

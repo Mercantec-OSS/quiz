@@ -2,25 +2,30 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>My page</PageTitle>
 
-<div class="Split">
-    <h1>My Page</h1>
+<Row>
+    <Column ColumnSize="ColumnSize.Is10">
+        <h1>My Page</h1>
 
-    <h2>
-        Avg. score:
-        @if (quizzesLink == null)
-        {
-            <span>Loading...</span>
-        }
-        else
-        {
-            <span>
-                @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Average(ql => ql.Results)) : "0")
-            </span>
-        }
-    </h2>
-</div>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is2">
+        <h2>
+            Avg. score:
+            @if (quizzesLink == null)
+            {
+                <span>Loading...</span>
+            }
+            else
+            {
+                <span>
+                    @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Where(ql => ql.Completed).Average(ql => ql.Results), 2) : 0)
+                </span>
+            }
+        </h2>
+    </Column>
+</Row>
 
 @if (quizzesLink == null)
 {
@@ -30,74 +35,67 @@
 }
 else
 {
-    <div class="row my-1">
+    <Row HorizontalGutter="10" VerticalGutter="10">
         @foreach (User_QuizQuizInfoDTO quizLink in quizzesLink)
         {
-            <div class="col-md-4 p-1">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <div class="Split">
-                            <h3 class="card-title">@quizLink.quiz.Title</h3>
-                            <h4 class="text-end">@quizLink.quiz.Creator</h4>
-                        </div>
-                        <div class="MyPageCardGab">
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Category: @quizLink.quiz.Category</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Difficulty: @quizLink.quiz.Difficulty</p>
-                            </div>
-                            <div class="MyPageCustomBox">
-                                <p class="card-text">Score: @quizLink.Results</p>
-                            </div>
-                        </div>
-                        <div class="pt-2 MyPageCardGab">
-                            <button class="MyPageCustomBox btn
-                                @(quizLink.Completed ? "btn-secondary" : "btn-primary")"
-                                    @onclick="() => Start(quizLink.Completed, quizLink.quiz.ID ?? 0)"
-                                    disabled="@quizLink.Completed">
-
-                                <p class="card-text">Start</p>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Column ColumnSize="ColumnSize.Is4">
+                <Card>
+                    <CardHeader>
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is8">
+                                <h3 class="card-title">@quizLink.quiz.Title</h3>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <h4 class="text-end">@quizLink.quiz.Creator</h4>
+                            </Column>
+                        </Row>
+                    </CardHeader>
+                    <CardBody>
+                        <Row>
+                            <Column>
+                                Category: @quizLink.quiz.Category
+                            </Column>
+                            <Column>
+                                Difficulty: @quizLink.quiz.Difficulty
+                            </Column>
+                            <Column>
+                                Score: @quizLink.Results
+                            </Column>
+                        </Row>
+                    </CardBody>
+                    <CardFooter>
+                        @if (!quizLink.Completed)
+                        {
+                            <Button Class="btn btn-primary w-100"
+                            Clicked="() => Start(quizLink.quiz.ID ?? 0)"
+                            Disabled="@quizLink.Completed">
+                                Start
+                            </Button>
+                        }
+                        else
+                        {
+                            <p class="text-center">Completed</p>
+                        }
+                    </CardFooter>
+                </Card>
+            </Column>
         }
-    </div>
-}
-
-@if (hasEditHtml)
-{
-    <div class="model custom-modal">
-        <h4>Why did you edit the html?</h4>
-        <p>ARE YOU STOOPID!</p>
-        <div class="mt-1">
-            <button class="btn" @onclick="ClosehasEditHtmlModal">Close</button>
-        </div>
-    </div>
-
-    <!-- Modal overlay (transparent background) -->
-    <div @onclick="ClosehasEditHtmlModal" class="modal-overlay"></div>
+    </Row>
 }
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
     private List<User_QuizQuizInfoDTO>? quizzesLink = null;
-    private bool hasEditHtml = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null) return;
-        try
+        if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
+            if (Http == null) return;
+            if (jWTokenHandler == null) return;
 
+            string jwt = await jWTokenHandler.GetToken();
             int id = await sessionStorage.GetItemAsync<int>("userID");
 
             (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO>? response) =
@@ -107,22 +105,13 @@ else
             if (statusCode == HttpStatusCode.OK)
             {
                 quizzesLink = response ?? new();
+                StateHasChanged();
             }
-        }
-        catch (InvalidOperationException)
-        {
-            // It fails the first time,
-            // therefore I need this.
         }
     }
 
-    private void Start(bool completed, int quizID)
+    private void Start(int quizID)
     {
-        if (completed)
-        {
-            hasEditHtml = true;
-            return;
-        }
         if (quizID == 0)
         {
             return;
@@ -130,6 +119,4 @@ else
 
         NavigationManager.NavigateTo($"/quiz_ui?quiz_id={Uri.EscapeDataString(quizID.ToString())}");
     }
-
-    private void ClosehasEditHtmlModal() => hasEditHtml = false;
 }

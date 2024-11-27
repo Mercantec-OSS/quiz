@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Category list</PageTitle>
 
 <h3>CategoryList</h3>
@@ -10,6 +11,8 @@
 <ListGroup Flush>
     @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
     {
+        bool show = categoryShowingUnderCategories != category;
+
         <ListGroupItem >
             <Div Flex="Flex.JustifyContent.Between" Width="Width.Is100">
                 <Heading Size="HeadingSize.Is5" Margin="Margin.Is1.FromBottom">
@@ -17,9 +20,9 @@
                 </Heading>
                 <Small>
                     <Button Class="btn" Color="Color.Primary" 
-                    Clicked="() => categoryShowingUnderCategories != category ?
+                    Clicked="() => show ?
                             GetSubCategories(category) : ClearSubCategories()">
-                        Show undercategories
+                        @(show ? "Show" : "Hide") undercategories
                     </Button>
                 </Small>
             </Div>
@@ -57,10 +60,10 @@
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
     private List<CategoryDTO> categories = new();
     private CategoryDTO? categoryShowingUnderCategories;
     private List<UnderCategoryGetDTO>? underCategories;
-
     private LoadingSpinner? loading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -68,16 +71,12 @@
         if (firstRender)
         {
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
+
             loading?.Start();
-
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
+            string jwt = await jWTokenHandler.GetToken();
             string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+
             if (string.IsNullOrEmpty(userRole) || userRole == "Student")
             {
                 NavigationManager.NavigateTo("/home");
@@ -90,6 +89,7 @@
             if (statusCode == HttpStatusCode.OK)
             {
                 categories = response ?? new();
+                StateHasChanged();
             }
 
             loading?.Stop();
@@ -108,8 +108,9 @@
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
 
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+        string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
             await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(

@@ -11,6 +11,8 @@
 <ListGroup Flush>
     @foreach (var (category, i) in categories.Select((category, index) => (category, index)))
     {
+        bool show = categoryShowingUnderCategories != category;
+
         <ListGroupItem >
             <Div Flex="Flex.JustifyContent.Between" Width="Width.Is100">
                 <Heading Size="HeadingSize.Is5" Margin="Margin.Is1.FromBottom">
@@ -18,9 +20,9 @@
                 </Heading>
                 <Small>
                     <Button Class="btn" Color="Color.Primary" 
-                    Clicked="() => categoryShowingUnderCategories != category ?
+                    Clicked="() => show ?
                             GetSubCategories(category) : ClearSubCategories()">
-                        Show undercategories
+                        @(show ? "Show" : "Hide") undercategories
                     </Button>
                 </Small>
             </Div>
@@ -74,7 +76,7 @@
             loading?.Start();
             string jwt = await jWTokenHandler.GetToken();
             string userRole = await sessionStorage.GetItemAsync<string>("userRole");
-            
+
             if (string.IsNullOrEmpty(userRole) || userRole == "Student")
             {
                 NavigationManager.NavigateTo("/home");
@@ -87,6 +89,7 @@
             if (statusCode == HttpStatusCode.OK)
             {
                 categories = response ?? new();
+                StateHasChanged();
             }
 
             loading?.Stop();

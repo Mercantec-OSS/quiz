@@ -225,12 +225,87 @@
             }
         }
 
+        [HttpPost("MoreUsers")]
+        public async Task<ActionResult<List<User_QuizInfoDTO>>> PostUsers_Quiz(Users_QuizDTO users_QuizDTO)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
+            List<User_QuizInfoDTO> user_QuizDTOs = new List<User_QuizInfoDTO>();
+
+            var userQuizzes = new List<User_Quiz>();
+            var quiz = await _context.Quizs
+                                .Include(q => q.education)
+                                .Include(q => q.difficulty)
+                                .Include(q => q.category)
+                                .Include(q => q.creator)
+                                .FirstOrDefaultAsync(q => q.ID == users_QuizDTO.QuizID);
+            for (int i = 0; i < users_QuizDTO.UserID.Length; i++)
+            {
+
+                var user = await _context.Users
+                    .Include(u => u.role)
+                    .FirstOrDefaultAsync(u => u.ID == users_QuizDTO.UserID[i]);
+
+                if (quiz == null || user == null)
+                {
+                    return NotFound("Quiz or User not found.");
+                }
+                int questionAmount = await _context.Quiz_Question.CountAsync(qa => qa.quiz.ID == quiz.ID);
+
+                userQuizzes.Add(new User_Quiz
+                {
+                    quiz = quiz,
+                    user = user,
+                    Completed = false,
+                    QuizEndDate = DateTime.UtcNow.AddDays(1),
+                    Results = 0,
+                    TimeUsed = 0,
+                });
+                user_QuizDTOs.Add(new User_QuizInfoDTO
+                {
+                    Quiz = new QuizDTO
+                    {
+                        Category = quiz.category.Category,
+                        Difficulty = quiz.difficulty.Difficulty,
+                        Education = quiz.education.Education,
+                        Creator = quiz.creator.Username,
+                        ID = quiz.ID,
+                        QestionsAmount = questionAmount,
+                        Title = quiz.Title
+                    },
+                    User = new UserDTO
+                    {
+                        ID = user.ID,
+                        email = user.Email,
+                        role = user.role.Role,
+                        username = user.Username,
+                    },
+                    Completed = false,
+                    QuizEndDate = DateTime.UtcNow.AddDays(1),
+                    Results = 0,
+                    TimeUsed = 0,
+                });
+            }
+            _context.User_Quiz.AddRange(userQuizzes);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUser_Quiz", user_QuizDTOs);
+        }
         // POST: api/User_Quiz
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<User_QuizInfoDTO>> PostUser_Quiz(User_QuizDTO user_QuizDTO)
         {
-
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
 

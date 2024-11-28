@@ -45,6 +45,34 @@
                 }).ToList();
         }
 
+        [HttpGet("AllStudents")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetStudents()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
+            return (await _context.Users
+                .Include(u => u.role)
+                .Where(u => u.role.Role == "Student")
+                .ToListAsync())
+                .Select(u => new UserDTO()
+                {
+                    ID = u.ID,
+                    username = u.Username,
+                    email = u.Email,
+                    role = u.role.Role,
+                }).ToList();
+        }
+
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)

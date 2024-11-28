@@ -2,12 +2,12 @@
 
 public class User_QuizDTO
 {
-    public DateTime? QuizEndDate { get; set; }
+    public DateTime? QuizEndDate { get; set; } = DateTime.UtcNow.AddDays(1);
 
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     // The ID of the Quiz
@@ -19,6 +19,25 @@ public class User_QuizDTO
     public int TimeUsed { get; set; } = 0;
 }
 
+public class CreateMultiUsers_QuizDTO
+{
+    public DateTime? QuizEndDate { get; set; } = DateTime.UtcNow.AddDays(1);
+
+    // This is used to flag indicate if the quiz is completed
+    public bool Completed { get; set; } = false;
+
+    // Needs to be a percent
+    public int Results { get; set; } = 0;
+
+    // The ID of the Quiz
+    public int QuizID { get; set; }
+
+    // The ID of the User
+    public int[] UserID { get; set; }
+
+    public int TimeUsed { get; set; } = 0;
+}
+
 public class User_QuizInfoDTO
 {
     public DateTime QuizEndDate { get; set; }
@@ -26,7 +45,7 @@ public class User_QuizInfoDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     // The ID of the Quiz
@@ -45,7 +64,7 @@ public class User_QuizUserInfoDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }
@@ -60,7 +79,7 @@ public class User_QuizQuizInfoDTO
     // This is used to indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }

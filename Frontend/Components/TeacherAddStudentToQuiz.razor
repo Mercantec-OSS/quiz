@@ -23,14 +23,14 @@
                     <Row HorizontalGutter="10" VerticalGutter="10">
                         @foreach (var user in students)
                         {
-                            <Column ColumnSize="ColumnSize.Is6">
+                            <Column ColumnSize="ColumnSize.Is3">
                                 <Card>
                                     <CardHeader>
                                         @user.Key.username
                                     </CardHeader>
                                     <CardBody>
                                         <Row>
-                                            <Column ColumnSize="ColumnSize.Is6">
+                                            <Column ColumnSize="ColumnSize.Is8">
                                                 <p class="card-text">Email: @user.Key.email</p>
                                             </Column>
                                             <Column ColumnSize="ColumnSize.Is2">
@@ -61,15 +61,15 @@
     private QuizDTO quiz = new();
     private Dictionary<UserDTO, bool>? students = null;
 
-    private Action<QuizDTO>? action;
+    private Action<QuizDTO>? openTeacherQuizInfo;
 
-    public async void Open(QuizDTO quiz, Action<QuizDTO> action)
+    public async void Open(QuizDTO quiz, Action<QuizDTO> openTeacherQuizInfo)
     {
         if (Http == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
-        this.action = action;
+        this.openTeacherQuizInfo = openTeacherQuizInfo;
         this.quiz = quiz;
         loading?.Start();
         modal?.Show();
@@ -91,7 +91,7 @@
     {
         students = null;
         modal?.Hide();
-        action?.Invoke(quiz);
+        openTeacherQuizInfo?.Invoke(quiz);
     }
 
     private void OnChanged(bool value, UserDTO user)
@@ -106,11 +106,12 @@
     {
         if (Http == null) return;
         if (jWTokenHandler == null) return;
+        if (students == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
         loading?.Start();
 
-        return;
+        List<int> userIds = students.Where(s => s.Value).Select(s => s.Key.ID).ToList();
 
         (HttpStatusCode statusCode, List<UserDTO>? response) =
            await HttpHandler.GetAsync<List<UserDTO>>(
@@ -118,7 +119,7 @@
 
         if (statusCode == HttpStatusCode.OK)
         {
-            // idk
+            Close();
         }
 
         loading?.Stop();

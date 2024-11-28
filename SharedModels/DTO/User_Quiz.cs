@@ -19,7 +19,7 @@ public class User_QuizDTO
     public int TimeUsed { get; set; } = 0;
 }
 
-public class Users_QuizDTO
+public class CreateMultiUsers_QuizDTO
 {
     public DateTime? QuizEndDate { get; set; } = DateTime.UtcNow.AddDays(1);
 

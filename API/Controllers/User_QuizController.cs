@@ -226,7 +226,7 @@
         }
 
         [HttpPost("MoreUsers")]
-        public async Task<ActionResult<List<User_QuizInfoDTO>>> PostUsers_Quiz(Users_QuizDTO users_QuizDTO)
+        public async Task<ActionResult<List<User_QuizInfoDTO>>> PostUsers_Quiz(CreateMultiUsers_QuizDTO users_QuizDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);

@@ -18,7 +18,7 @@
                 <label for="mainCategory"></label>
                 <Dropdown Display="Display.InlineBlock">
                     <DropdownToggle Color="Color.Primary">
-                        @(CategoryID == 0 ? "Quiz Kategori" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
+                        @(CategoryID == 0 ? "Main category" : categories.FirstOrDefault(c => c.ID == CategoryID)?.Category ?? "Select Main Category")
                     </DropdownToggle>
                     <DropdownMenu MaxMenuHeight="100px">
                         @foreach (var category in categories)
@@ -35,7 +35,7 @@
                 <label for="mainDifficulty"></label>
                 <Dropdown Display="Display.InlineBlock">
                     <DropdownToggle Color="Color.Primary">
-                        @(DifficultyID == 0 ? "Quiz Niveau" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
+                        @(DifficultyID == 0 ? "Main level" : difficulties.FirstOrDefault(c => c.ID == DifficultyID)?.Difficulty ?? "Select Main Difficulty")
                     </DropdownToggle>
                     <DropdownMenu MaxMenuHeight="100px">
                         @foreach (var difficulty in difficulties)
@@ -61,7 +61,7 @@
                         <div class="dropdown-categories">
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
+                                    @(question.selectedCategory == null ? "Choose category" : question.selectedCategory.Category)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (CategoryDTO category in categories)
@@ -76,7 +76,7 @@
                         <div class="dropdown-underCategories">
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
+                                    @(question.selectedUnderCategory == null ? "Choose under category" : question.selectedUnderCategory.UnderCategory)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (UnderCategoryGetDTO underCategory in underCategories)
@@ -91,7 +91,7 @@
                         <div class="dropdown-difficulties">
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
+                                    @(question.selectedDifficulty == null ? "Choose level" : question.selectedDifficulty.Difficulty)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (DifficultyDTO difficulty in difficulties)
@@ -103,14 +103,14 @@
                         </div>
                     </td>
                     <td>
-                        <label for="questionCount">Antal</label>
+                        <label for="questionCount">Amount</label>
                         <input type="number" @bind="question.DesiredQuestionCount" min="1" max="25" />
                     </td>
                     <td>
-                        <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Slet Spørgsmål</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteQuestionSet(question)">Remove question</button>
                     </td>
                     <td>
-                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Vis spørgsmål</button>
+                        <button class="btn btn-success" @onclick="() => FetchQuestions(question)">Show questions</button>
                     </td>
                 </tr>
             </table>
@@ -118,7 +118,7 @@
 
         <br>
 
-        <h4>Tilgængelige spørgsmål:</h4>
+        <h4>Available questions:</h4>
 
         @* this is where the list is being displayed/made *@
         @if (question.Questions != null && question.Questions.Any())
@@ -126,11 +126,11 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Valgt</th>
-                        <th>Spørgsmål</th>
-                        <th>Tid</th>
-                        <th>Mulige svar</th>
-                        <th>Rigtige svar</th>
+                        <th>Chosen</th>
+                        <th>Question</th>
+                        <th>Time</th>
+                        <th>Probable answers</th>
+                        <th>Correct answer</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,7 +153,7 @@
         }
         else
         {
-            <p>Ingen Spørgsmål</p>
+            <p>No questions</p>
         }
     }
 </div>
@@ -164,8 +164,24 @@
 <p>@SaveQuizMessage</p>
 
 @* button for making the random quiz *@
-<button class="btn btn-success" @onclick="RandomQuizMaking">Lav tilfældig quiz</button>
-<button class="btn btn-success" @onclick="customQuiz">Gem valgte som quiz</button>
+<button class="btn btn-success" @onclick="RandomQuizMaking">Generate random quiz</button>
+<button class="btn btn-success" @onclick="customQuiz">Save chosen questions as quiz</button>
+
+
+
+@if (createdQuiz)
+{
+    <div class="model custom-modal">
+        <h4>Questions saved successfully </h4>
+        <div class="m-1 Split">
+            <button class="btn btn-outline-dark" @onclick="ToggleCreatedConfirmed">Close</button>
+        </div>
+    </div>
+
+    <div @onclick="ToggleCreatedConfirmed" class="modal-overlay"></div>
+
+}
+<LoadingSpinner @ref="loading" />
 
 @code
 {
@@ -219,6 +235,15 @@
     private List<Question> Questions { get; set; } = new();
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
+
+    private bool createdQuiz = false;
+    private LoadingSpinner? loading;
+
+    private void ToggleCreatedConfirmed()
+    {
+        createdQuiz = !createdQuiz;
+    }
+
 
     public List<Question> GetSelectedQuestions()
     {

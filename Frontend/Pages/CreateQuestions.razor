@@ -10,7 +10,7 @@
     @foreach (var question in questionsHandler)
     {
         <div>
-            <h5>Spørgsmål @((questionsHandler.IndexOf(question) + 1))</h5>
+            <h5>Questions @((questionsHandler.IndexOf(question) + 1))</h5>
 
 
             <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
@@ -23,7 +23,7 @@
                         <td>
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
+                                    @(question.selectedCategory == null ? "Choose category" : question.selectedCategory.Category)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (CategoryDTO category in categories)
@@ -36,7 +36,7 @@
                         <td>
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
+                                    @(question.selectedUnderCategory == null ? "Choose under category" : question.selectedUnderCategory.UnderCategory)
                                 </DropdownToggle>
                                 <DropdownMenu  MaxMenuHeight="100px">
                                     @foreach (UnderCategoryGetDTO underCategory in underCategories)
@@ -49,7 +49,7 @@
                         <td>
                             <Dropdown Display="Display.InlineBlock">
                                 <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
+                                    @(question.selectedDifficulty == null ? "Choose level" : question.selectedDifficulty.Difficulty)
                                 </DropdownToggle>
                                 <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (DifficultyDTO difficulty in difficulties)
@@ -60,8 +60,8 @@
                             </Dropdown>
                         </td>
                         <td>
-                            <label for="Time">Tid</label>
-                            <input type="number" placeholder="Tid (sek)" @bind="question.questionModel.Time" min="10" step="5" style="width: 90px;">
+                            <label for="Time">Time</label>
+                            <input type="number" placeholder="Time (sec)" @bind="question.questionModel.Time" min="10" step="5" style="width: 100px;">
                         </td>
                     </tr>
                 </table>
@@ -73,20 +73,20 @@
 
             <div class="answer-option">
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
-                <input type="text" placeholder="Valgmulighed 1" @bind="question.questionModel.Answer1" />
+                <input type="text" placeholder="Answer 1" @bind="question.questionModel.Answer1" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[1]" />
-                <input type="text" placeholder="Valgmulighed 2" @bind="question.questionModel.Answer2" />
+                <input type="text" placeholder="Answer 2" @bind="question.questionModel.Answer2" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[2]" />
-                <input type="text" placeholder="Valgmulighed 3" @bind="question.questionModel.Answer3" />
+                <input type="text" placeholder="Answer 3" @bind="question.questionModel.Answer3" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[3]" />
-                <input type="text" placeholder="Valmulighed 4" @bind="question.questionModel.Answer4" />
+                <input type="text" placeholder="Answer 4" @bind="question.questionModel.Answer4" />
 
             </div> <br> <br>
 
-            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Slet Spørgsmål</button>
+            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Remove question</button>
         </div>
         <hr />
     }
@@ -99,19 +99,19 @@
 
     @if (questionsHandler.Count >= MaxQuestions)
     {
-        <p style="color:red"> MAXIMUM ANTAL SPØRGSMÅL NÅET!!! (@MaxQuestions)</p>
+        <p style="color:red"> MAX QUESTIONS REACHED!!! (@MaxQuestions)</p>
     }
 
-    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(questionsHandler.Count >= MaxQuestions)">Tilføj spørgsmål</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(questionsHandler.Count >= MaxQuestions)">Add questions</button>
 
-    <button class="btn btn-success" @onclick="SaveQuestions">Gem spørgsmål</button>
+    <button class="btn btn-success" @onclick="SaveQuestions">Save questions</button>
 
 </div>
 
 <br />
 
 <div class="button-upload">
-    <h6>Upload spørgsmål fra Excel</h6>
+    <h6>Upload questions from Excel</h6>
     <Label for="file-upload" class="upload-button">
         <i class="fa-solid fa-upload"></i>
     </Label>
@@ -122,7 +122,7 @@
 @if (createdQuestions)
 {
     <div class="model custom-modal">
-        <h4>Spørgsmål gemt succesfuldt</h4>
+        <h4>Questions saved successfully </h4>
         <div class="m-1 Split">
             <button class="btn btn-outline-dark" @onclick="ToggleCreatedConfirmed">Close</button>
         </div>

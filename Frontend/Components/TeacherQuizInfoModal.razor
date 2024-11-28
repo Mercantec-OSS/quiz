@@ -89,8 +89,9 @@
 
     private void Close()
     {
-        modal?.Hide();
         usersToQuiz = null;
+        StateHasChanged();
+        modal?.Hide();
     }
 
     private void OpenAddStudentsModal(){

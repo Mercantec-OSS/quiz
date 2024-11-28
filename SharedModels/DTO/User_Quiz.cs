@@ -7,7 +7,7 @@ public class User_QuizDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     // The ID of the Quiz
@@ -26,7 +26,7 @@ public class Users_QuizDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     // The ID of the Quiz
@@ -45,7 +45,7 @@ public class User_QuizInfoDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     // The ID of the Quiz
@@ -64,7 +64,7 @@ public class User_QuizUserInfoDTO
     // This is used to flag indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }
@@ -79,7 +79,7 @@ public class User_QuizQuizInfoDTO
     // This is used to indicate if the quiz is completed
     public bool Completed { get; set; } = false;
 
-    // This is used to check the results of the quiz's
+    // Needs to be a percent
     public int Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }

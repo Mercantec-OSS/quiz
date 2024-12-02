@@ -180,3 +180,9 @@ code {
     .upload-button i {
         margin-right: 5px;
     }
+
+.barChart-container {
+    height: 75vh;
+    max-height: 75vh;
+    width: 100%;
+}

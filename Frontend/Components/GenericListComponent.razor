@@ -1,0 +1,32 @@
+﻿@typeparam T
+
+@if (Items == null)
+{
+    <Div>Loading...</Div>
+}
+else
+{
+    @if (!Items.Any())
+    {
+        <Div>@NoItemsText</Div>
+    }
+    else
+    {
+        <Row HorizontalGutter="10" VerticalGutter="10">
+            @if (BodyContent == null)
+            {
+                return;
+            }
+            @foreach (var item in Items)
+            {
+                @BodyContent(item)
+            }
+        </Row>
+    }
+}
+
+@code {
+    [Parameter] public List<T>? Items { get; set; }
+    [Parameter] public RenderFragment<T>? BodyContent { get; set; }
+    [Parameter] public string NoItemsText { get; set; } = "No items";
+}

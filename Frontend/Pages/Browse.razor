@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.WebUtilities;
 @using System.Collections.Generic
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Browse</PageTitle>
 
 <Row>
@@ -68,7 +69,7 @@
     </Column>
 </Row>
 
-@if (loading?.IsLoading() ?? false)
+@if (loading?.isLoading ?? false)
 {
     <p>
         Loading...
@@ -99,7 +100,7 @@ else
                     </CardBody>
                     <CardFooter>
                         <Button Color="Color.Primary" Style="width: 100%" Clicked="() => StartQuiz(quiz.ID ?? 0)">
-                            Start
+                            @(quiz.Creator == username ? "Try quiz" : "Start")
                         </Button>
                     </CardFooter>
                 </Card>
@@ -112,6 +113,7 @@ else
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
     private List<QuizDTO> allQuizzes = new();
 
     private List<string> creators = new();
@@ -127,30 +129,26 @@ else
     private string dropdownDifficuly = string.Empty;
 
     private LoadingSpinner? loading;
+    private string username = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
 
+            string jwt = await jWTokenHandler.GetToken();
+            string searchWord = "";
             loading?.Start();
 
-            string searchWord = "";
             Uri? uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("search", out var dataValue))
             {
                 searchWord = dataValue.ToArray()[0] ?? "";
             }
 
-            Dictionary<string, string> parameters = new() { {"searchWord", searchWord} };
+            Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
 
             (HttpStatusCode statusCode, List<QuizDTO>? response) =
                 await HttpHandler.GetAsync<List<QuizDTO>>(
@@ -158,6 +156,7 @@ else
 
             if (statusCode == HttpStatusCode.OK)
             {
+                username = await sessionStorage.GetItemAsync<string>("userUsername");
                 allQuizzes = response ?? new();
                 Dictionary<string, int> creators = new();
                 Dictionary<string, int> categories = new();
@@ -184,13 +183,14 @@ else
             }
 
             loading?.Stop();
+            StateHasChanged();
         }
     }
 
     private void SelectCreator(string? creator) => selectedCreators = creator;
     private void SelectCategory(string? category) => selectedCategory = category;
     private void SelectDifficulty(string? difficult) => selectedDifficulty = difficult;
-    
+
     private List<QuizDTO> Sort()
     {
         List<QuizDTO> quizzes = new();

@@ -1,7 +1,7 @@
 ﻿@page "/createCategory"
-@inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<LoadingSpinner @ref="loading" />
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Create Kategori</PageTitle>
 
 <Div style="display: flex; align-items: center; flex-direction: column;">
@@ -15,11 +15,11 @@
             <DropdownMenu MaxMenuHeight="100px">
                 <DropdownItem>
                     <input type="text" class="form-control" placeholder="Search"
-                    @oninput="SearchWordChange"
-                    @bind="searchWord" />
+                           @oninput="SearchWordChange"
+                           @bind="searchWord" />
                 </DropdownItem>
                 <DropdownDivider />
-                @foreach (CategoriesDTO category in searchWord == string.Empty ?
+                @foreach (CategoryDTO category in searchWord == string.Empty ?
                 categories : categories.Where(c =>
                 c.Category.ToLower().Contains(searchWord.ToLower())))
                 {
@@ -34,7 +34,7 @@
         </Dropdown>
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
-        Clicked="() => ToggleEditCategoryModal(selectedCategory)">
+                Clicked="() => ToggleEditCategoryModal(selectedCategory)">
             Edit Kategori
         </Button>
 
@@ -53,19 +53,19 @@
         </TableRow>
     </TableHeader>
     <TableBody>
-        @foreach (UnderCategoriesGetDTO underCategory in underCategories)
+        @foreach (UnderCategoryGetDTO underCategory in underCategories)
         {
             <TableRow>
                 <TableRowCell>@underCategory.UnderCategory</TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-warning"
-                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
+                            @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
                         Edit
                     </button>
                 </TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-danger"
-                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
+                            @onclick="() => ToggleDeleteConfirmation(underCategory)">
                         Delete
                     </button>
                 </TableRowCell>
@@ -86,110 +86,59 @@
     </TableBody>
 </Table>
 
-<Modal @ref="modalAddNewCategory">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Add new category</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            <Field>
-                <TextEdit @bind-Text="newCategory" Placeholder="Enter category..." />
-            </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalAddNewCategory)">Close</Button>
-            <Button Color="Color.Primary" Clicked="AddNewCategory">Save</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<CustomModal Title="Add new under category" @ref="modalAddNewCategory" OnClose="() => CloseModal(modalAddNewCategory)"
+             OnPrimaryAction="AddNewCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+    <BodyContent>
+        <Field>
+            <TextEdit @bind-Text="newCategory" Placeholder="Enter category..." />
+        </Field>
+    </BodyContent>
+</CustomModal>
 
-<Modal @ref="modalAddNewUnderCategory">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Add new under category</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            <Field>
-                <TextEdit @bind-Text="newUnderCategory" Placeholder="Enter under category..." />
-            </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalAddNewUnderCategory)">Close</Button>
-            <Button Color="Color.Primary" Clicked="AddNewUnderCategory">Save</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<CustomModal Title="Add new category" @ref="modalAddNewUnderCategory" OnClose="() => CloseModal(modalAddNewUnderCategory)"
+             OnPrimaryAction="AddNewUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+    <BodyContent>
+        <Field>
+            <TextEdit @bind-Text="newUnderCategory" Placeholder="Enter under category..." />
+        </Field>
+    </BodyContent>
+</CustomModal>
 
-<Modal @ref="modalEditCategory">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Edit category</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            <Field>
-                <TextEdit @bind-Text="editCategoryText" Placeholder="Enter category..." />
-            </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalEditCategory)">Close</Button>
-            <Button Color="Color.Primary" Clicked="SaveEditedCategory">Save</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<CustomModal Title="Edit category" @ref="modalEditCategory" OnClose="() => CloseModal(modalEditCategory)"
+             OnPrimaryAction="SaveEditedCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+    <BodyContent>
+        <Field>
+            <TextEdit @bind-Text="editCategoryText" Placeholder="Enter category..." />
+        </Field>
+    </BodyContent>
+</CustomModal>
 
-<Modal @ref="modalEditUnderCategory">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Edit under category</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            <Field>
-                <TextEdit @bind-Text="editUnderCategoryText" Placeholder="Enter under category..." />
-            </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalEditUnderCategory)">Close</Button>
-            <Button Color="Color.Primary" Clicked="SaveEditedUnderCategory">Save</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<CustomModal Title="Edit under category" @ref="modalEditUnderCategory" OnClose="() => CloseModal(modalEditUnderCategory)"
+             OnPrimaryAction="SaveEditedUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+    <BodyContent>
+        <Field>
+            <TextEdit @bind-Text="editUnderCategoryText" Placeholder="Enter under category..." />
+        </Field>
+    </BodyContent>
+</CustomModal>
 
-<Modal @ref="modalDeleteConfirmation">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Are you sure you want to  delete this under kategori?</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            You can't undo this action.
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalDeleteConfirmation)">Cancel</Button>
-            <Button Color="Color.Primary" Clicked="DeleteConfirmed">Delete</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<CustomModal Title="Are you sure you want to  delete this under kategori?" @ref="modalDeleteConfirmation" OnClose="() => CloseModal(modalDeleteConfirmation)"
+             OnPrimaryAction="DeleteConfirmed" PrimaryButtonText="Delete" size="ModalSize.Default">
+    <BodyContent>
+        You can't undo this action.
+    </BodyContent>
+</CustomModal>
 
-<Modal @ref="modalErrorHappened">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>An error happened</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => CloseModal(modalErrorHappened)">Ok</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
-
-<LoadingSpinner @ref="loading" />
+<CustomModal Title="An error happened!" @ref="modalErrorHappened" OnClose="() => CloseModal(modalErrorHappened)"
+             NeedPrimary="false" size="ModalSize.Default">
+    <BodyContent>
+        You can't undo this action.
+    </BodyContent>
+</CustomModal>
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
+    private JWTokenHandler? jWTokenHandler;
 
     private CategoryDTO? selectedCategory = null;
     private List<CategoryDTO> categories = new();
@@ -209,26 +158,23 @@
 
     private string searchWord = string.Empty;
     private LoadingSpinner? loading;
-    private Modal? modalErrorHappened;
+    private CustomModal? modalErrorHappened;
 
-    private Modal? modalAddNewCategory;
-    private Modal? modalAddNewUnderCategory;
-    private Modal? modalEditCategory;
-    private Modal? modalEditUnderCategory;
-    private Modal? modalDeleteConfirmation;
+    private CustomModal? modalAddNewCategory;
+    private CustomModal? modalAddNewUnderCategory;
+    private CustomModal? modalEditCategory;
+    private CustomModal? modalEditUnderCategory;
+    private CustomModal? modalDeleteConfirmation;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
-
             if (Http == null) return;
+            if (jWTokenHandler == null) return;
+
+            string jwt = await jWTokenHandler.GetToken();
+
             loading?.Start();
 
             (HttpStatusCode statusCode, List<CategoryDTO>? response) =
@@ -252,7 +198,7 @@
         searchWord = e.Value?.ToString() ?? string.Empty;
     }
 
-    private void CloseModal(Modal? modal) => modal?.Hide();
+    private void CloseModal(CustomModal? modal) => modal?.Hide();
 
     private void OpenModalAddNewCategory()
     {
@@ -310,8 +256,10 @@
         selectedCategory = category;
 
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
                 await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
@@ -331,24 +279,24 @@
 
     private async Task SaveEditedCategory()
     {
-        if (Http == null || this.editCategory == null)
+        if (Http == null || this.editCategory == null || jWTokenHandler == null)
         {
             ToggleEditCategoryModal();
             return;
         }
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
-        CategoriesDTO editCategory = new()
+        CategoryDTO editCategory = new()
             {
                 ID = this.editCategory.ID,
                 Category = editCategoryText,
                 Education = this.editCategory.Education
             };
 
-        (HttpStatusCode statusCode, CategoriesDTO? response) =
-           await HttpHandler.PutAsync<CategoriesDTO>(
+        (HttpStatusCode statusCode, CategoryDTO? response) =
+           await HttpHandler.PutAsync<CategoryDTO>(
                $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -366,21 +314,30 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || editUnderCategory == null)
+        if (Http == null || this.editUnderCategory == null || jWTokenHandler == null)
         {
             ToggleEditUnderCategoryModal();
             return;
         }
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-        editUnderCategory.UnderCategory = editUnderCategoryText;
+        string jwt = await jWTokenHandler.GetToken();
+
+        UnderCategoryGetDTO editUnderCategory = new()
+            {
+                ID = this.editUnderCategory.ID,
+                UnderCategory = this.editUnderCategory.UnderCategory,
+            };
 
         HttpStatusCode statusCode =
            await HttpHandler.PutAsync(
                $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
 
-        if (statusCode != HttpStatusCode.OK)
+        if (statusCode == HttpStatusCode.OK)
+        {
+            this.editUnderCategory.UnderCategory = editUnderCategory.UnderCategory;
+        }
+        else
         {
             modalErrorHappened?.Show();
         }
@@ -391,11 +348,11 @@
 
     private async Task DeleteConfirmed()
     {
-        if (Http == null || underCategoryToBeDeleted == null)
+        if (Http == null || underCategoryToBeDeleted == null || jWTokenHandler == null)
             return;
 
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
         HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
 
@@ -419,8 +376,10 @@
         this.newCategory = string.Empty;
 
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         CategoryCreateDTO newCategory = new()
             {
@@ -454,8 +413,10 @@
 
         if (selectedCategory == null) return;
         if (Http == null) return;
+        if (jWTokenHandler == null) return;
+
         loading?.Start();
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
 
         UnderCategoryCreateDTO newUnderCategories = new()
             {
@@ -463,8 +424,8 @@
                 CategoryID = selectedCategory.ID
             };
 
-        (HttpStatusCode statusCode, UnderCategoriesGetDTO? response) =
-                await HttpHandler.PostAsync<UnderCategoriesGetDTO>(
+        (HttpStatusCode statusCode, UnderCategoryGetDTO? response) =
+                await HttpHandler.PostAsync<UnderCategoryGetDTO>(
                     $"api/UnderCategories", newUnderCategories, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)

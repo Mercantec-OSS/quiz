@@ -1,0 +1,49 @@
+﻿@using Blazorise
+
+<Modal @ref="ModalRef">
+    <ModalContent Size="size" Scrollable="Scrollable">
+        <ModalHeader>
+            <ModalTitle>@Title</ModalTitle>
+            <CloseButton Clicked="OnClose" />
+        </ModalHeader>
+        <ModalBody>
+            @BodyContent
+        </ModalBody>
+        <ModalFooter>
+            @if (NeedPrimary)
+            {
+                <Button Color="Color.Primary" Clicked="OnPrimaryAction">@PrimaryButtonText</Button>
+            }
+            <Button Color="Color.Secondary" Clicked="OnClose">Close</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+    [Parameter] public RenderFragment? BodyContent { get; set; }
+    [Parameter] public ModalSize size { get; set; } = ModalSize.Fullscreen;
+    [Parameter] public string Title { get; set; } = "Modal Title";
+    [Parameter] public bool NeedPrimary { get; set; } = true;
+    [Parameter] public bool Scrollable { get; set; } = true;
+    [Parameter] public EventCallback OnPrimaryAction { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public string PrimaryButtonText { get; set; } = "OK";
+
+    private Modal? ModalRef;
+
+    public async Task Show()
+    {
+        if (ModalRef != null)
+        {
+            await ModalRef.Show();
+        }
+    }
+
+    public async Task Hide()
+    {
+        if (ModalRef != null)
+        {
+            await ModalRef.Hide();
+        }
+    }
+}

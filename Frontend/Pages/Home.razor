@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
+<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Home</PageTitle>
 
 <div style="display: flex; align-items: center; flex-direction: column;">
@@ -17,7 +18,7 @@
         <EditForm Model="searchWord" OnValidSubmit="OnSearchClick" FormName="LoginForm">
             <div class="form-group p-1">
                 <InputText placeholder="Search..." class="form-control" type="text"
-                           @bind-Value="searchWord.word" />
+                @bind-Value="searchWord.word" />
             </div>
 
             <div class="form-group d-flex justify-content-center p-1">
@@ -36,6 +37,7 @@
 </div>
 
 @code {
+    private JWTokenHandler? jWTokenHandler;
     private SearchWord searchWord = new();
     private string userRole = string.Empty;
 
@@ -43,13 +45,9 @@
     {
         if (firstRender)
         {
-            string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-            if (string.IsNullOrEmpty(jwt))
-            {
-                NavigationManager.NavigateTo("/");
-                return;
-            }
+            if (jWTokenHandler == null) return;
 
+            string jwt = await jWTokenHandler.GetToken();
             userRole = await sessionStorage.GetItemAsync<string>("userRole");
             if (userRole == "Teacher")
             {

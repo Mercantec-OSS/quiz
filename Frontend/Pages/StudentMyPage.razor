@@ -59,7 +59,7 @@ else
                                 Difficulty: @quizLink.quiz.Difficulty
                             </Column>
                             <Column>
-                                Score: @quizLink.Results
+                                @quizLink.Results%
                             </Column>
                         </Row>
                     </CardBody>
@@ -67,8 +67,8 @@ else
                         @if (!quizLink.Completed)
                         {
                             <Button Class="btn btn-primary w-100"
-                            Clicked="() => Start(quizLink.quiz.ID ?? 0)"
-                            Disabled="@quizLink.Completed">
+                                    Clicked="() => Start(quizLink.quiz.ID ?? 0)"
+                                    Disabled="@quizLink.Completed">
                                 Start
                             </Button>
                         }

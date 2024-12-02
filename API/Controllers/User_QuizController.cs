@@ -137,6 +137,76 @@
             return Ok(users);
         }
 
+        //used to get all students available to be added to a quiz
+        [HttpGet("AllStudentsNotOnQuiz/{quizId}")]
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllStudentsNotOnQuiz(int quizId)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Teacher" && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized.");
+            }
+
+            var usersOnQuiz = (await _context.User_Quiz.
+                Include(uq => uq.user).
+                Include(uq => uq.quiz.difficulty).
+                Include(uq => uq.quiz.education).
+                Include(uq => uq.quiz.category).
+                Include(uq => uq.quiz.creator).
+                Include(uq => uq.user.role).
+                Where(uq => uq.quiz.ID == quizId).ToListAsync()).
+                Select(uq => new User_QuizUserInfoDTO()
+                {
+                    Completed = uq.Completed,
+                    Results = uq.Results,
+                    TimeUsed = uq.TimeUsed,
+                    QuizEndDate = uq.QuizEndDate,
+
+                    User = new UserDTO
+                    {
+                        ID = uq.user.ID,
+                        email = uq.user.Email,
+                        role = uq.user.role.Role,
+                        username = uq.user.Username,
+                    }
+                }).ToList();
+            
+            var allStudents = await _context.Users
+                .Include(u => u.role)
+                .Where(u => u.role.Role == "Student")
+                .Select(u => new UserDTO()
+                {
+                    ID = u.ID,
+                    username = u.Username,
+                    email = u.Email,
+                    role = u.role.Role,
+                })
+                .ToListAsync();
+            
+            var usersOnQuizIds = new HashSet<int>(usersOnQuiz.Select(uq => uq.User.ID));
+            List<UserDTO> users = new();
+            
+            foreach(UserDTO user in allStudents)
+            {
+                if (!usersOnQuizIds.Contains(user.ID))
+                {
+                    users.Add(user);
+                }
+            }
+
+
+            if (users == null)
+            {
+                return NotFound("No users can be added to this quiz");
+            }
+            return Ok(users);
+        }
 
         // GET: api/User_Quiz/5/2
         [HttpGet("{quizId}/{userId}")]

@@ -1,62 +1,53 @@
 ﻿<LoadingSpinner @ref="loading" />
 <JWTokenHandler @ref="jWTokenHandler" />
 
-<Modal @ref="modal">
-    <ModalContent Size="ModalSize.Large" Scrollable>
-        <ModalHeader>
-            <ModalTitle>@quiz.Title</ModalTitle>
-            <CloseButton Clicked="Close" />
-        </ModalHeader>
-        <ModalBody>
-            @if (usersToQuiz == null)
+<CustomModal Title="@quiz.Title" @ref="modal" size="ModalSize.Large" OnClose="Close"
+             OnPrimaryAction="OpenAddStudentsModal" PrimaryButtonText="Add Student(s)">
+    <BodyContent>
+        @if (usersToQuiz == null)
+        {
+            <Div>Loading...</Div>
+        }
+        else
+        {
+            @if (usersToQuiz.Count <= 0)
             {
-                <Div>Loading...</Div>
+                <Div>No students found assigned to this quiz</Div>
             }
             else
             {
-                @if (usersToQuiz.Count <= 0)
-                {
-                    <Div>No students found assigned to this quiz</Div>
-                }
-                else
-                {
-                    <Row HorizontalGutter="10" VerticalGutter="10">
-                        @foreach (User_QuizUserInfoDTO userQuiz in usersToQuiz)
-                        {
-                            <Column ColumnSize="ColumnSize.Is6">
-                                <Card>
-                                    <CardHeader>
-                                        @userQuiz.User.username
-                                    </CardHeader>
-                                    <CardBody>
-                                        <Row>
-                                            <Column ColumnSize="ColumnSize.Is6">
-                                                <p class="card-text">Email: @userQuiz.User.email</p>
-                                            </Column>
-                                            <Column ColumnSize="ColumnSize.Is6">
-                                                <p class="card-text">Score: @userQuiz.Results</p>
-                                            </Column>
-                                        </Row>
-                                    </CardBody>
-                                </Card>
-                            </Column>
-                        }
-                    </Row>
-                }
+                <Row HorizontalGutter="10" VerticalGutter="10">
+                    @foreach (User_QuizUserInfoDTO userQuiz in usersToQuiz)
+                    {
+                        <Column ColumnSize="ColumnSize.Is6">
+                            <Card>
+                                <CardHeader>
+                                    @userQuiz.User.username
+                                </CardHeader>
+                                <CardBody>
+                                    <Row>
+                                        <Column ColumnSize="ColumnSize.Is6">
+                                            <p class="card-text">Email: @userQuiz.User.email</p>
+                                        </Column>
+                                        <Column ColumnSize="ColumnSize.Is6">
+                                            <p class="card-text">Score: @userQuiz.Results</p>
+                                        </Column>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                        </Column>
+                    }
+                </Row>
             }
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Primary" Clicked="OpenAddStudentsModal">Add students</Button>
-            <Button Color="Color.Secondary" Clicked="Close">Close</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+        }
+    </BodyContent>
+</CustomModal>
 
 @code {
     [Inject] public HttpClient? Http { get; set; }
     private LoadingSpinner? loading;
     private JWTokenHandler? jWTokenHandler;
-    private Modal? modal;
+    private CustomModal? modal;
 
     private QuizDTO quiz = new();
     private List<User_QuizUserInfoDTO>? usersToQuiz = null;
@@ -94,7 +85,8 @@
         modal?.Hide();
     }
 
-    private void OpenAddStudentsModal(){
+    private void OpenAddStudentsModal()
+    {
         Close();
         openAddStudentsModal?.Invoke(quiz);
     }

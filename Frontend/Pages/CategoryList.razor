@@ -13,14 +13,14 @@
     {
         bool show = categoryShowingUnderCategories != category;
 
-        <ListGroupItem >
+        <ListGroupItem>
             <Div Flex="Flex.JustifyContent.Between" Width="Width.Is100">
                 <Heading Size="HeadingSize.Is5" Margin="Margin.Is1.FromBottom">
                     @category.Category
                 </Heading>
                 <Small>
-                    <Button Class="btn" Color="Color.Primary" 
-                    Clicked="() => show ?
+                    <Button Class="btn" Color="Color.Primary"
+                            Clicked="() => show ?
                             GetSubCategories(category) : ClearSubCategories()">
                         @(show ? "Show" : "Hide") undercategories
                     </Button>

@@ -14,8 +14,8 @@
             <DropdownMenu MaxMenuHeight="100px">
                 <DropdownItem>
                     <input type="text" class="form-control" placeholder="Search"
-                    @oninput="SearchWordChange"
-                    @bind="searchWord" />
+                           @oninput="SearchWordChange"
+                           @bind="searchWord" />
                 </DropdownItem>
                 <DropdownDivider />
                 @foreach (CategoryDTO category in searchWord == string.Empty ?
@@ -33,7 +33,7 @@
         </Dropdown>
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
-        Clicked="() => ToggleEditCategoryModal(selectedCategory)">
+                Clicked="() => ToggleEditCategoryModal(selectedCategory)">
             Edit Kategori
         </Button>
 
@@ -58,13 +58,13 @@
                 <TableRowCell>@underCategory.UnderCategory</TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-warning"
-                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
+                            @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
                         Edit
                     </button>
                 </TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-danger"
-                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
+                            @onclick="() => ToggleDeleteConfirmation(underCategory)">
                         Delete
                     </button>
                 </TableRowCell>

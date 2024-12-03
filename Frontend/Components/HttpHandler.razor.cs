@@ -48,15 +48,7 @@ public partial class HttpHandler
         return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK) ?
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
-    public async Task<HttpStatusCode> PostAsync(string path, object dto, string JWTtoken, HttpClient http, bool doesNotReturn = false)
-    {
-        if (!string.IsNullOrEmpty(JWTtoken))
-        {
-            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
-        }
-        HttpResponseMessage response = await http.PostAsync(path, Serialize(dto));
-        return response.StatusCode;
-    }
+
     public async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http)
     {
         if (!string.IsNullOrEmpty(JWTtoken))

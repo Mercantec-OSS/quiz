@@ -1,0 +1,16 @@
+﻿<CustomModal @ref="InternalServerErrorModal" Title="Something went wrong!" Scrollable="false"
+             size="ModalSize.Default" DefaultOnClose="true">
+    <BodyContent>
+        Something went wrong internally, if this keeps happening contact support.
+    </BodyContent>
+</CustomModal>
+
+<CustomModal @ref="BadRequestModal" Title="Bad request!" Scrollable="false"
+             size="ModalSize.Default" DefaultOnClose="true" />
+
+<CustomModal @ref="NotFoundModal" Title="Not found!" Scrollable="false"
+             size="ModalSize.Default" DefaultOnClose="true">
+    <BodyContent>
+        The context wasn't found.
+    </BodyContent>
+</CustomModal>

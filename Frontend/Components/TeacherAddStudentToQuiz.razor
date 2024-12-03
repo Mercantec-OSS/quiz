@@ -1,7 +1,4 @@
-﻿<JWTokenHandler @ref="jWTokenHandler" />
-<LoadingSpinner @ref="loading" />
-
-<CustomModal Title="@quiz.Title" @ref="modal" OnClose="Close"
+﻿<CustomModal Title="@quiz.Title" @ref="modal" OnClose="Close"
              OnPrimaryAction="AddStudents" PrimaryButtonText="Add Student(s)">
     <BodyContent>
         <GenericListComponent T="UserDTO" Items="students?.Keys.ToList()"
@@ -30,9 +27,16 @@
 </CustomModal>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
-    private LoadingSpinner? loading;
     private CustomModal? modal;
 
     private QuizDTO quiz = new();
@@ -42,7 +46,7 @@
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openTeacherQuizInfo)
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
@@ -52,7 +56,7 @@
         modal?.Show();
 
         (HttpStatusCode statusCode, List<UserDTO>? response) =
-           await HttpHandler.GetAsync<List<UserDTO>>(
+           await httpHandler.GetAsync<List<UserDTO>>(
                $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -81,7 +85,7 @@
 
     private async void AddStudents()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (students == null) return;
 
@@ -94,7 +98,7 @@
                 UserID = students.Where(s => s.Value).Select(s => s.Key.ID).ToArray()
             };
 
-        (HttpStatusCode statusCode, string response) = await HttpHandler.PostAsync(
+        (HttpStatusCode statusCode, string response) = await httpHandler.PostAsync(
                $"/api/User_Quiz/MoreUsers", newUserToQuiz, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)

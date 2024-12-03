@@ -3,9 +3,6 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<JWTokenHandler @ref="jWTokenHandler" />
-<LoadingSpinner @ref="loading" />
-
 <PageTitle>@pageTitle</PageTitle>
 
 @if (!ready)
@@ -82,10 +79,18 @@ else
 }
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
     private const string noCategory = "No category";
-    private JWTokenHandler? jWTokenHandler;
-    private LoadingSpinner? loading;
+
     private string pageTitle = "Quiz ui";
     private bool ready = false;
     private int quizID;
@@ -138,7 +143,7 @@ else
         {
             timer.Stop();
 
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
@@ -161,7 +166,7 @@ else
 
             int userID = await sessionStorage.GetItemAsync<int>("userID");
             (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
-                await HttpHandler.GetAsync<User_QuizDTO>(
+                await httpHandler.GetAsync<User_QuizDTO>(
                     $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
 
             string userRole = await sessionStorage.GetItemAsync<string>("userRole");
@@ -177,7 +182,7 @@ else
             }
 
             (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
-               await HttpHandler.GetAsync<QuizDTO>(
+               await httpHandler.GetAsync<QuizDTO>(
                    $"/api/Quizs/{quizID}", jwt, Http);
 
             if (statusCodeQuiz == HttpStatusCode.OK)
@@ -186,7 +191,7 @@ else
             }
 
             (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
-                await HttpHandler.GetAsync<List<QuestionDTO>>(
+                await httpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt, Http);
 
             if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
@@ -301,7 +306,7 @@ else
 
     private async Task OpenSummery()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (quiz == null)
         {
@@ -316,7 +321,7 @@ else
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
         (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
-                await HttpHandler.GetAsync<List<DifficultyDTO>>(
+                await httpHandler.GetAsync<List<DifficultyDTO>>(
                     $"/api/Difficulties", jwt, Http);
 
         if (statusCodeDifficulties != HttpStatusCode.OK)
@@ -381,7 +386,7 @@ else
             };
 
         HttpStatusCode statusCodeUserQuiz =
-           await HttpHandler.PutAsync(
+           await httpHandler.PutAsync(
                    $"/api/User_Quiz", updateUserQuiz, jwt, Http);
 
         if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)

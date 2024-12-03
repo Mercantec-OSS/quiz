@@ -40,14 +40,15 @@
     </EditForm>
 </div>
 
-<LoadingSpinner @ref="loading" />
-
 @code {
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+    
+    [Inject] public HttpClient? Http { get; set; }
+
     private LoginModel loginRequest = new();
     private string ErrorMessage = string.Empty;
-    [Inject] public HttpClient? Http { get; set; }
-    private LoadingSpinner? loading;
-
+    
     // Method to handle login
     private async Task HandleLogin()
     {

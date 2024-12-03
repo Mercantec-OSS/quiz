@@ -53,7 +53,7 @@
 
         (HttpStatusCode statusCode, List<UserDTO>? response) =
            await HttpHandler.GetAsync<List<UserDTO>>(
-               $"/api/Users/AllStudents", jwt, Http);
+               $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {

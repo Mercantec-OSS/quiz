@@ -8,7 +8,6 @@
 <Row>
     <Column ColumnSize="ColumnSize.Is10">
         <h1>My Page</h1>
-
     </Column>
     <Column ColumnSize="ColumnSize.Is2">
         <h2>
@@ -27,61 +26,52 @@
     </Column>
 </Row>
 
-@if (quizzesLink == null)
-{
-    <p>
-        Loading...
-    </p>
-}
-else
-{
-    <Row HorizontalGutter="10" VerticalGutter="10">
-        @foreach (User_QuizQuizInfoDTO quizLink in quizzesLink)
-        {
-            <Column ColumnSize="ColumnSize.Is4">
-                <Card>
-                    <CardHeader>
-                        <Row>
-                            <Column ColumnSize="ColumnSize.Is8">
-                                <h3 class="card-title">@quizLink.quiz.Title</h3>
-                            </Column>
-                            <Column ColumnSize="ColumnSize.Is4">
-                                <h4 class="text-end">@quizLink.quiz.Creator</h4>
-                            </Column>
-                        </Row>
-                    </CardHeader>
-                    <CardBody>
-                        <Row>
-                            <Column>
-                                Category: @quizLink.quiz.Category
-                            </Column>
-                            <Column>
-                                Difficulty: @quizLink.quiz.Difficulty
-                            </Column>
-                            <Column>
-                                Score: @quizLink.Results
-                            </Column>
-                        </Row>
-                    </CardBody>
-                    <CardFooter>
-                        @if (!quizLink.Completed)
-                        {
-                            <Button Class="btn btn-primary w-100"
-                            Clicked="() => Start(quizLink.quiz.ID ?? 0)"
-                            Disabled="@quizLink.Completed">
-                                Start
-                            </Button>
-                        }
-                        else
-                        {
-                            <p class="text-center">Completed</p>
-                        }
-                    </CardFooter>
-                </Card>
-            </Column>
-        }
-    </Row>
-}
+<GenericListComponent T="User_QuizQuizInfoDTO" Items="quizzesLink"
+                      NoItemsText="You don't have any quiz assigned to you.'">
+    <BodyContent>
+        <Column ColumnSize="ColumnSize.Is4">
+            <Card>
+                <CardHeader>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is8">
+                            <h3 class="card-title">@context.quiz.Title</h3>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <h4 class="text-end">@context.quiz.Creator</h4>
+                        </Column>
+                    </Row>
+                </CardHeader>
+                <CardBody>
+                    <Row>
+                        <Column>
+                            Category: @context.quiz.Category
+                        </Column>
+                        <Column>
+                            Difficulty: @context.quiz.Difficulty
+                        </Column>
+                        <Column>
+                            @context.Results%
+                        </Column>
+                    </Row>
+                </CardBody>
+                <CardFooter>
+                    @if (!context.Completed)
+                    {
+                        <Button Class="btn btn-primary w-100"
+                                Clicked="() => Start(context.quiz.ID ?? 0)"
+                                Disabled="@context.Completed">
+                            Start
+                        </Button>
+                    }
+                    else
+                    {
+                        <p class="text-center">Completed</p>
+                    }
+                </CardFooter>
+            </Card>
+        </Column>
+    </BodyContent>
+</GenericListComponent>
 
 @code {
     [Inject] public HttpClient? Http { get; set; }

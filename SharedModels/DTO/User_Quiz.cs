@@ -8,7 +8,7 @@ public class User_QuizDTO
     public bool Completed { get; set; } = false;
 
     // Needs to be a percent
-    public int Results { get; set; } = 0;
+    public double Results { get; set; } = 0;
 
     // The ID of the Quiz
     public int QuizID { get; set; }
@@ -27,7 +27,7 @@ public class CreateMultiUsers_QuizDTO
     public bool Completed { get; set; } = false;
 
     // Needs to be a percent
-    public int Results { get; set; } = 0;
+    public double Results { get; set; } = 0;
 
     // The ID of the Quiz
     public int QuizID { get; set; }
@@ -46,7 +46,7 @@ public class User_QuizInfoDTO
     public bool Completed { get; set; } = false;
 
     // Needs to be a percent
-    public int Results { get; set; } = 0;
+    public double Results { get; set; } = 0;
 
     // The ID of the Quiz
     public QuizDTO Quiz { get; set; }
@@ -65,7 +65,7 @@ public class User_QuizUserInfoDTO
     public bool Completed { get; set; } = false;
 
     // Needs to be a percent
-    public int Results { get; set; } = 0;
+    public double Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }
 
@@ -80,7 +80,7 @@ public class User_QuizQuizInfoDTO
     public bool Completed { get; set; } = false;
 
     // Needs to be a percent
-    public int Results { get; set; } = 0;
+    public double Results { get; set; } = 0;
 
     public int TimeUsed { get; set; }
 

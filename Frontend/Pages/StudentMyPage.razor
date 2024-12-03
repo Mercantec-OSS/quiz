@@ -2,7 +2,6 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>My page</PageTitle>
 
 <Row>
@@ -74,22 +73,27 @@
 </GenericListComponent>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
     private List<User_QuizQuizInfoDTO>? quizzesLink = null;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
             int id = await sessionStorage.GetItemAsync<int>("userID");
 
             (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO>? response) =
-                await HttpHandler.GetAsync<List<User_QuizQuizInfoDTO>>(
+                await httpHandler.GetAsync<List<User_QuizQuizInfoDTO>>(
                     $"api/User_Quiz/AllUserQuiz/{id}", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)

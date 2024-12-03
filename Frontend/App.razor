@@ -1,6 +1,15 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<HttpHandler />
+<LoadingSpinner />
+<JWTokenHandler />
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <CascadingValue Name="HttpHandler" Value="HttpHandler.Instance">
+            <CascadingValue Name="LoadingSpinner" Value="LoadingSpinner.Instance">
+                <CascadingValue Name="JWTokenHandler" Value="JWTokenHandler.Instance">
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                </CascadingValue>
+            </CascadingValue>
+        </CascadingValue>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>

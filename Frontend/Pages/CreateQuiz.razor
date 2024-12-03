@@ -1,15 +1,12 @@
 ﻿@page "/quiz"
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-
 <h3>Quiz</h3>
 
 <div>
     <label for="quizTitle">Titel:</label>
     <input type="text" id="quizTitle" @bind="Title" placeholder="Quiz titel" class="form-control" style="width: 40%" />
 </div>
-
-
 
 <table>
     <tr>
@@ -176,8 +173,8 @@
         public CategoryDTO Categories { get; set; }
         public UnderCategoryGetDTO UnderCategories { get; set; }
         public DifficultyDTO Difficulties { get; set; }
-        public string[] PossibleAnswers { get; set; }
-        public int[] CorrectAnswer { get; set; }
+        public string[] PossibleAnswers { get; set; } = Array.Empty<string>();
+        public int[] CorrectAnswer { get; set; } = Array.Empty<int>();
         public int DesiredQuestionCount { get; set; }
 
         //public category dropdown
@@ -198,15 +195,18 @@
     public class Question
     {
         public int ID { get; set; }
-        public string Title { get; set; }
-        public string Category { get; set; }
-        public string UnderCategory { get; set; }
-        public string Difficulty { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string UnderCategory { get; set; } = string.Empty;
+        public string Difficulty { get; set; } = string.Empty;
         public int Time { get; set; }
-        public string[] PossibleAnswers { get; set; }
-        public int[] CorrectAnswer { get; set; }
+        public string[] PossibleAnswers { get; set; } = Array.Empty<string>();
+        public int[] CorrectAnswer { get; set; } = Array.Empty<int>();
         public bool IsSelected { get; set; }
     }
+
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
 
     [Inject] public HttpClient? Http { get; set; }
     private List<DifficultyDTO> difficulties = new();
@@ -215,7 +215,7 @@
     private List<CategoryHandlingQuiz> CategoriesHandler = new();
     private int CategoryID { get; set; }
     private int DifficultyID { get; set; }
-    private string Title { get; set; }
+    private string Title { get; set; } = string.Empty;
     private List<Question> Questions { get; set; } = new();
     private string SaveQuizMessage = string.Empty;
     private const int MaxQuestions = 25;
@@ -234,38 +234,20 @@
         return selectedQuestions;
     }
 
-
-
-    private bool mainCategoryDropdownVisible = false;
-    private void ToggleMainCategoryDropdown()
-    {
-        mainCategoryDropdownVisible = !mainCategoryDropdownVisible;
-    }
-
     private void SelectMainCategory(CategoryDTO Category)
     {
         CategoryID = Category.ID;
-        mainCategoryDropdownVisible = false;
-    }
-
-
-
-    private bool mainDifficultyDropdownVisible = false;
-    private void ToggleMainDifficultyDropdown()
-    {
-        mainDifficultyDropdownVisible = !mainDifficultyDropdownVisible;
     }
 
     private void SelectMainDifficulty(DifficultyDTO Difficulty)
     {
         DifficultyID = Difficulty.ID;
-        mainDifficultyDropdownVisible = false;
     }
 
     //Get the question and info
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
-        if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
+        if (Http == null || httpHandler == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
 
         int categoryID = questionHandling.selectedCategory.ID;
         int underCategoryID = questionHandling.selectedUnderCategory.ID;
@@ -281,7 +263,7 @@
             return;
         }
 
-        (HttpStatusCode statusCode, List<Question>? questions) = await HttpHandler.GetAsync<List<Question>>(url, jwt, Http);
+        (HttpStatusCode statusCode, List<Question>? questions) = await httpHandler.GetAsync<List<Question>>(url, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -296,13 +278,12 @@
         {
             Console.WriteLine("FUCK YOU");
         }
-
     }
 
     //method to make a random quiz by button press
     private async Task RandomQuizMaking()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
 
         List<QuestionAmount> questions = new();
         for (int i = 0; i < CategoriesHandler.Count; i++)
@@ -331,14 +312,12 @@
 
             };
 
-
         // add "jwt" between quizDto and Http
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
 
-
         (HttpStatusCode statusCode, QuizDTO? response) =
-           await HttpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt, Http);
+           await httpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -355,7 +334,7 @@
 
     private async Task customQuiz()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
 
         var selectedQuestions = GetSelectedQuestions();
 
@@ -367,7 +346,6 @@
 
         int userID = await sessionStorage.GetItemAsync<int>("userID");
         string jwt = await sessionStorage.GetItemAsync<string>("jwt");
-
 
         int[] questionIDs = selectedQuestions.Select(q => q.ID).ToArray();
 
@@ -384,7 +362,7 @@
         string url = "/api/Quizs/Setup-Quiz/Custom";
 
         (HttpStatusCode statusCode, QuizDTO? response) =
-        await HttpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
+        await httpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -397,19 +375,17 @@
         StateHasChanged();
     }
 
-
-
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
 
         if (firstRender)
         {
             string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
-               await HttpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
+               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
@@ -417,7 +393,7 @@
             }
 
             (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
-            await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
+            await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
             if (statusCodeCategories == HttpStatusCode.OK)
             {
                 categories.AddRange(getCategories ?? new());
@@ -425,7 +401,7 @@
 
 
             (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
-            await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>("/api/UnderCategories", Jwt, Http);
+            await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("/api/UnderCategories", Jwt, Http);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
@@ -443,61 +419,27 @@
         CategoriesHandler.Remove(categoryHandling);
     }
 
-
     private void AddNewCategory()
     {
         CategoriesHandler.Add(new CategoryHandlingQuiz());
-    }
-
-    //simple drop down menu category
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownCategory(CategoryHandlingQuiz categoryHandling)
-    {
-        categoryHandling.dropdownCategory = categoryHandling.dropdownCategory == "" ? "show" : "";
-        categoryHandling.dropdownUnderCategory = "";
-        categoryHandling.dropdownDifficulty = "";
     }
 
     // Set the selected item and close the dropdown
     private void SelectCategory(CategoryDTO category, CategoryHandlingQuiz questionHandling)
     {
         questionHandling.selectedCategory = category;
-        questionHandling.dropdownCategory = ""; // Hide the dropdown
-    }
-
-
-    //simple drop down menu for undercategory
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownUnderCategory(CategoryHandlingQuiz questionHandling)
-    {
-        questionHandling.dropdownUnderCategory = questionHandling.dropdownUnderCategory == "" ? "show" : "";
-        questionHandling.dropdownCategory = "";
-        questionHandling.dropdownDifficulty = "";
     }
 
     // Set the selected item and close the dropdown
     private void SelectUnderCategory(UnderCategoryGetDTO underCategory, CategoryHandlingQuiz underCategoryHandling)
     {
         underCategoryHandling.selectedUnderCategory = underCategory;
-        underCategoryHandling.dropdownUnderCategory = ""; // Hide the dropdown
-    }
-
-
-
-    //simple drop down menu for difficulties
-    // Toggle the visibility of the dropdown menu
-    private void ToggleDropdownDifficulties(CategoryHandlingQuiz difficultyHandling)
-    {
-        difficultyHandling.dropdownDifficulty = difficultyHandling.dropdownDifficulty == "" ? "show" : "";
-        difficultyHandling.dropdownCategory = "";
-        difficultyHandling.dropdownUnderCategory = "";
     }
 
     // Set the selected item and close the dropdown
     private void SelectDifficulties(DifficultyDTO difficulties, CategoryHandlingQuiz difficultyHandling)
     {
         difficultyHandling.selectedDifficulty = difficulties;
-        difficultyHandling.dropdownDifficulty = ""; // Hide the dropdown
     }
 }
 

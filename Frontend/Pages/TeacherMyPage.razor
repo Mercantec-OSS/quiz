@@ -1,9 +1,8 @@
 ﻿@page "/TeacherMyPage"
 
+@inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<JWTokenHandler @ref="jWTokenHandler" />
-<LoadingSpinner @ref="loading" />
 <TeacherQuizInfoModal @ref="teacherQuizInfoModal" />
 <TeacherAddStudentToQuiz @ref="teacherAddStudentToQuiz" />
 
@@ -12,7 +11,7 @@
 <h3>My Page</h3>
 
 <GenericListComponent T="QuizDTO" Items="quizzesMaked"
-    NoItemsText="You haven't created any quizzes.">
+                      NoItemsText="You haven't created any quizzes.">
     <BodyContent>
         <Column ColumnSize="ColumnSize.Is4">
             <Card>
@@ -41,27 +40,42 @@
 </GenericListComponent>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
-    private LoadingSpinner? loading;
+
     private TeacherQuizInfoModal? teacherQuizInfoModal;
     private TeacherAddStudentToQuiz? teacherAddStudentToQuiz;
 
-    private List<QuizDTO> quizzesMaked = new();
+    private List<QuizDTO>? quizzesMaked;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
             int id = await sessionStorage.GetItemAsync<int>("userID");
+            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            if (userRole == "Student")
+            {
+                NavigationManager.NavigateTo("/home");
+                return;
+            }
+
             loading?.Start();
 
             (HttpStatusCode statusCode, List<QuizDTO>? response) =
-                await HttpHandler.GetAsync<List<QuizDTO>>(
+                await httpHandler.GetAsync<List<QuizDTO>>(
                     $"/api/Quizs/ByCreater/{id}", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)

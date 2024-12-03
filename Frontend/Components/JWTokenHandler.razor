@@ -2,7 +2,13 @@
 @inject NavigationManager NavigationManager
 
 @code {
+    public static JWTokenHandler? Instance { get; private set; }
     private string jwt = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Instance = this;
+    }
 
     public async Task<string> GetToken()
     {

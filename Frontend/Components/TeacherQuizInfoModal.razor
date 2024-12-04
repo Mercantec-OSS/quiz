@@ -1,7 +1,4 @@
-﻿<LoadingSpinner @ref="loading" />
-<JWTokenHandler @ref="jWTokenHandler" />
-
-<CustomModal Title="@quiz.Title" @ref="modal" size="ModalSize.Large" OnClose="Close"
+﻿<CustomModal Title="@quiz.Title" @ref="modal" size="ModalSize.Large" OnClose="Close"
              OnPrimaryAction="OpenAddStudentsModal" PrimaryButtonText="Add Student(s)">
     <BodyContent>
         <GenericListComponent T="User_QuizUserInfoDTO" Items="usersToQuiz" NoItemsText="No students found assigned to this quiz">
@@ -29,9 +26,16 @@
 </CustomModal>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private LoadingSpinner? loading;
-    private JWTokenHandler? jWTokenHandler;
     private CustomModal? modal;
 
     private QuizDTO quiz = new();
@@ -40,7 +44,7 @@
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openAddStudentsModal)
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         modal?.Show();
@@ -51,7 +55,7 @@
         this.openAddStudentsModal = openAddStudentsModal;
 
         (HttpStatusCode statusCode, List<User_QuizUserInfoDTO>? response) =
-           await HttpHandler.GetAsync<List<User_QuizUserInfoDTO>>(
+           await httpHandler.GetAsync<List<User_QuizUserInfoDTO>>(
                $"/api/User_Quiz/AllStudents/{quiz.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)

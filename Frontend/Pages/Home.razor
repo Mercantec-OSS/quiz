@@ -3,7 +3,6 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<JWTokenHandler @ref="jWTokenHandler" />
 <PageTitle>Home</PageTitle>
 
 <div style="display: flex; align-items: center; flex-direction: column;">
@@ -37,7 +36,9 @@
 </div>
 
 @code {
-    private JWTokenHandler? jWTokenHandler;
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
     private SearchWord searchWord = new();
     private string userRole = string.Empty;
 

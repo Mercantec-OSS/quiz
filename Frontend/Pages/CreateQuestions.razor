@@ -3,7 +3,6 @@
 @using OfficeOpenXml
 @using System.IO
 
-
 <PageTitle>Create</PageTitle>
 
 <div>
@@ -12,9 +11,7 @@
         <div>
             <h5>Questions @((questionsHandler.IndexOf(question) + 1))</h5>
 
-
             <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
-
 
             @* simple drop down menu, very  important *@
             <div class="drop-menu">
@@ -38,7 +35,7 @@
                                 <DropdownToggle Color="Color.Primary">
                                     @(question.selectedUnderCategory == null ? "Choose under category" : question.selectedUnderCategory.UnderCategory)
                                 </DropdownToggle>
-                                <DropdownMenu  MaxMenuHeight="100px">
+                                <DropdownMenu MaxMenuHeight="100px">
                                     @foreach (UnderCategoryGetDTO underCategory in underCategories)
                                     {
                                         <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
@@ -69,8 +66,6 @@
             @* end of dropdown menu  *@
             <br />
 
-
-
             <div class="answer-option">
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
                 <input type="text" placeholder="Answer 1" @bind="question.questionModel.Answer1" />
@@ -92,11 +87,7 @@
     }
 </div>
 
-
-
 <div>
-
-
     @if (questionsHandler.Count >= MaxQuestions)
     {
         <p style="color:red"> MAX QUESTIONS REACHED!!! (@MaxQuestions)</p>
@@ -118,7 +109,6 @@
     <InputFile id="file-upload" style="display: none;" OnChange="UploadExcel" />
 </div>
 
-
 @if (createdQuestions)
 {
     <div class="model custom-modal">
@@ -131,40 +121,28 @@
     <div @onclick="ToggleCreatedConfirmed" class="modal-overlay"></div>
 }
 
-<LoadingSpinner @ref="loading" />
-
 @code {
     public class QuestionModel
     {
         public int Id { get; set; }
-        public string QuestionText { get; set; }
-        public string Categories { get; set; }
-        public string UnderCategories { get; set; }
-        public string Answer1 { get; set; }
-        public string Answer2 { get; set; }
-        public string Answer3 { get; set; }
-        public string Answer4 { get; set; }
+        public string QuestionText { get; set; } = string.Empty;
+        public string Categories { get; set; } = string.Empty;
+        public string UnderCategories { get; set; } = string.Empty;
+        public string Answer1 { get; set; }= string.Empty;
+        public string Answer2 { get; set; }= string.Empty;
+        public string Answer3 { get; set; } = string.Empty;
+        public string Answer4 { get; set; } = string.Empty;
         public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
-        public string Difficulties { get; set; }
+        public string Difficulties { get; set; } = string.Empty;
         public bool QuestionStatus { get; set; }
         public int? Time { get; set; }
         public int User { get; set; }
-        public string Picture { get; set; }
-    }
-
-    public class Question
-    {
-        public int QuestionId { get; set; }
-        public string QuestionText { get; set; } = "";
-        public string Answer1 { get; set; } = "";
-        public string Answer2 { get; set; } = "";
-        public string Answer3 { get; set; } = "";
-        public string Answer4 { get; set; } = "";
+        public string Picture { get; set; } = string.Empty;
     }
 
     private class QuestionHandling
     {
-        public QuestionModel? questionModel;
+        public QuestionModel questionModel = new();
 
         //public category dropdown
         public CategoryDTO? selectedCategory;
@@ -179,28 +157,36 @@
     private List<DifficultyDTO> difficulties = new();
     private List<CategoryDTO> categories = new();
     private List<UnderCategoryGetDTO> underCategories = new();
-    
+
     private bool createdQuestions = false;
-    private LoadingSpinner? loading;
 
     private const int MaxQuestions = 25;
-    // private int nextQuestionId = 1;
     private List<QuestionHandling> questionsHandler = new();
+
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
 
     [Inject] public HttpClient? Http { get; set; }
 
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
+        if (jWTokenHandler == null) return;
 
         if (firstRender)
         {
-            string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            string Jwt = await jWTokenHandler.GetToken();
             loading?.Start();
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
-               await HttpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
+               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
@@ -208,7 +194,7 @@
             }
 
             (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
-               await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
+               await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
 
             if (statusCodeCategories == HttpStatusCode.OK)
             {
@@ -216,7 +202,7 @@
             }
 
             (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
-               await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt, Http);
+               await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt, Http);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
@@ -227,23 +213,17 @@
         }
     }
 
-
     private void ToggleCreatedConfirmed()
     {
         createdQuestions = !createdQuestions;
     }
-
-
 
     //method to add new question to the quiz
     private void AddNewQuestion()
     {
         if (questionsHandler.Count < MaxQuestions)
         {
-            questionsHandler.Add(new()
-                {
-                    questionModel = new()
-                });
+            questionsHandler.Add(new());
         }
     }
 
@@ -256,6 +236,10 @@
     // save questions to database, to save for other use
     private async Task SaveQuestions()
     {
+        if (Http == null || httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        string jwt = await jWTokenHandler.GetToken();
         loading?.Start();
 
         foreach (QuestionHandling question in questionsHandler)
@@ -289,13 +273,10 @@
                 return;
             }
 
-
-
-            var correctAnswerIds = question.questionModel?.CorrectAnswers
-            .Select((isCorrect, index) => isCorrect ? index + 1 : (int?)null)
-            .Where(id => id.HasValue)
-            .Select(id => id.Value)
-            .ToArray();
+            int[] correctAnswerIds = question.questionModel.CorrectAnswers
+                .Where(isCorrect => isCorrect)
+                .Select((isCorrect, index) => index + 1)
+                .ToArray();
 
             var dto = new QuestionCreateDTO
                 {
@@ -312,17 +293,17 @@
                     Creator = 1,
                 };
 
-
             try
             {
                 // Send the POST request
-                var response = await Http.PostAsJsonAsync("https://mercantec-quiz.onrender.com/api/Questions", dto);
+                (HttpStatusCode statusCode, string? response) = 
+                    await httpHandler.PostAsync<string>($"api/Questions", dto, jwt, Http);
 
                 // Check if the request was successful
-                if (!response.IsSuccessStatusCode)
+                if (statusCode != HttpStatusCode.Created)
                 {
                     // Log the status code and reason phrase in case of failure
-                    Console.WriteLine($"Failed to save question '{dto.Title}': {response.StatusCode} - {response.ReasonPhrase}");
+                    Console.WriteLine($"Failed to save question '{dto.Title}': {statusCode} - {response}");
                 }
             }
             catch (Exception ex)
@@ -335,8 +316,6 @@
         ToggleCreatedConfirmed();
         loading?.Stop();
     }
-
-
 
     //Helper method to map Selected answer
     private int ConvertAnswerToId(String selectedAnswer)
@@ -351,7 +330,7 @@
             default: return 0; //No Answer selected
         }
     }
-    
+
     // Set the selected item and close the dropdown
     private void SelectCategory(CategoryDTO item, QuestionHandling questionHandling)
     {
@@ -376,81 +355,80 @@
         questionsHandler.Remove(questionHandling);
     }
 
-
     //uploading the excel file to the database
     private async Task UploadExcel(InputFileChangeEventArgs e)
     {
-            try
+        try
+        {
+            // Set the license context
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            var file = e.File;
+
+            if (file != null)
             {
-                // Set the license context
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-                var file = e.File;
-
-                if (file != null)
+                using (var stream = new MemoryStream())
                 {
-                    using (var stream = new MemoryStream())
+                    await file.OpenReadStream().CopyToAsync(stream);
+
+                    using (var package = new OfficeOpenXml.ExcelPackage(stream))
                     {
-                        await file.OpenReadStream().CopyToAsync(stream);
+                        var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
 
-                        using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                        var rowCount = worksheet.Dimension.Rows;
+
+                        for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
                         {
-                            var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
-
-                            var rowCount = worksheet.Dimension.Rows;
-
-                            for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
-                            {
-                                var question = new QuestionModel
-                                    {
-                                        // Id = nextQuestionId++,
-                                        QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
-                                        Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
-                                        Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
-                                        Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
-                                        Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
-                                    };
-
-                                // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
-                                var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
-                                if (!string.IsNullOrEmpty(correctAnswers))
+                            var question = new QuestionModel
                                 {
-                                    var correctIndices = correctAnswers.Split(',')
-                                        .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
-                                        .Where(x => x > 0 && x <= 4)
-                                        .ToList();
+                                    // Id = nextQuestionId++,
+                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
+                                };
 
-                                    for (int i = 0; i < correctIndices.Count; i++)
+                            // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
+                            var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
+                            if (!string.IsNullOrEmpty(correctAnswers))
+                            {
+                                var correctIndices = correctAnswers.Split(',')
+                                    .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
+                                    .Where(x => x > 0 && x <= 4)
+                                    .ToList();
+
+                                for (int i = 0; i < correctIndices.Count; i++)
+                                {
+                                    if (correctIndices[i] <= 4) // Assuming only 4 answers
                                     {
-                                        if (correctIndices[i] <= 4) // Assuming only 4 answers
-                                        {
-                                            question.CorrectAnswers[correctIndices[i] - 1] = true;
-                                        }
+                                        question.CorrectAnswers[correctIndices[i] - 1] = true;
                                     }
                                 }
-
-                                // Set additional properties from the Excel columns
-                                question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
-                                question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
-                                question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
-                                question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
-                                question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
-                                question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
-                                question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
-
-
-                                questionsHandler.Add(new()
-                                    {
-                                        questionModel = question
-                                    });
                             }
+
+                            // Set additional properties from the Excel columns
+                            question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                            question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+                            question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
+                            question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
+                            question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
+                            question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
+                            question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
+
+
+                            questionsHandler.Add(new()
+                                {
+                                    questionModel = question
+                                });
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error uploading file: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading file: {ex.Message}");
+        }
     }
 }

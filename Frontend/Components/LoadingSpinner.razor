@@ -6,11 +6,17 @@
 }
 
 @code {
+    public static LoadingSpinner? Instance { get; private set; }
     private bool loading = false;
-    public bool isLoading 
+    public bool isLoading
     {
         private set => loading = value;
         get => loading;
+    }
+
+    protected override void OnInitialized()
+    {
+        Instance = this;
     }
 
     public void Start()

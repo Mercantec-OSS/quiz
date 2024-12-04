@@ -6,15 +6,21 @@
             <ModalTitle>@Title</ModalTitle>
             <CloseButton Clicked="OnClose" />
         </ModalHeader>
-        <ModalBody>
-            @BodyContent
-        </ModalBody>
+        @if (BodyContent != null)
+        {
+            <ModalBody>
+                @BodyContent
+            </ModalBody>
+        }
         <ModalFooter>
             @if (PrimaryButtonText != null)
             {
                 <Button Color="Color.Primary" Clicked="OnPrimaryAction">@PrimaryButtonText</Button>
             }
-            <Button Color="Color.Secondary" Clicked="OnClose">Close</Button>
+            <Button Color="Color.Secondary" Clicked="() =>
+                    DefaultOnClose ? Hide() : OnClose.InvokeAsync()">
+                Close
+            </Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -27,6 +33,8 @@
     [Parameter] public string Title { get; set; } = "Modal Title";
     [Parameter] public string? PrimaryButtonText { get; set; } = null;
     [Parameter] public EventCallback OnPrimaryAction { get; set; }
+
+    [Parameter] public bool DefaultOnClose { get; set; } = false;
     [Parameter] public EventCallback OnClose { get; set; }
 
     private Modal? ModalRef;

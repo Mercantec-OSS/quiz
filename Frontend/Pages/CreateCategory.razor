@@ -1,23 +1,19 @@
 ﻿@page "/createCategory"
 
-<PageTitle>Create Kategori</PageTitle>
+<PageTitle>Create Categori</PageTitle>
 
 <Div style="display: flex; align-items: center; flex-direction: column;">
     <h1>Create Kategori</h1>
 
     <Div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-        <Dropdown Display="Display.InlineBlock">
-            <DropdownToggle Color="Color.Primary">
-                @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
-            </DropdownToggle>
-            <DropdownMenu MaxMenuHeight="100px">
-                <DropdownItem>
-                    <input type="text" class="form-control" placeholder="Search"
-                    @oninput="SearchWordChange"
-                    @bind="searchWord" />
-                </DropdownItem>
-                <DropdownDivider />
-                @foreach (CategoryDTO category in searchWord == string.Empty ?
+        <Dropdown @ref="dropdown" Display="Display.InlineBlock">
+            <Button Style="padding: 0 !important" Color="Color.Primary">
+                <input type="text" class="form-control" placeholder="Search category..."
+                       @oninput="SearchWordChange" @onselect="ShowDropdown" @bind="searchWord" />
+            </Button>
+            <DropdownToggle Class="h-100" Color="Color.Primary" Split />
+            <DropdownMenu MaxMenuHeight="400px">
+                @foreach (CategoryDTO category in string.IsNullOrEmpty(searchWord) ?
                 categories : categories.Where(c =>
                 c.Category.ToLower().Contains(searchWord.ToLower())))
                 {
@@ -32,12 +28,12 @@
         </Dropdown>
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
-        Clicked="() => ToggleEditCategoryModal(selectedCategory)">
-            Edit Kategori
+                Clicked="() => ToggleEditCategoryModal(selectedCategory)">
+            Edit Categori
         </Button>
 
         <Button Class="btn btn-success" Clicked="OpenModalAddNewCategory">
-            Add Kategori
+            Add Categori
         </Button>
     </Div>
 </Div>
@@ -57,13 +53,13 @@
                 <TableRowCell>@underCategory.UnderCategory</TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-warning"
-                    @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
+                            @onclick="() => ToggleEditUnderCategoryModal(underCategory)">
                         Edit
                     </button>
                 </TableRowCell>
                 <TableRowCell>
                     <button class="btn btn-danger"
-                    @onclick="() => ToggleDeleteConfirmation(underCategory)">
+                            @onclick="() => ToggleDeleteConfirmation(underCategory)">
                         Delete
                     </button>
                 </TableRowCell>
@@ -85,7 +81,7 @@
 </Table>
 
 <CustomModal Title="Add new under category" @ref="modalAddNewCategory" OnClose="() => CloseModal(modalAddNewCategory)"
-OnPrimaryAction="AddNewCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+             OnPrimaryAction="AddNewCategory" PrimaryButtonText="Save" size="ModalSize.Default">
     <BodyContent>
         <Field>
             <TextEdit @bind-Text="newCategory" Placeholder="Enter category..." />
@@ -94,7 +90,7 @@ OnPrimaryAction="AddNewCategory" PrimaryButtonText="Save" size="ModalSize.Defaul
 </CustomModal>
 
 <CustomModal Title="Add new category" @ref="modalAddNewUnderCategory" OnClose="() => CloseModal(modalAddNewUnderCategory)"
-OnPrimaryAction="AddNewUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+             OnPrimaryAction="AddNewUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
     <BodyContent>
         <Field>
             <TextEdit @bind-Text="newUnderCategory" Placeholder="Enter under category..." />
@@ -103,7 +99,7 @@ OnPrimaryAction="AddNewUnderCategory" PrimaryButtonText="Save" size="ModalSize.D
 </CustomModal>
 
 <CustomModal Title="Edit category" @ref="modalEditCategory" OnClose="() => CloseModal(modalEditCategory)"
-OnPrimaryAction="SaveEditedCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+             OnPrimaryAction="SaveEditedCategory" PrimaryButtonText="Save" size="ModalSize.Default">
     <BodyContent>
         <Field>
             <TextEdit @bind-Text="editCategoryText" Placeholder="Enter category..." />
@@ -112,7 +108,7 @@ OnPrimaryAction="SaveEditedCategory" PrimaryButtonText="Save" size="ModalSize.De
 </CustomModal>
 
 <CustomModal Title="Edit under category" @ref="modalEditUnderCategory" OnClose="() => CloseModal(modalEditUnderCategory)"
-OnPrimaryAction="SaveEditedUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
+             OnPrimaryAction="SaveEditedUnderCategory" PrimaryButtonText="Save" size="ModalSize.Default">
     <BodyContent>
         <Field>
             <TextEdit @bind-Text="editUnderCategoryText" Placeholder="Enter under category..." />
@@ -121,14 +117,14 @@ OnPrimaryAction="SaveEditedUnderCategory" PrimaryButtonText="Save" size="ModalSi
 </CustomModal>
 
 <CustomModal Title="Are you sure you want to  delete this under kategori?" @ref="modalDeleteConfirmation" OnClose="() => CloseModal(modalDeleteConfirmation)"
-OnPrimaryAction="DeleteConfirmed" PrimaryButtonText="Delete" size="ModalSize.Default">
+             OnPrimaryAction="DeleteConfirmed" PrimaryButtonText="Delete" size="ModalSize.Default">
     <BodyContent>
         You can't undo this action.
     </BodyContent>
 </CustomModal>
 
 <CustomModal Title="An error happened!" @ref="modalErrorHappened" OnClose="() => CloseModal(modalErrorHappened)"
-NeedPrimary="false" size="ModalSize.Default">
+             size="ModalSize.Default">
     <BodyContent>
         You can't undo this action.
     </BodyContent>
@@ -164,6 +160,7 @@ NeedPrimary="false" size="ModalSize.Default">
 
     private string searchWord = string.Empty;
 
+    private Dropdown? dropdown;
     private CustomModal? modalErrorHappened;
 
     private CustomModal? modalAddNewCategory;
@@ -199,8 +196,11 @@ NeedPrimary="false" size="ModalSize.Default">
         }
     }
 
+    private void ShowDropdown() => dropdown?.Show();
+
     private void SearchWordChange(ChangeEventArgs e)
     {
+        ShowDropdown();
         searchWord = e.Value?.ToString() ?? string.Empty;
     }
 
@@ -320,7 +320,7 @@ NeedPrimary="false" size="ModalSize.Default">
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null 
+        if (Http == null || this.editCategory == null || jWTokenHandler == null
             || httpHandler == null || this.editUnderCategory == null)
         {
             ToggleEditUnderCategoryModal();
@@ -355,7 +355,7 @@ NeedPrimary="false" size="ModalSize.Default">
 
     private async Task DeleteConfirmed()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null 
+        if (Http == null || this.editCategory == null || jWTokenHandler == null
             || httpHandler == null || underCategoryToBeDeleted == null)
             return;
 

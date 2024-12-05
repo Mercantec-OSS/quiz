@@ -245,6 +245,27 @@
             });
         }
 
+        // POST: api/Users
+        [AllowAnonymous]
+        [HttpPost("LoginGuest")]
+        public async Task<ActionResult<UserDTO>> LoginGuest()
+        {
+            User? userFinder = await _context.Users.
+                Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Username == "Guest");
+
+            var Token = await _context.Token.FirstOrDefaultAsync(t => t.user.ID == userFinder.ID);
+
+            return Ok(new UserDTO()
+            {
+                ID = userFinder.ID,
+                email = userFinder.Email,
+                username = userFinder.Username,
+                role = userFinder.role.Role,
+                token = Token.JWTToken
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost("ADSignup")]
         public async Task<ActionResult<UserDTO>> PostADUser(SignUpRequest userSignUp)

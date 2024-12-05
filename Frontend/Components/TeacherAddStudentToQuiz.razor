@@ -1,49 +1,42 @@
-﻿<JWTokenHandler @ref="jWTokenHandler" />
-<LoadingSpinner @ref="loading" />
-
-<CustomModal Title="@quiz.Title" @ref="modal" OnClose="Close"
+﻿<CustomModal Title="@quiz.Title" @ref="modal" OnClose="Close"
              OnPrimaryAction="AddStudents" PrimaryButtonText="Add Student(s)">
     <BodyContent>
-        @if (students == null)
-        {
-            <Div>Loading...</Div>
-        }
-        else if (students.Count == 0)
-        {
-            <Div>No students found assigned to this quiz</Div>
-        }
-        else
-        {
-            <Row HorizontalGutter="10" VerticalGutter="10">
-                @foreach (var user in students)
-                {
-                    <Column ColumnSize="ColumnSize.Is3">
-                        <Card>
-                            <CardHeader>
-                                @user.Key.username
-                            </CardHeader>
-                            <CardBody>
-                                <Row>
-                                    <Column ColumnSize="ColumnSize.Is8">
-                                        <p>Email: @user.Key.email</p>
-                                    </Column>
-                                    <Column ColumnSize="ColumnSize.Is2">
-                                        <Switch TValue="bool" CheckedChanged="Value => OnChanged(Value, user.Key)">Add</Switch>
-                                    </Column>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                    </Column>
-                }
-            </Row>
-        }
+        <GenericListComponent T="UserDTO" Items="students?.Keys.ToList()"
+                              NoItemsText="No students found assigned to this quiz">
+            <BodyContent>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Card>
+                        <CardHeader>
+                            @context.username
+                        </CardHeader>
+                        <CardBody>
+                            <Row>
+                                <Column ColumnSize="ColumnSize.Is8">
+                                    <p>Email: @context.email</p>
+                                </Column>
+                                <Column ColumnSize="ColumnSize.Is2">
+                                    <Switch TValue="bool" CheckedChanged="Value => OnChanged(Value, context)">Add</Switch>
+                                </Column>
+                            </Row>
+                        </CardBody>
+                    </Card>
+                </Column>
+            </BodyContent>
+        </GenericListComponent>
     </BodyContent>
 </CustomModal>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
-    private LoadingSpinner? loading;
     private CustomModal? modal;
 
     private QuizDTO quiz = new();
@@ -53,7 +46,7 @@
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openTeacherQuizInfo)
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
@@ -63,8 +56,8 @@
         modal?.Show();
 
         (HttpStatusCode statusCode, List<UserDTO>? response) =
-           await HttpHandler.GetAsync<List<UserDTO>>(
-               $"/api/Users", jwt, Http);
+           await httpHandler.GetAsync<List<UserDTO>>(
+               $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -92,7 +85,7 @@
 
     private async void AddStudents()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (students == null) return;
 
@@ -105,7 +98,7 @@
                 UserID = students.Where(s => s.Value).Select(s => s.Key.ID).ToArray()
             };
 
-        (HttpStatusCode statusCode, string response) = await HttpHandler.PostAsync(
+        (HttpStatusCode statusCode, string response) = await httpHandler.PostAsync(
                $"/api/User_Quiz/MoreUsers", newUserToQuiz, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created)

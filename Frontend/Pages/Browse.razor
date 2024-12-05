@@ -17,7 +17,7 @@
     <Column Class="mx-1" ColumnSize="ColumnSize.Is2">
         <Dropdown Display="Display.InlineBlock">
             <DropdownToggle Color="Color.Primary">
-                @(selectedCreators == null ? "Filter by creators" : selectedCreators)
+                @(selectedCreator == null ? "Filter by creators" : selectedCreator)
             </DropdownToggle>
             <DropdownMenu MaxMenuHeight="100px">
                 <DropdownItem Clicked="() => SelectCreator(null)">Remove filter</DropdownItem>
@@ -35,7 +35,7 @@
     <Column Class="mx-1" ColumnSize="ColumnSize.Is2">
         <Dropdown Display="Display.InlineBlock">
             <DropdownToggle Color="Color.Primary">
-                @(selectedCategory == null ? "Filter by Kategori" : selectedCategory)
+                @(selectedCategory == null ? "Filter by categori" : selectedCategory)
             </DropdownToggle>
             <DropdownMenu MaxMenuHeight="100px">
                 <DropdownItem Clicked="() => SelectCategory(null)">Remove filter</DropdownItem>
@@ -69,73 +69,64 @@
     </Column>
 </Row>
 
-@if (loading?.isLoading ?? false)
-{
-    <p>
-        Loading...
-    </p>
-}
-else
-{
-    <Row HorizontalGutter="10" VerticalGutter="10">
-        @foreach (QuizDTO quiz in Sort())
-        {
-            <Column ColumnSize="ColumnSize.Is4">
-                <Card>
-                    <CardHeader>
-                        <strong>@quiz.Title</strong>
-                    </CardHeader>
-                    <CardBody>
-                        <Row>
-                            <Column>
-                                Category: @quiz.Category
-                            </Column>
-                            <Column>
-                                Difficulty: @quiz.Difficulty
-                            </Column>
-                            <Column>
-                                Questions: @quiz.QestionsAmount
-                            </Column>
-                        </Row>
-                    </CardBody>
-                    <CardFooter>
-                        <Button Color="Color.Primary" Style="width: 100%" Clicked="() => StartQuiz(quiz.ID ?? 0)">
-                            @(quiz.Creator == username ? "Try quiz" : "Start")
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </Column>
-        }
-    </Row>
-}
-
-<LoadingSpinner @ref="loading" />
+<GenericListComponent T="QuizDTO" Items="Sort()" NoItemsText="Loading...">
+    <BodyContent>
+        <Column ColumnSize="ColumnSize.Is4">
+            <Card>
+                <CardHeader>
+                    <strong>@context.Title</strong>
+                </CardHeader>
+                <CardBody>
+                    <Row>
+                        <Column>
+                            Category: @context.Category
+                        </Column>
+                        <Column>
+                            Difficulty: @context.Difficulty
+                        </Column>
+                        <Column>
+                            Questions: @context.QestionsAmount
+                        </Column>
+                    </Row>
+                </CardBody>
+                <CardFooter>
+                    <Button Color="Color.Primary" Style="width: 100%" 
+                        Clicked="() => StartQuiz(context.ID ?? 0)">
+                        @(context.Creator == username ? "Try quiz" : "Start")
+                    </Button>
+                </CardFooter>
+            </Card>
+        </Column>
+    </BodyContent>
+</GenericListComponent>
 
 @code {
-    [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
-    private List<QuizDTO> allQuizzes = new();
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
 
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
+    [Inject] public HttpClient? Http { get; set; }
+    
+    private List<QuizDTO> allQuizzes = new();
     private List<string> creators = new();
     private List<string> categories = new();
     private List<string> difficulties = new();
 
-    private string? selectedCategory;
-    private string? selectedCreators;
-    private string? selectedDifficulty;
-
-    private string dropdownCreator = string.Empty;
-    private string dropdownCategory = string.Empty;
-    private string dropdownDifficuly = string.Empty;
-
-    private LoadingSpinner? loading;
     private string username = string.Empty;
+    private string? selectedCategory;
+    private string? selectedCreator;
+    private string? selectedDifficulty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
@@ -151,7 +142,7 @@ else
             Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
 
             (HttpStatusCode statusCode, List<QuizDTO>? response) =
-                await HttpHandler.GetAsync<List<QuizDTO>>(
+                await httpHandler.GetAsync<List<QuizDTO>>(
                     $"/api/Quizs/QuizSearch", parameters, jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
@@ -187,7 +178,7 @@ else
         }
     }
 
-    private void SelectCreator(string? creator) => selectedCreators = creator;
+    private void SelectCreator(string? creator) => selectedCreator = creator;
     private void SelectCategory(string? category) => selectedCategory = category;
     private void SelectDifficulty(string? difficult) => selectedDifficulty = difficult;
 
@@ -196,9 +187,9 @@ else
         List<QuizDTO> quizzes = new();
         foreach (QuizDTO item in allQuizzes)
         {
-            if (!string.IsNullOrEmpty(selectedCreators))
+            if (!string.IsNullOrEmpty(selectedCreator))
             {
-                if (item.Creator != selectedCreators)
+                if (item.Creator != selectedCreator)
                 {
                     continue;
                 }

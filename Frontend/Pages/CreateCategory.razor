@@ -1,25 +1,19 @@
 ﻿@page "/createCategory"
 
-<LoadingSpinner @ref="loading" />
-<JWTokenHandler @ref="jWTokenHandler" />
-<PageTitle>Create Kategori</PageTitle>
+<PageTitle>Create Categori</PageTitle>
 
 <Div style="display: flex; align-items: center; flex-direction: column;">
     <h1>Create Kategori</h1>
 
     <Div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-        <Dropdown Display="Display.InlineBlock">
-            <DropdownToggle Color="Color.Primary">
-                @(selectedCategory == null ? "Vælg Kategori" : selectedCategory.Category)
-            </DropdownToggle>
-            <DropdownMenu MaxMenuHeight="100px">
-                <DropdownItem>
-                    <input type="text" class="form-control" placeholder="Search"
-                           @oninput="SearchWordChange"
-                           @bind="searchWord" />
-                </DropdownItem>
-                <DropdownDivider />
-                @foreach (CategoryDTO category in searchWord == string.Empty ?
+        <Dropdown @ref="dropdown" Display="Display.InlineBlock">
+            <Button Style="padding: 0 !important" Color="Color.Primary">
+                <input type="text" class="form-control" placeholder="Search category..."
+                       @oninput="SearchWordChange" @onselect="ShowDropdown" @bind="searchWord" />
+            </Button>
+            <DropdownToggle Class="h-100" Color="Color.Primary" Split />
+            <DropdownMenu MaxMenuHeight="400px">
+                @foreach (CategoryDTO category in string.IsNullOrEmpty(searchWord) ?
                 categories : categories.Where(c =>
                 c.Category.ToLower().Contains(searchWord.ToLower())))
                 {
@@ -35,11 +29,11 @@
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
                 Clicked="() => ToggleEditCategoryModal(selectedCategory)">
-            Edit Kategori
+            Edit Categori
         </Button>
 
         <Button Class="btn btn-success" Clicked="OpenModalAddNewCategory">
-            Add Kategori
+            Add Categori
         </Button>
     </Div>
 </Div>
@@ -130,15 +124,23 @@
 </CustomModal>
 
 <CustomModal Title="An error happened!" @ref="modalErrorHappened" OnClose="() => CloseModal(modalErrorHappened)"
-             NeedPrimary="false" size="ModalSize.Default">
+             size="ModalSize.Default">
     <BodyContent>
         You can't undo this action.
     </BodyContent>
 </CustomModal>
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    private JWTokenHandler? jWTokenHandler;
 
     private CategoryDTO? selectedCategory = null;
     private List<CategoryDTO> categories = new();
@@ -157,7 +159,8 @@
     private UnderCategoryGetDTO? underCategoryToBeDeleted = null;
 
     private string searchWord = string.Empty;
-    private LoadingSpinner? loading;
+
+    private Dropdown? dropdown;
     private CustomModal? modalErrorHappened;
 
     private CustomModal? modalAddNewCategory;
@@ -170,7 +173,7 @@
     {
         if (firstRender)
         {
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
@@ -178,7 +181,7 @@
             loading?.Start();
 
             (HttpStatusCode statusCode, List<CategoryDTO>? response) =
-                await HttpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
+                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -193,8 +196,11 @@
         }
     }
 
+    private void ShowDropdown() => dropdown?.Show();
+
     private void SearchWordChange(ChangeEventArgs e)
     {
+        ShowDropdown();
         searchWord = e.Value?.ToString() ?? string.Empty;
     }
 
@@ -255,14 +261,14 @@
     {
         selectedCategory = category;
 
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         loading?.Start();
         string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
-                await HttpHandler.GetAsync<List<UnderCategoryGetDTO>>(
+                await httpHandler.GetAsync<List<UnderCategoryGetDTO>>(
                     $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -279,7 +285,7 @@
 
     private async Task SaveEditedCategory()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null)
+        if (Http == null || this.editCategory == null || jWTokenHandler == null || httpHandler == null)
         {
             ToggleEditCategoryModal();
             return;
@@ -296,7 +302,7 @@
             };
 
         (HttpStatusCode statusCode, CategoryDTO? response) =
-           await HttpHandler.PutAsync<CategoryDTO>(
+           await httpHandler.PutAsync<CategoryDTO>(
                $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -314,7 +320,8 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || this.editUnderCategory == null || jWTokenHandler == null)
+        if (Http == null || this.editCategory == null || jWTokenHandler == null
+            || httpHandler == null || this.editUnderCategory == null)
         {
             ToggleEditUnderCategoryModal();
             return;
@@ -330,7 +337,7 @@
             };
 
         HttpStatusCode statusCode =
-           await HttpHandler.PutAsync(
+           await httpHandler.PutAsync(
                $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.OK)
@@ -348,12 +355,13 @@
 
     private async Task DeleteConfirmed()
     {
-        if (Http == null || underCategoryToBeDeleted == null || jWTokenHandler == null)
+        if (Http == null || this.editCategory == null || jWTokenHandler == null
+            || httpHandler == null || underCategoryToBeDeleted == null)
             return;
 
         loading?.Start();
         string jwt = await jWTokenHandler.GetToken();
-        HttpStatusCode statusCode = await HttpHandler.DeleteAsync(
+        HttpStatusCode statusCode = await httpHandler.DeleteAsync(
                     $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
 
         if (statusCode == HttpStatusCode.NoContent)
@@ -375,7 +383,7 @@
         string newCategoryText = this.newCategory;
         this.newCategory = string.Empty;
 
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         loading?.Start();
@@ -388,7 +396,7 @@
             };
 
         (HttpStatusCode statusCode, CategoryDTO? response) =
-           await HttpHandler.PostAsync<CategoryDTO>(
+           await httpHandler.PostAsync<CategoryDTO>(
                $"api/Categories", newCategory, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)
@@ -413,6 +421,7 @@
 
         if (selectedCategory == null) return;
         if (Http == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         loading?.Start();
@@ -425,7 +434,7 @@
             };
 
         (HttpStatusCode statusCode, UnderCategoryGetDTO? response) =
-                await HttpHandler.PostAsync<UnderCategoryGetDTO>(
+                await httpHandler.PostAsync<UnderCategoryGetDTO>(
                     $"api/UnderCategories", newUnderCategories, jwt, Http);
 
         if (statusCode == HttpStatusCode.Created && response != null)

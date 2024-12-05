@@ -3,9 +3,6 @@
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<JWTokenHandler @ref="jWTokenHandler" />
-<LoadingSpinner @ref="loading" />
-
 <PageTitle>@pageTitle</PageTitle>
 
 @if (!ready)
@@ -61,31 +58,45 @@ else
                             @answeredCorrectly.Count(a => a.AnsweredCorrect) / @questions.Count
                         </Column>
                         <Column>
-                            @(Math.Round((double)answeredCorrectly.Count(isCorrect => isCorrect.AnsweredCorrect) / questions.Count * 100, 2))%
+                            @userGotRightInProcents%
                         </Column>
                         <Column>
-                            Points: @pointsGained
+                            Points: @pointsGained / @pointsPossible
                         </Column>
                     </Row>
                 </CardBody>
             </Card>
         </Column>
 
-        <BarChart Class="w-100 my-2" @ref="barChartProcent" TItem="double" Options="barChartProcentOptions" />
-        <BarChart Class="w-100 my-2" @ref="barChartNumber" TItem="double" Options="barChartNumberOptions" />
+        <Div Class="barChart-container my-2">
+            <BarChart @ref="barChartProcent" TItem="double" Options="barChartProcentOptions" />
+        </Div>
+
+        <Div Class="barChart-container my-2">
+            <BarChart @ref="barChartNumber" TItem="int" Options="barChartNumberOptions" />
+        </Div>
     }
 }
 
 @code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
     private const string noCategory = "No category";
-    private JWTokenHandler? jWTokenHandler;
-    private LoadingSpinner? loading;
+
     private string pageTitle = "Quiz ui";
     private bool ready = false;
     private int quizID;
     private QuizDTO? quiz;
     private int pointsGained = 0;
+    private int pointsPossible = 0;
 
     private bool[] selectedAnswers = new bool[0];
     private int correctlyQuestionAnswering = -1;
@@ -97,13 +108,14 @@ else
 
     private User_QuizDTO userQuiz = new();
 
+    private double userGotRightInProcents = 0;
     private readonly string[] ChartBackgroundColors = new string[] { "#ff6384", "#36a2eb", "#cc65fe", "#ffce56" };
-
     private BarChart<double>? barChartProcent;
-    private BarChart<double>? barChartNumber;
+    private BarChart<int>? barChartNumber;
 
     private BarChartOptions barChartProcentOptions = new()
         {
+            MaintainAspectRatio = false,
             Responsive = true,
             Plugins = new ChartPlugins
             {
@@ -116,6 +128,7 @@ else
 
     private BarChartOptions barChartNumberOptions = new()
         {
+            MaintainAspectRatio = false,
             Responsive = true,
         };
 
@@ -130,7 +143,7 @@ else
         {
             timer.Stop();
 
-            if (Http == null) return;
+            if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
@@ -153,7 +166,7 @@ else
 
             int userID = await sessionStorage.GetItemAsync<int>("userID");
             (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
-                await HttpHandler.GetAsync<User_QuizDTO>(
+                await httpHandler.GetAsync<User_QuizDTO>(
                     $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
 
             string userRole = await sessionStorage.GetItemAsync<string>("userRole");
@@ -169,7 +182,7 @@ else
             }
 
             (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
-               await HttpHandler.GetAsync<QuizDTO>(
+               await httpHandler.GetAsync<QuizDTO>(
                    $"/api/Quizs/{quizID}", jwt, Http);
 
             if (statusCodeQuiz == HttpStatusCode.OK)
@@ -178,7 +191,7 @@ else
             }
 
             (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
-                await HttpHandler.GetAsync<List<QuestionDTO>>(
+                await httpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt, Http);
 
             if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
@@ -293,7 +306,7 @@ else
 
     private async Task OpenSummery()
     {
-        if (Http == null) return;
+        if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (quiz == null)
         {
@@ -308,8 +321,9 @@ else
         int userID = await sessionStorage.GetItemAsync<int>("userID");
 
         (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
-                await HttpHandler.GetAsync<List<DifficultyDTO>>(
+                await httpHandler.GetAsync<List<DifficultyDTO>>(
                     $"/api/Difficulties", jwt, Http);
+
         if (statusCodeDifficulties != HttpStatusCode.OK)
         {
             NavigationManager.NavigateTo("/home");
@@ -323,23 +337,31 @@ else
             return;
         }
 
+        userGotRightInProcents = Math.Round((double)answeredCorrectly.Count(isCorrect =>
+            isCorrect.AnsweredCorrect) / questions.Count * 100, 2);
+
         for (int i = 0; i < questions.Count; i++)
         {
-            if (answeredCorrectly[i].AnsweredCorrect)
+            DifficultyDTO? questionDifficulty = difficulties?
+                .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
+
+            int questionPoints = 0;
+            if (questionDifficulty == null)
             {
-                DifficultyDTO? questionDifficulty = difficulties?
-                    .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
-
-                if (questionDifficulty == null)
-                {
-                    // Gets default
-                    pointsGained += 100;
-                    continue;
-                }
-
+                // Gets default
+                questionPoints = 100;
+            }
+            else
+            {
                 int difference = questionDifficulty.ID - quizDifficulty.ID;
                 int difficultyAddition = (1 + difference / 10);
-                pointsGained += 100 * difficultyAddition;
+                questionPoints = 100 * difficultyAddition;
+            }
+
+            pointsPossible += questionPoints;
+            if (answeredCorrectly[i].AnsweredCorrect)
+            {
+                pointsGained += questionPoints;
             }
         }
 
@@ -359,12 +381,12 @@ else
                 Completed = true,
                 QuizID = quizID,
                 UserID = userID,
-                Results = pointsGained,
+                Results = userGotRightInProcents,
                 TimeUsed = 0,
             };
 
         HttpStatusCode statusCodeUserQuiz =
-           await HttpHandler.PutAsync(
+           await httpHandler.PutAsync(
                    $"/api/User_Quiz", updateUserQuiz, jwt, Http);
 
         if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
@@ -386,14 +408,14 @@ else
             {
                 Category = group.Key,
                 CorrectPercentage = group.Count(q => q.AnsweredCorrect) * 100.0 / group.Count(),
-                Total = (double)group.Count(),
-                CorrectAnwsered = (double)group.Count(q => q.AnsweredCorrect)
+                Total = group.Count(),
+                CorrectAnwsered = group.Count(q => q.AnsweredCorrect)
             })
             .ToList();
 
         await barChartNumber.AddLabelsDatasetsAndUpdate(
             categoryPercentages.Select(c => c.Category).ToArray(),
-            GetBarChartDataset(["Total", "Correct"],
+            GetBarChartDataset<int>(["Total", "Correct"],
                 [
                     categoryPercentages.Select(c => c.Total).ToList(),
     categoryPercentages.Select(c => c.CorrectAnwsered).ToList()
@@ -406,21 +428,21 @@ else
             GetBarChartDataset(["% Correct"], [categoryPercentages.Select(c => c.CorrectPercentage).ToList()]));
     }
 
-    private BarChartDataset<double>[] GetBarChartDataset(List<string> labels, List<List<double>> data)
+    private BarChartDataset<T>[] GetBarChartDataset<T>(List<string> labels, List<List<T>> data)
     {
         // All data needs a label...
         if (labels.Count != data.Count)
         {
-            return Array.Empty<BarChartDataset<double>>();
+            return Array.Empty<BarChartDataset<T>>();
         }
 
         // Free Blazorise chart has a limit of columns it can show.
         while (data.Count > 10)
         {
-            data.RemoveAt(data.Count -1);
+            data.RemoveAt(data.Count - 1);
         }
 
-        return data.Select((dataSet, index) => new BarChartDataset<double>
+        return data.Select((dataSet, index) => new BarChartDataset<T>
             {
                 Label = labels[index],
                 Data = dataSet,

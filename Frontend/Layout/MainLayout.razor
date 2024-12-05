@@ -37,8 +37,6 @@
 <div class="page">
     <main>
         <div class="top-row">
-            <div class="main-nav"></div>
-
             @if (!string.IsNullOrEmpty(jwtToken))
             {
                 <Dropdown Direction="Direction.End">
@@ -60,19 +58,19 @@
                         {
                             <DropdownItem>
                                 <NavLink class="nav-link" href="create">
-                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav spørgsmål
+                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create question
                                 </NavLink>
                             </DropdownItem>
 
                             <DropdownItem>
                                 <NavLink class="nav-link" href="quiz">
-                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Lav quiz
+                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create quiz
                                 </NavLink>
                             </DropdownItem>
 
                             <DropdownItem>
                                 <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
-                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Kategori
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categori
                                 </NavLink>
                             </DropdownItem>
                         }
@@ -85,7 +83,7 @@
 
                         <DropdownItem>
                             <NavLink class="nav-link" href="/logout">
-                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Log ud
+                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Logout
                             </NavLink>
                         </DropdownItem>
                     </DropdownMenu>
@@ -95,8 +93,6 @@
             <div class="about mx-2">
                 <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
             </div>
-
-
         </div>
 
         <article class="content px-4">

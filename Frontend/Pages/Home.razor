@@ -5,35 +5,28 @@
 
 <PageTitle>Home</PageTitle>
 
-<div style="display: flex; align-items: center; flex-direction: column;">
-    <h1>QUIZ</h1>
-    <br><br><br>
+<Div Class="d-flex flex-column align-items-center gap-3">
+    <h1 class="mb-2">QUIZ</h1>
 
-    <h2>
-        Search for a quiz
-    </h2>
+    <h3 class="my-1">Search for a quiz</h3>
 
-    <div>
-        <EditForm Model="searchWord" OnValidSubmit="OnSearchClick" FormName="LoginForm">
-            <div class="form-group p-1">
-                <InputText placeholder="Search..." class="form-control" type="text"
-                           @bind-Value="searchWord.word" />
-            </div>
+    <EditForm Model="searchWord" OnValidSubmit="OnSearchClick" FormName="LoginForm">
+        <Div Class="input-group">
+            <InputText placeholder="Search..." class="form-control" type="text"
+                       @bind-Value="searchWord.word" />
 
-            <div class="form-group d-flex justify-content-center p-1">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </EditForm>
-    </div>
+            <Button Type="ButtonType.Submit" Class="btn btn-primary">Search</Button>
+        </Div>
+    </EditForm>
 
-    <div style="gap: 5px; display: flex;">
+    <Div Class="d-flex gap-1">
         @if (userRole == "Teacher")
         {
-            <button class="btn btn-primary">Create</button>
+            <Button Class="btn btn-primary">Create</Button>
         }
-        <button class="btn btn-primary" @onclick="() => GoToBrowse()">Browse</button>
-    </div>
-</div>
+        <Button Class="btn btn-primary" Clicked="() => GoToBrowse()">Browse</Button>
+    </Div>
+</Div>
 
 @code {
     [CascadingParameter(Name = "JWTokenHandler")]

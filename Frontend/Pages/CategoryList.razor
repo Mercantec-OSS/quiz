@@ -67,8 +67,6 @@
     [CascadingParameter(Name = "SessionStorageHandler")]
     private SessionStorageHandler? sessionStorageHandler { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
-
     private List<CategoryDTO> categories = new();
     private CategoryDTO? categoryShowingUnderCategories;
     private List<UnderCategoryGetDTO>? underCategories;
@@ -77,7 +75,7 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
             if (sessionStorageHandler == null) return;
 
@@ -92,7 +90,7 @@
             }
 
             (HttpStatusCode statusCode, List<CategoryDTO>? response) =
-                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
+                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -116,14 +114,13 @@
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
 
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
         string jwt = await jWTokenHandler.GetToken();
 
         (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
             await httpHandler.GetAsync<List<UnderCategoryGetDTO>>(
-                $"api/UnderCategories/CategoryID/{category.ID}",
-                jwt, Http);
+                $"api/UnderCategories/CategoryID/{category.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {

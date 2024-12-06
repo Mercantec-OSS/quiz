@@ -213,7 +213,6 @@
     [CascadingParameter(Name = "SessionStorageHandler")]
     private SessionStorageHandler? sessionStorageHandler { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
     private List<DifficultyDTO> difficulties = new();
     private List<CategoryDTO> categories = new();
     private List<UnderCategoryGetDTO> underCategories = new();
@@ -252,7 +251,7 @@
     //Get the question and info
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
-        if (Http == null || httpHandler == null || jWTokenHandler == null ||
+        if (httpHandler == null || jWTokenHandler == null ||
             questionHandling.selectedCategory == null ||
             questionHandling.selectedUnderCategory == null ||
             questionHandling.selectedDifficulty == null)
@@ -266,13 +265,13 @@
         string jwt = await jWTokenHandler.GetToken();
 
         Console.WriteLine("Fetching questions for selected category, undercategory, and difficulty.");
-        if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null)
+        if (questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null)
         {
             Console.WriteLine("FetchQuestions aborted due to missing selections.");
             return;
         }
 
-        (HttpStatusCode statusCode, List<Question>? questions) = await httpHandler.GetAsync<List<Question>>(url, jwt, Http);
+        (HttpStatusCode statusCode, List<Question>? questions) = await httpHandler.GetAsync<List<Question>>(url, jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -292,8 +291,8 @@
     //method to make a random quiz by button press
     private async Task RandomQuizMaking()
     {
-        if (Http == null || httpHandler == null || 
-            jWTokenHandler == null || sessionStorageHandler == null) return;
+        if (httpHandler == null || jWTokenHandler == null 
+            || sessionStorageHandler == null) return;
 
         List<QuestionAmount> questions = new();
         for (int i = 0; i < CategoriesHandler.Count; i++)
@@ -327,7 +326,7 @@
         string url = "/api/Quizs/Setup-Quiz/Random";
 
         (HttpStatusCode statusCode, QuizDTO? response) =
-           await httpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt, Http);
+           await httpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -344,7 +343,7 @@
 
     private async Task customQuiz()
     {
-        if (Http == null || httpHandler == null ||
+        if (httpHandler == null ||
             jWTokenHandler == null || sessionStorageHandler == null) return;
 
         var selectedQuestions = GetSelectedQuestions();
@@ -373,7 +372,7 @@
         string url = "/api/Quizs/Setup-Quiz/Custom";
 
         (HttpStatusCode statusCode, QuizDTO? response) =
-        await httpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt, Http);
+        await httpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -389,14 +388,14 @@
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null || httpHandler == null || jWTokenHandler == null) return;
+        if (httpHandler == null || jWTokenHandler == null) return;
 
         if (firstRender)
         {
             string Jwt = await jWTokenHandler.GetToken();
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
-               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
+               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
@@ -404,7 +403,7 @@
             }
 
             (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
-            await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
+            await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt);
             if (statusCodeCategories == HttpStatusCode.OK)
             {
                 categories.AddRange(getCategories ?? new());
@@ -412,7 +411,7 @@
 
 
             (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
-            await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("/api/UnderCategories", Jwt, Http);
+            await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("/api/UnderCategories", Jwt);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {

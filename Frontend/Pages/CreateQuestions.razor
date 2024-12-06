@@ -172,12 +172,10 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
-
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         if (firstRender)
@@ -186,7 +184,7 @@
             loading?.Start();
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
-               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);
+               await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
@@ -194,7 +192,7 @@
             }
 
             (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
-               await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt, Http);
+               await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt);
 
             if (statusCodeCategories == HttpStatusCode.OK)
             {
@@ -202,7 +200,7 @@
             }
 
             (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
-               await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt, Http);
+               await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
@@ -236,7 +234,7 @@
     // save questions to database, to save for other use
     private async Task SaveQuestions()
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
@@ -297,7 +295,7 @@
             {
                 // Send the POST request
                 (HttpStatusCode statusCode, string? response) = 
-                    await httpHandler.PostAsync<string>($"api/Questions", dto, jwt, Http);
+                    await httpHandler.PostAsync<string>($"api/Questions", dto, jwt);
 
                 // Check if the request was successful
                 if (statusCode != HttpStatusCode.Created)

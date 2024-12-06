@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.AspNetCore.Components;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -8,7 +9,7 @@ namespace Frontend.Components;
 public partial class HttpHandler
 {
     public static HttpHandler? Instance { get; private set; }
-    //[Inject] public HttpClient? Http { get; set; }
+    [Inject] private HttpClient http { get; set; } = new();
 
     private CustomModal? InternalServerErrorModal;
     private CustomModal? BadRequestModal;
@@ -23,7 +24,7 @@ public partial class HttpHandler
         Instance = this;
     }
 
-    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -34,7 +35,7 @@ public partial class HttpHandler
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, Dictionary<string, string> parameters, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, Dictionary<string, string> parameters, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -51,7 +52,7 @@ public partial class HttpHandler
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -69,7 +70,7 @@ public partial class HttpHandler
         }
     }
 
-    public async Task<(HttpStatusCode, T?)> PostAsync<T>(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, T?)> PostAsync<T>(string path, object dto, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -80,7 +81,7 @@ public partial class HttpHandler
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<HttpStatusCode> PutAsync(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<HttpStatusCode> PutAsync(string path, object dto, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -91,7 +92,7 @@ public partial class HttpHandler
         return response.StatusCode;
     }
 
-    public async Task<(HttpStatusCode, T?)> PutAsync<T>(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, T?)> PutAsync<T>(string path, object dto, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -102,7 +103,7 @@ public partial class HttpHandler
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<HttpStatusCode> DeleteAsync(string path, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
+    public async Task<HttpStatusCode> DeleteAsync(string path, string JWTtoken, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {

@@ -90,7 +90,6 @@ else
     [CascadingParameter(Name = "SessionStorageHandler")]
     private SessionStorageHandler? sessionStorageHandler { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
     private const string noCategory = "No category";
 
     private string pageTitle = "Quiz ui";
@@ -145,7 +144,7 @@ else
         {
             timer.Stop();
 
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
             if (sessionStorageHandler == null) return;
 
@@ -170,7 +169,7 @@ else
             int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
             (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
                 await httpHandler.GetAsync<User_QuizDTO>(
-                    $"/api/User_Quiz/{quizID}/{userID}", jwt, Http, false);
+                    $"/api/User_Quiz/{quizID}/{userID}", jwt, false);
 
             string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             if (userRole == "Student" && userQuiz == null)
@@ -186,7 +185,7 @@ else
 
             (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
                await httpHandler.GetAsync<QuizDTO>(
-                   $"/api/Quizs/{quizID}", jwt, Http);
+                   $"/api/Quizs/{quizID}", jwt);
 
             if (statusCodeQuiz == HttpStatusCode.OK)
             {
@@ -195,7 +194,7 @@ else
 
             (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
                 await httpHandler.GetAsync<List<QuestionDTO>>(
-                    $"/api/Questions/ByQuizID/{quizID}", jwt, Http);
+                    $"/api/Questions/ByQuizID/{quizID}", jwt);
 
             if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
             {
@@ -309,7 +308,7 @@ else
 
     private async Task OpenSummery()
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (sessionStorageHandler == null) return;
         if (quiz == null)
@@ -326,7 +325,7 @@ else
 
         (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
                 await httpHandler.GetAsync<List<DifficultyDTO>>(
-                    $"/api/Difficulties", jwt, Http);
+                    $"/api/Difficulties", jwt);
 
         if (statusCodeDifficulties != HttpStatusCode.OK)
         {
@@ -391,7 +390,7 @@ else
 
         HttpStatusCode statusCodeUserQuiz =
            await httpHandler.PutAsync(
-                   $"/api/User_Quiz", updateUserQuiz, jwt, Http);
+                   $"/api/User_Quiz", updateUserQuiz, jwt);
 
         if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
         {

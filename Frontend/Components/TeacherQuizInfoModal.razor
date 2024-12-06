@@ -35,7 +35,6 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
     private CustomModal? modal;
 
     private QuizDTO quiz = new();
@@ -44,7 +43,7 @@
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openAddStudentsModal)
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         modal?.Show();
@@ -56,7 +55,7 @@
 
         (HttpStatusCode statusCode, List<User_QuizUserInfoDTO>? response) =
            await httpHandler.GetAsync<List<User_QuizUserInfoDTO>>(
-               $"/api/User_Quiz/AllStudents/{quiz.ID}", jwt, Http);
+               $"/api/User_Quiz/AllStudents/{quiz.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {

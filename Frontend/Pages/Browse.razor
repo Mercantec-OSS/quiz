@@ -112,8 +112,6 @@
     [CascadingParameter(Name = "SessionStorageHandler")]
     private SessionStorageHandler? sessionStorageHandler { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
-
     private List<QuizDTO> allQuizzes = new();
     private List<string> creators = new();
     private List<string> categories = new();
@@ -128,7 +126,7 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
             if (sessionStorageHandler == null) return;
 
@@ -147,7 +145,7 @@
             if (userRole == "Guest")
             {
                 (statusCode, QuizDTO? quiz) = await httpHandler.GetAsync<QuizDTO>(
-                        $"/api/Quizs/39", jwt, Http);
+                        $"/api/Quizs/39", jwt);
 
                 quizes = new();
                 if (statusCode == HttpStatusCode.OK && quiz != null)
@@ -160,7 +158,7 @@
                 Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
 
                 (statusCode, quizes) = await httpHandler.GetAsync<List<QuizDTO>>(
-                        $"/api/Quizs/QuizSearch", parameters, jwt, Http);
+                        $"/api/Quizs/QuizSearch", parameters, jwt);
             }
 
             if (statusCode == HttpStatusCode.OK && sessionStorageHandler != null)

@@ -1,7 +1,6 @@
 ﻿@page "/"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @namespace Login
 @using System.ComponentModel.DataAnnotations
@@ -38,17 +37,27 @@
             <button type="submit" class="btn btn-primary">Login</button>
         </div>
     </EditForm>
+
+    <Divider />
+
+    <Button Class="btn btn-primary" Clicked="GuestLogin">
+        Guest login
+    </Button>
+
 </div>
 
 @code {
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
-    
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
 
     private LoginModel loginRequest = new();
     private string ErrorMessage = string.Empty;
-    
+
     // Method to handle login
     private async Task HandleLogin()
     {
@@ -67,7 +76,7 @@
             var response = await Http.PostAsJsonAsync("/api/Users/login", request);
 
             // Read response content
-            var responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
@@ -75,16 +84,7 @@
                 if (dTO == null)
                     return;
 
-                await sessionStorage.SetItemAsync("jwt", dTO.token);
-                await sessionStorage.SetItemAsync("userRole", dTO.role);
-                await sessionStorage.SetItemAsync("userEmail", dTO.email);
-                await sessionStorage.SetItemAsync("userUsername", dTO.username);
-                await sessionStorage.SetItemAsync("userID", dTO.ID);
-
-                MainLayout.GetItems(dTO.token ?? "", dTO.role);
-
-                //navigate to home when email/username and password is correct
-                NavigationManager.NavigateTo("/home");
+                SuccessfullyLoggedIn(dTO, "/home");
             }
             else
             {
@@ -101,6 +101,36 @@
         {
             loading?.Stop();
         }
+    }
+
+    private async void GuestLogin()
+    {
+        loading?.Start();
+        if (Http == null) return;
+
+        var response = await Http.PostAsync("/api/Users/LoginGuest", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            string responseContent = await response.Content.ReadAsStringAsync();
+            UserDTO? dTO = HttpHandler.Deserialize<UserDTO>(responseContent);
+            if (dTO == null)
+                return;
+
+            SuccessfullyLoggedIn(dTO, "/Browse");
+        }
+
+        loading?.Stop();
+    }
+
+    private async void SuccessfullyLoggedIn(UserDTO dTO, string path)
+    {
+        if (sessionStorageHandler == null)
+            return;
+
+        await sessionStorageHandler.LoggedIn(dTO);
+        MainLayout.GetItems(dTO.token ?? "", dTO.role);
+        NavigationManager.NavigateTo(path);
     }
 
     private void ClearErrorMessage()

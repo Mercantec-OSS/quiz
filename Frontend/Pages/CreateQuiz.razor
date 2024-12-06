@@ -1,5 +1,4 @@
 ﻿@page "/quiz"
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <h3>Quiz</h3>
 
@@ -208,6 +207,12 @@
     [CascadingParameter(Name = "HttpHandler")]
     private HttpHandler? httpHandler { get; set; }
 
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
     private List<DifficultyDTO> difficulties = new();
     private List<CategoryDTO> categories = new();
@@ -247,14 +252,18 @@
     //Get the question and info
     private async Task FetchQuestions(CategoryHandlingQuiz questionHandling)
     {
-        if (Http == null || httpHandler == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null) return;
+        if (Http == null || httpHandler == null || jWTokenHandler == null ||
+            questionHandling.selectedCategory == null ||
+            questionHandling.selectedUnderCategory == null ||
+            questionHandling.selectedDifficulty == null)
+            return;
 
         int categoryID = questionHandling.selectedCategory.ID;
         int underCategoryID = questionHandling.selectedUnderCategory.ID;
         int difficultyID = questionHandling.selectedDifficulty.ID;
 
         string url = $"/api/Questions";
-        string jwt = await sessionStorage.GetItemAsStringAsync("jwtToken");
+        string jwt = await jWTokenHandler.GetToken();
 
         Console.WriteLine("Fetching questions for selected category, undercategory, and difficulty.");
         if (Http == null || questionHandling.selectedCategory == null || questionHandling.selectedUnderCategory == null || questionHandling.selectedDifficulty == null)
@@ -283,7 +292,8 @@
     //method to make a random quiz by button press
     private async Task RandomQuizMaking()
     {
-        if (Http == null || httpHandler == null) return;
+        if (Http == null || httpHandler == null || 
+            jWTokenHandler == null || sessionStorageHandler == null) return;
 
         List<QuestionAmount> questions = new();
         for (int i = 0; i < CategoriesHandler.Count; i++)
@@ -297,8 +307,8 @@
                 });
         }
 
-        int userID = await sessionStorage.GetItemAsync<int>("userID");
-        string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string Jwt = await jWTokenHandler.GetToken();
+        int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
         QuizCreateRandomDTO quizDto = new()
             {
@@ -334,7 +344,8 @@
 
     private async Task customQuiz()
     {
-        if (Http == null || httpHandler == null) return;
+        if (Http == null || httpHandler == null ||
+            jWTokenHandler == null || sessionStorageHandler == null) return;
 
         var selectedQuestions = GetSelectedQuestions();
 
@@ -344,8 +355,8 @@
             return;
         }
 
-        int userID = await sessionStorage.GetItemAsync<int>("userID");
-        string jwt = await sessionStorage.GetItemAsync<string>("jwt");
+        string jwt = await jWTokenHandler.GetToken();
+        int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
         int[] questionIDs = selectedQuestions.Select(q => q.ID).ToArray();
 
@@ -378,11 +389,11 @@
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Http == null || httpHandler == null) return;
+        if (Http == null || httpHandler == null || jWTokenHandler == null) return;
 
         if (firstRender)
         {
-            string Jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            string Jwt = await jWTokenHandler.GetToken();
 
             (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
                await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt, Http);

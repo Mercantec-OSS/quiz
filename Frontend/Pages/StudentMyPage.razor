@@ -1,6 +1,5 @@
 ﻿@page "/MyPage"
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>My page</PageTitle>
 
@@ -26,7 +25,7 @@
 </Row>
 
 <GenericListComponent T="User_QuizQuizInfoDTO" Items="quizzesLink"
-                      NoItemsText="You don't have any quiz assigned to you.'">
+NoItemsText="You don't have any quiz assigned to you.'">
     <BodyContent>
         <Column ColumnSize="ColumnSize.Is4">
             <Card>
@@ -57,8 +56,8 @@
                     @if (!context.Completed)
                     {
                         <Button Class="btn btn-primary w-100"
-                                Clicked="() => Start(context.quiz.ID ?? 0)"
-                                Disabled="@context.Completed">
+                        Clicked="() => Start(context.quiz.ID ?? 0)"
+                        Disabled="@context.Completed">
                             Start
                         </Button>
                     }
@@ -79,6 +78,9 @@
     [CascadingParameter(Name = "JWTokenHandler")]
     private JWTokenHandler? jWTokenHandler { get; set; }
 
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
     private List<User_QuizQuizInfoDTO>? quizzesLink = null;
 
@@ -88,9 +90,10 @@
         {
             if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
-            int id = await sessionStorage.GetItemAsync<int>("userID");
+            int id = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
             (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO>? response) =
                 await httpHandler.GetAsync<List<User_QuizQuizInfoDTO>>(

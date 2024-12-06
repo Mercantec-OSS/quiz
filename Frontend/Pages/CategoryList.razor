@@ -1,7 +1,6 @@
 ﻿@page "/CategoryList"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Category list</PageTitle>
 
@@ -19,7 +18,7 @@
                 </Heading>
                 <Small>
                     <Button Class="btn" Color="Color.Primary"
-                            Clicked="() => show ?
+                    Clicked="() => show ?
                             GetSubCategories(category) : ClearSubCategories()">
                         @(show ? "Show" : "Hide") undercategories
                     </Button>
@@ -64,9 +63,12 @@
 
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
-    
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
-    
+
     private List<CategoryDTO> categories = new();
     private CategoryDTO? categoryShowingUnderCategories;
     private List<UnderCategoryGetDTO>? underCategories;
@@ -77,10 +79,11 @@
         {
             if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             loading?.Start();
             string jwt = await jWTokenHandler.GetToken();
-            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
 
             if (string.IsNullOrEmpty(userRole) || userRole == "Student")
             {

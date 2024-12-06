@@ -1,7 +1,6 @@
 ﻿@page "/TeacherMyPage"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <TeacherQuizInfoModal @ref="teacherQuizInfoModal" />
 <TeacherAddStudentToQuiz @ref="teacherAddStudentToQuiz" />
@@ -11,7 +10,7 @@
 <h3>My Page</h3>
 
 <GenericListComponent T="QuizDTO" Items="quizzesMaked"
-                      NoItemsText="You haven't created any quizzes.">
+NoItemsText="You haven't created any quizzes.">
     <BodyContent>
         <Column ColumnSize="ColumnSize.Is4">
             <Card>
@@ -30,7 +29,7 @@
                 </CardBody>
                 <CardFooter>
                     <Button Class="btn btn-primary w-100"
-                            Clicked="() => OpenQuizModal(context)">
+                    Clicked="() => OpenQuizModal(context)">
                         Show details
                     </Button>
                 </CardFooter>
@@ -49,6 +48,9 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
 
     private TeacherQuizInfoModal? teacherQuizInfoModal;
@@ -62,10 +64,11 @@
         {
             if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
-            int id = await sessionStorage.GetItemAsync<int>("userID");
-            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            int id = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             if (userRole == "Student")
             {
                 NavigationManager.NavigateTo("/home");

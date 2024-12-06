@@ -1,7 +1,6 @@
 ﻿@page "/quiz_ui"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>@pageTitle</PageTitle>
 
@@ -88,6 +87,9 @@ else
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     [Inject] public HttpClient? Http { get; set; }
     private const string noCategory = "No category";
 
@@ -145,6 +147,7 @@ else
 
             if (Http == null || httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
             loading?.Start();
@@ -164,13 +167,13 @@ else
                 return;
             }
 
-            int userID = await sessionStorage.GetItemAsync<int>("userID");
+            int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
             (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
                 await httpHandler.GetAsync<User_QuizDTO>(
-                    $"/api/User_Quiz/{quizID}/{userID}", jwt, Http);
+                    $"/api/User_Quiz/{quizID}/{userID}", jwt, Http, false);
 
-            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
-            if (statusCodeUserQuiz != HttpStatusCode.OK || (userRole == "Student" && userQuiz == null))
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+            if (userRole == "Student" && userQuiz == null)
             {
                 // Isn't invited to this quiz or has completed it before.
                 NavigationManager.NavigateTo("/browse");
@@ -308,6 +311,7 @@ else
     {
         if (Http == null || httpHandler == null) return;
         if (jWTokenHandler == null) return;
+        if (sessionStorageHandler == null) return;
         if (quiz == null)
         {
             NavigationManager.NavigateTo("/home");
@@ -318,7 +322,7 @@ else
 
         loading?.Start();
         string jwt = await jWTokenHandler.GetToken();
-        int userID = await sessionStorage.GetItemAsync<int>("userID");
+        int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
         (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
                 await httpHandler.GetAsync<List<DifficultyDTO>>(
@@ -369,8 +373,8 @@ else
 
         GetSummeryChartDataAndUpdate();
 
-        string userRole = await sessionStorage.GetItemAsync<string>("userRole");
-        if (userRole == "Teacher")
+        string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+        if (userRole == "Teacher" || userRole == "Guest")
         {
             loading?.Stop();
             return;

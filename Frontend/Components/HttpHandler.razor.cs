@@ -8,6 +8,8 @@ namespace Frontend.Components;
 public partial class HttpHandler
 {
     public static HttpHandler? Instance { get; private set; }
+    //[Inject] public HttpClient? Http { get; set; }
+
     private CustomModal? InternalServerErrorModal;
     private CustomModal? BadRequestModal;
     private CustomModal? NotFoundModal;
@@ -21,18 +23,18 @@ public partial class HttpHandler
         Instance = this;
     }
 
-    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, string JWTtoken, HttpClient http)
+    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.GetAsync(path);
-        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK) ?
+        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK, needDefualtCheck) ?
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, Dictionary<string, string> parameters, string JWTtoken, HttpClient http)
+    public async Task<(HttpStatusCode, T?)> GetAsync<T>(string path, Dictionary<string, string> parameters, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
@@ -45,18 +47,18 @@ public partial class HttpHandler
         }
 
         HttpResponseMessage response = await http.GetAsync(path);
-        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK) ?
+        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK, needDefualtCheck) ?
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http)
+    public async Task<(HttpStatusCode, string)> PostAsync(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PostAsync(path, Serialize(dto));
-        Successful(response.StatusCode, HttpStatusCode.Created);
+        Successful(response.StatusCode, HttpStatusCode.Created, needDefualtCheck);
         try
         {
             return (response.StatusCode, await response.Content.ReadAsStringAsync());
@@ -67,47 +69,47 @@ public partial class HttpHandler
         }
     }
 
-    public async Task<(HttpStatusCode, T?)> PostAsync<T>(string path, object dto, string JWTtoken, HttpClient http)
+    public async Task<(HttpStatusCode, T?)> PostAsync<T>(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PostAsync(path, Serialize(dto));
-        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.Created) ?
+        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.Created, needDefualtCheck) ?
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<HttpStatusCode> PutAsync(string path, object dto, string JWTtoken, HttpClient http)
+    public async Task<HttpStatusCode> PutAsync(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PutAsync(path, Serialize(dto));
-        _ = Successful(response.StatusCode, HttpStatusCode.OK);
+        _ = Successful(response.StatusCode, HttpStatusCode.OK, needDefualtCheck);
         return response.StatusCode;
     }
 
-    public async Task<(HttpStatusCode, T?)> PutAsync<T>(string path, object dto, string JWTtoken, HttpClient http)
+    public async Task<(HttpStatusCode, T?)> PutAsync<T>(string path, object dto, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.PutAsync(path, Serialize(dto));
-        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK) ?
+        return (response.StatusCode, Successful(response.StatusCode, HttpStatusCode.OK, needDefualtCheck) ?
             Deserialize<T>(await response.Content.ReadAsStringAsync()) : default);
     }
 
-    public async Task<HttpStatusCode> DeleteAsync(string path, string JWTtoken, HttpClient http)
+    public async Task<HttpStatusCode> DeleteAsync(string path, string JWTtoken, HttpClient http, bool needDefualtCheck = true)
     {
         if (!string.IsNullOrEmpty(JWTtoken))
         {
             http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
         HttpResponseMessage response = await http.DeleteAsync(path);
-        _ = Successful(response.StatusCode, HttpStatusCode.NoContent);
+        _ = Successful(response.StatusCode, HttpStatusCode.NoContent, needDefualtCheck);
         return response.StatusCode;
     }
 
@@ -125,22 +127,24 @@ public partial class HttpHandler
         return path;
     }
 
-    private bool Successful(HttpStatusCode response, HttpStatusCode wants)
+    private bool Successful(HttpStatusCode response, HttpStatusCode wants, bool needDefualtCheck)
     {
-        if (response == HttpStatusCode.NotFound)
+        if (needDefualtCheck)
         {
-            NotFoundModal?.Show();
-            return false;
-        }
-        else if (response == HttpStatusCode.BadRequest)
-        {
-            BadRequestModal?.Show();
-            return false;
-        }
-        else if (response == HttpStatusCode.InternalServerError)
-        {
-            InternalServerErrorModal?.Show();
-            return false;
+            switch (response)
+            {
+                case HttpStatusCode.BadRequest:
+                    BadRequestModal?.Show();
+                    return false;
+                case HttpStatusCode.NotFound:
+                    NotFoundModal?.Show();
+                    return false;
+                case HttpStatusCode.InternalServerError:
+                    InternalServerErrorModal?.Show();
+                    return false;
+
+                default: break;
+            }
         }
 
         return response == wants;

@@ -75,13 +75,13 @@ NoItemsText="You haven't created any quizzes.">
 
             loading?.Start();
 
-            (HttpStatusCode statusCode, List<QuizDTO>? response) =
+            (HttpStatusCode statusCode, List<QuizDTO> response) =
                 await httpHandler.GetAsync<List<QuizDTO>>(
                     $"/api/Quizs/ByCreater/{id}", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                quizzesMaked = response ?? new();
+                quizzesMaked = response;
                 StateHasChanged();
             }
             loading?.Stop();

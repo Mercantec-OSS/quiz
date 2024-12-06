@@ -128,8 +128,8 @@
         public string QuestionText { get; set; } = string.Empty;
         public string Categories { get; set; } = string.Empty;
         public string UnderCategories { get; set; } = string.Empty;
-        public string Answer1 { get; set; }= string.Empty;
-        public string Answer2 { get; set; }= string.Empty;
+        public string Answer1 { get; set; } = string.Empty;
+        public string Answer2 { get; set; } = string.Empty;
         public string Answer3 { get; set; } = string.Empty;
         public string Answer4 { get; set; } = string.Empty;
         public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
@@ -183,28 +183,28 @@
             string Jwt = await jWTokenHandler.GetToken();
             loading?.Start();
 
-            (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
+            (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO> getDifficulties) =
                await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
-                difficulties.AddRange(getDifficulties ?? new());
+                difficulties.AddRange(getDifficulties);
             }
 
-            (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
+            (HttpStatusCode statusCodeCategories, List<CategoryDTO> getCategories) =
                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt);
 
             if (statusCodeCategories == HttpStatusCode.OK)
             {
-                categories.AddRange(getCategories ?? new());
+                categories.AddRange(getCategories);
             }
 
-            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO> getUnderCategories) =
                await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("api/UnderCategories", Jwt);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
-                underCategories.AddRange(getUnderCategories ?? new());
+                underCategories.AddRange(getUnderCategories);
             }
 
             loading?.Stop();
@@ -294,8 +294,8 @@
             try
             {
                 // Send the POST request
-                (HttpStatusCode statusCode, string? response) = 
-                    await httpHandler.PostAsync<string>($"api/Questions", dto, jwt);
+                (HttpStatusCode statusCode, string response) =
+                    await httpHandler.PostAsync($"api/Questions", dto, jwt);
 
                 // Check if the request was successful
                 if (statusCode != HttpStatusCode.Created)
@@ -363,65 +363,59 @@
 
             var file = e.File;
 
-            if (file != null)
+            if (file == null)
             {
-                using (var stream = new MemoryStream())
-                {
-                    await file.OpenReadStream().CopyToAsync(stream);
+                return;
+            }
 
-                    using (var package = new OfficeOpenXml.ExcelPackage(stream))
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            using var package = new OfficeOpenXml.ExcelPackage(stream);
+
+            var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
+            var rowCount = worksheet.Dimension.Rows;
+
+            for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
+            {
+                var question = new QuestionModel
                     {
-                        var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
+                        QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                        Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "",
+                        UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "",
+                        Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                        Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                        Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                        Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? "",
+                        // Coulmn 8 is answers, added below.
+                        Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "",
+                        Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30, // Default 30 seconds
+                        Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned",
+                        QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1",
+                        User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1,
+                    };
 
-                        var rowCount = worksheet.Dimension.Rows;
+                // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
+                var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
+                if (!string.IsNullOrEmpty(correctAnswers))
+                {
+                    var correctIndices = correctAnswers.Split(',')
+                        .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
+                        .Where(x => x > 0 && x <= 4)
+                        .ToList();
 
-                        for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
+                    for (int i = 0; i < correctIndices.Count; i++)
+                    {
+                        if (correctIndices[i] <= 4) // Assuming only 4 answers
                         {
-                            var question = new QuestionModel
-                                {
-                                    // Id = nextQuestionId++,
-                                    QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
-                                    Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
-                                    Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
-                                    Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
-                                    Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? ""
-                                };
-
-                            // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
-                            var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
-                            if (!string.IsNullOrEmpty(correctAnswers))
-                            {
-                                var correctIndices = correctAnswers.Split(',')
-                                    .Select(x => int.TryParse(x.Trim(), out int result) ? result : 0)
-                                    .Where(x => x > 0 && x <= 4)
-                                    .ToList();
-
-                                for (int i = 0; i < correctIndices.Count; i++)
-                                {
-                                    if (correctIndices[i] <= 4) // Assuming only 4 answers
-                                    {
-                                        question.CorrectAnswers[correctIndices[i] - 1] = true;
-                                    }
-                                }
-                            }
-
-                            // Set additional properties from the Excel columns
-                            question.Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "";
-                            question.UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "";
-                            question.Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "";
-                            question.Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30; // Default 30 seconds
-                            question.Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
-                            question.QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1";
-                            question.User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1;
-
-
-                            questionsHandler.Add(new()
-                                {
-                                    questionModel = question
-                                });
+                            question.CorrectAnswers[correctIndices[i] - 1] = true;
                         }
                     }
                 }
+
+                questionsHandler.Add(new()
+                    {
+                        questionModel = question
+                    });
             }
         }
         catch (Exception ex)

@@ -94,13 +94,13 @@ NoItemsText="You don't have any quiz assigned to you.'">
             string jwt = await jWTokenHandler.GetToken();
             int id = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
-            (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO>? response) =
+            (HttpStatusCode statusCode, List<User_QuizQuizInfoDTO> response) =
                 await httpHandler.GetAsync<List<User_QuizQuizInfoDTO>>(
                     $"api/User_Quiz/AllUserQuiz/{id}", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                quizzesLink = response ?? new();
+                quizzesLink = response;
                 StateHasChanged();
             }
         }

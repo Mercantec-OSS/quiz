@@ -167,12 +167,12 @@ else
             }
 
             int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
-            (HttpStatusCode statusCodeUserQuiz, User_QuizDTO? userQuiz) =
+            (HttpStatusCode statusCodeUserQuiz, User_QuizDTO userQuiz) =
                 await httpHandler.GetAsync<User_QuizDTO>(
                     $"/api/User_Quiz/{quizID}/{userID}", jwt, false);
 
             string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
-            if (userRole == "Student" && userQuiz == null)
+            if (userRole == "Student" && statusCodeUserQuiz == HttpStatusCode.NotFound)
             {
                 // Isn't invited to this quiz or has completed it before.
                 NavigationManager.NavigateTo("/browse");
@@ -180,10 +180,10 @@ else
             }
             else
             {
-                this.userQuiz = userQuiz ?? new();
+                this.userQuiz = userQuiz;
             }
 
-            (HttpStatusCode statusCodeQuiz, QuizDTO? quizDTO) =
+            (HttpStatusCode statusCodeQuiz, QuizDTO quizDTO) =
                await httpHandler.GetAsync<QuizDTO>(
                    $"/api/Quizs/{quizID}", jwt);
 
@@ -192,11 +192,11 @@ else
                 quiz = quizDTO;
             }
 
-            (HttpStatusCode statusCodeCuestions, List<QuestionDTO>? QuestionDTOs) =
+            (HttpStatusCode statusCodeCuestions, List<QuestionDTO> QuestionDTOs) =
                 await httpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt);
 
-            if (statusCodeCuestions == HttpStatusCode.OK && QuestionDTOs != null)
+            if (statusCodeCuestions == HttpStatusCode.OK)
             {
                 questions.AddRange(QuestionDTOs);
                 timer.Elapsed += OnTimedEvent;
@@ -323,7 +323,7 @@ else
         string jwt = await jWTokenHandler.GetToken();
         int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
-        (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? difficulties) =
+        (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO> difficulties) =
                 await httpHandler.GetAsync<List<DifficultyDTO>>(
                     $"/api/Difficulties", jwt);
 
@@ -333,7 +333,7 @@ else
             return;
         }
 
-        DifficultyDTO? quizDifficulty = difficulties?.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
+        DifficultyDTO? quizDifficulty = difficulties.FirstOrDefault(d => quiz.Difficulty == d.Difficulty);
         if (quizDifficulty == null)
         {
             NavigationManager.NavigateTo("/home");

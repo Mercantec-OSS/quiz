@@ -89,12 +89,12 @@
                 return;
             }
 
-            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
+            (HttpStatusCode statusCode, List<CategoryDTO> response) =
                 await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                categories = response ?? new();
+                categories = response;
                 StateHasChanged();
             }
 
@@ -118,13 +118,13 @@
         if (jWTokenHandler == null) return;
         string jwt = await jWTokenHandler.GetToken();
 
-        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO> response) =
             await httpHandler.GetAsync<List<UnderCategoryGetDTO>>(
                 $"api/UnderCategories/CategoryID/{category.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            underCategories = response ?? new();
+            underCategories = response;
         }
     }
 }

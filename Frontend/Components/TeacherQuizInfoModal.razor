@@ -53,13 +53,13 @@
         this.quiz = quiz;
         this.openAddStudentsModal = openAddStudentsModal;
 
-        (HttpStatusCode statusCode, List<User_QuizUserInfoDTO>? response) =
+        (HttpStatusCode statusCode, List<User_QuizUserInfoDTO> response) =
            await httpHandler.GetAsync<List<User_QuizUserInfoDTO>>(
                $"/api/User_Quiz/AllStudents/{quiz.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            usersToQuiz = response ?? new();
+            usersToQuiz = response;
             StateHasChanged();
         }
 

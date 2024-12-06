@@ -54,13 +54,13 @@
         loading?.Start();
         modal?.Show();
 
-        (HttpStatusCode statusCode, List<UserDTO>? response) =
+        (HttpStatusCode statusCode, List<UserDTO> response) =
            await httpHandler.GetAsync<List<UserDTO>>(
                $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            students = response?.ToDictionary(res => res, res => false);
+            students = response.ToDictionary(res => res, res => false);
             StateHasChanged();
         }
 

@@ -271,13 +271,13 @@
             return;
         }
 
-        (HttpStatusCode statusCode, List<Question>? questions) = await httpHandler.GetAsync<List<Question>>(url, jwt);
+        (HttpStatusCode statusCode, List<Question> questions) = await httpHandler.GetAsync<List<Question>>(url, jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            questionHandling.Questions = questions?.Where(q => q.Category == questionHandling.selectedCategory.Category &&
+            questionHandling.Questions = questions.Where(q => q.Category == questionHandling.selectedCategory.Category &&
             q.UnderCategory == questionHandling.selectedUnderCategory.UnderCategory &&
-            q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList() ?? new();
+            q.Difficulty == questionHandling.selectedDifficulty.Difficulty).ToList();
 
             Console.WriteLine($"Fetched {questionHandling.Questions.Count} questions.");
             StateHasChanged();
@@ -325,7 +325,7 @@
         //set up url for API endpoint
         string url = "/api/Quizs/Setup-Quiz/Random";
 
-        (HttpStatusCode statusCode, QuizDTO? response) =
+        (HttpStatusCode statusCode, QuizDTO response) =
            await httpHandler.PostAsync<QuizDTO>(url, quizDto, Jwt);
 
         if (statusCode == HttpStatusCode.Created)
@@ -371,7 +371,7 @@
 
         string url = "/api/Quizs/Setup-Quiz/Custom";
 
-        (HttpStatusCode statusCode, QuizDTO? response) =
+        (HttpStatusCode statusCode, QuizDTO response) =
         await httpHandler.PostAsync<QuizDTO>(url, customQuizDto, jwt);
 
         if (statusCode == HttpStatusCode.Created)
@@ -394,28 +394,28 @@
         {
             string Jwt = await jWTokenHandler.GetToken();
 
-            (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO>? getDifficulties) =
+            (HttpStatusCode statusCodeDifficulties, List<DifficultyDTO> getDifficulties) =
                await httpHandler.GetAsync<List<DifficultyDTO>>("api/Difficulties", Jwt);
 
             if (statusCodeDifficulties == HttpStatusCode.OK)
             {
-                difficulties.AddRange(getDifficulties ?? new());
+                difficulties.AddRange(getDifficulties);
             }
 
-            (HttpStatusCode statusCodeCategories, List<CategoryDTO>? getCategories) =
+            (HttpStatusCode statusCodeCategories, List<CategoryDTO> getCategories) =
             await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", Jwt);
             if (statusCodeCategories == HttpStatusCode.OK)
             {
-                categories.AddRange(getCategories ?? new());
+                categories.AddRange(getCategories);
             }
 
 
-            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO>? getUnderCategories) =
+            (HttpStatusCode statusCodeUnderCategories, List<UnderCategoryGetDTO> getUnderCategories) =
             await httpHandler.GetAsync<List<UnderCategoryGetDTO>>("/api/UnderCategories", Jwt);
 
             if (statusCodeUnderCategories == HttpStatusCode.OK)
             {
-                underCategories.AddRange(getUnderCategories ?? new());
+                underCategories.AddRange(getUnderCategories);
             }
 
             AddNewCategory();

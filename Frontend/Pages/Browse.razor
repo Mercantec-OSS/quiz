@@ -140,11 +140,11 @@
                 searchWord = dataValue.ToArray()[0] ?? "";
             }
             HttpStatusCode statusCode;
-            List<QuizDTO>? quizes;
+            List<QuizDTO> quizes;
             string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             if (userRole == "Guest")
             {
-                (statusCode, QuizDTO? quiz) = await httpHandler.GetAsync<QuizDTO>(
+                (statusCode, QuizDTO quiz) = await httpHandler.GetAsync<QuizDTO>(
                         $"/api/Quizs/39", jwt);
 
                 quizes = new();
@@ -164,7 +164,7 @@
             if (statusCode == HttpStatusCode.OK && sessionStorageHandler != null)
             {
                 username = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userUsername);
-                allQuizzes = quizes ?? new();
+                allQuizzes = quizes;
                 Dictionary<string, int> creators = new();
                 Dictionary<string, int> categories = new();
                 Dictionary<string, int> difficulty = new();

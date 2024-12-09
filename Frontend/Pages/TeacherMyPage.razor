@@ -1,7 +1,6 @@
 ﻿@page "/TeacherMyPage"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <TeacherQuizInfoModal @ref="teacherQuizInfoModal" />
 <TeacherAddStudentToQuiz @ref="teacherAddStudentToQuiz" />
@@ -11,7 +10,7 @@
 <h3>My Page</h3>
 
 <GenericListComponent T="QuizDTO" Items="quizzesMaked"
-                      NoItemsText="You haven't created any quizzes.">
+NoItemsText="You haven't created any quizzes.">
     <BodyContent>
         <Column ColumnSize="ColumnSize.Is4">
             <Card>
@@ -20,17 +19,20 @@
                 </CardHeader>
                 <CardBody>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is6">
+                        <Column ColumnSize="ColumnSize.Is4">
                             Category: @context.Category
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is6">
+                        <Column ColumnSize="ColumnSize.Is4">
                             Difficulty: @context.Difficulty
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            Questions: @context.QestionsAmount: @context.Difficulty
                         </Column>
                     </Row>
                 </CardBody>
                 <CardFooter>
                     <Button Class="btn btn-primary w-100"
-                            Clicked="() => OpenQuizModal(context)">
+                    Clicked="() => OpenQuizModal(context)">
                         Show details
                     </Button>
                 </CardFooter>
@@ -49,7 +51,8 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
 
     private TeacherQuizInfoModal? teacherQuizInfoModal;
     private TeacherAddStudentToQuiz? teacherAddStudentToQuiz;
@@ -60,12 +63,13 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
-            int id = await sessionStorage.GetItemAsync<int>("userID");
-            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            int id = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             if (userRole == "Student")
             {
                 NavigationManager.NavigateTo("/home");
@@ -74,13 +78,13 @@
 
             loading?.Start();
 
-            (HttpStatusCode statusCode, List<QuizDTO>? response) =
+            (HttpStatusCode statusCode, List<QuizDTO> response) =
                 await httpHandler.GetAsync<List<QuizDTO>>(
-                    $"/api/Quizs/ByCreater/{id}", jwt, Http);
+                    $"/api/Quizs/ByCreater/{id}", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                quizzesMaked = response ?? new();
+                quizzesMaked = response;
                 StateHasChanged();
             }
             loading?.Stop();

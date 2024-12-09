@@ -1,7 +1,6 @@
 ﻿@page "/CategoryList"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Category list</PageTitle>
 
@@ -19,7 +18,7 @@
                 </Heading>
                 <Small>
                     <Button Class="btn" Color="Color.Primary"
-                            Clicked="() => show ?
+                    Clicked="() => show ?
                             GetSubCategories(category) : ClearSubCategories()">
                         @(show ? "Show" : "Hide") undercategories
                     </Button>
@@ -64,9 +63,10 @@
 
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
-    
-    [Inject] public HttpClient? Http { get; set; }
-    
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     private List<CategoryDTO> categories = new();
     private CategoryDTO? categoryShowingUnderCategories;
     private List<UnderCategoryGetDTO>? underCategories;
@@ -75,12 +75,13 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             loading?.Start();
             string jwt = await jWTokenHandler.GetToken();
-            string userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
 
             if (string.IsNullOrEmpty(userRole) || userRole == "Student")
             {
@@ -88,12 +89,12 @@
                 return;
             }
 
-            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
-                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
+            (HttpStatusCode statusCode, List<CategoryDTO> response) =
+                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                categories = response ?? new();
+                categories = response;
                 StateHasChanged();
             }
 
@@ -113,18 +114,17 @@
         await ClearSubCategories();
         categoryShowingUnderCategories = category;
 
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
         string jwt = await jWTokenHandler.GetToken();
 
-        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO> response) =
             await httpHandler.GetAsync<List<UnderCategoryGetDTO>>(
-                $"api/UnderCategories/CategoryID/{category.ID}",
-                jwt, Http);
+                $"api/UnderCategories/CategoryID/{category.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            underCategories = response ?? new();
+            underCategories = response;
         }
     }
 }

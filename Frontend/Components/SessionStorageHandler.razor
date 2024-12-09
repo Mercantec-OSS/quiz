@@ -1,0 +1,33 @@
+﻿@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@code {
+    public static SessionStorageHandler? Instance { get; private set; }
+
+    public enum Item
+    {
+        jwt,
+        userID,
+        userRole,
+        userEmail,
+        userUsername,
+    }
+
+    protected override void OnInitialized()
+    {
+        Instance = this;
+    }
+
+    public async Task LoggedIn(UserDTO dTO)
+    {
+        await sessionStorage.SetItemAsync(Item.jwt.ToString(), dTO.token);
+        await sessionStorage.SetItemAsync(Item.userRole.ToString(), dTO.role);
+        await sessionStorage.SetItemAsync(Item.userEmail.ToString(), dTO.email);
+        await sessionStorage.SetItemAsync(Item.userUsername.ToString(), dTO.username);
+        await sessionStorage.SetItemAsync(Item.userID.ToString(), dTO.ID);
+    }
+
+    public async Task<T> GetItem<T>(Item item)
+    {
+        return await sessionStorage.GetItemAsync<T>(item.ToString());
+    }
+}

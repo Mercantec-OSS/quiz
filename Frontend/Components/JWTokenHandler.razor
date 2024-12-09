@@ -15,7 +15,9 @@
         // If jwt is empty, fetch it from sessionStorage
         if (string.IsNullOrEmpty(jwt))
         {
-            jwt = await sessionStorage.GetItemAsync<string>("jwt");
+            jwt = await sessionStorage.GetItemAsync<string>(
+                SessionStorageHandler.Item.jwt.ToString());
+
             if (string.IsNullOrEmpty(jwt))
             {
                 // If no JWT exists, navigate to the login page

@@ -36,7 +36,6 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
     private CustomModal? modal;
 
     private QuizDTO quiz = new();
@@ -46,7 +45,7 @@
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openTeacherQuizInfo)
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
@@ -55,13 +54,13 @@
         loading?.Start();
         modal?.Show();
 
-        (HttpStatusCode statusCode, List<UserDTO>? response) =
+        (HttpStatusCode statusCode, List<UserDTO> response) =
            await httpHandler.GetAsync<List<UserDTO>>(
-               $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt, Http);
+               $"/api/User_Quiz/AllStudentsNotOnQuiz/{quiz.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            students = response?.ToDictionary(res => res, res => false);
+            students = response.ToDictionary(res => res, res => false);
             StateHasChanged();
         }
 
@@ -85,7 +84,7 @@
 
     private async void AddStudents()
     {
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
         if (students == null) return;
 
@@ -99,7 +98,7 @@
             };
 
         (HttpStatusCode statusCode, string response) = await httpHandler.PostAsync(
-               $"/api/User_Quiz/MoreUsers", newUserToQuiz, jwt, Http);
+               $"/api/User_Quiz/MoreUsers", newUserToQuiz, jwt);
 
         if (statusCode == HttpStatusCode.Created)
         {

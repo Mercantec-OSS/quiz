@@ -204,14 +204,12 @@ namespace API.Controllers
                 return Unauthorized("Unauthorized.");
             }
 
-            var quizs = (await _context.Quizs.
+            var quizs = await _context.Quizs.
                 Include(q => q.creator).
                 Include(q => q.category).
                 Include(q => q.difficulty).
-                Include(q => q.creator).
                 Include(q => q.education).
                 Where(q => q.creator.ID == id)
-                .ToListAsync())
                 .Select(q => new QuizDTO()
                 {
                     ID = q.ID,
@@ -220,7 +218,7 @@ namespace API.Controllers
                     Difficulty = q.difficulty.Difficulty,
                     Education = q.education.Education,
                     Title = q.Title,
-                });
+                }).ToListAsync();
 
             if (quizs == null)
             {

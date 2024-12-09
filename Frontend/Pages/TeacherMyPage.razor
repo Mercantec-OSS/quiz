@@ -19,11 +19,14 @@ NoItemsText="You haven't created any quizzes.">
                 </CardHeader>
                 <CardBody>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is6">
+                        <Column ColumnSize="ColumnSize.Is4">
                             Category: @context.Category
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is6">
+                        <Column ColumnSize="ColumnSize.Is4">
                             Difficulty: @context.Difficulty
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            Questions: @context.QestionsAmount: @context.Difficulty
                         </Column>
                     </Row>
                 </CardBody>

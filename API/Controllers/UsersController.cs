@@ -253,16 +253,22 @@
             User? userFinder = await _context.Users.
                 Include(item => item.role).
                 FirstOrDefaultAsync(item => item.Username == "Guest");
+            if (userFinder == null) return BadRequest("Guest user not created");
 
-            var Token = await _context.Token.FirstOrDefaultAsync(t => t.user.ID == userFinder.ID);
-
+            Token token = await _context.Token.FirstOrDefaultAsync(t => t.user.ID == userFinder.ID)
+                ?? new();
+            
+            var validate = await _tokenController.GetUserRole(token.JWTToken);
+            if(validate == null) token = await GenerateJwtTokenForGuest(userFinder);
+            
+            
             return Ok(new UserDTO()
             {
                 ID = userFinder.ID,
                 email = userFinder.Email,
                 username = userFinder.Username,
                 role = userFinder.role.Role,
-                token = Token.JWTToken
+                token = token.JWTToken
             });
         }
 
@@ -359,16 +365,12 @@
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-
-            _configuration["JwtSettings:Issuer"] ?? Environment.GetEnvironmentVariable("Issuer"),
-
-            _configuration["JwtSettings:Audience"] ?? Environment.GetEnvironmentVariable("Audience"),
-
-            claims,
-
-            expires: DateTime.Now.AddDays(1),
-
-            signingCredentials: creds);
+                _configuration["JwtSettings:Issuer"] ?? Environment.GetEnvironmentVariable("Issuer"),
+                _configuration["JwtSettings:Audience"] ?? Environment.GetEnvironmentVariable("Audience"),
+                claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds
+            );
 
             Token userToken = new()
             {
@@ -376,6 +378,42 @@
                 user = user
             };
 
+            return userToken;
+        }
+
+        // Only used in case guestlogin has an invalid or non existing token
+        private async Task<Token> GenerateJwtTokenForGuest(User user)
+        {
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+
+                new Claim(ClaimTypes.Name, user.Username),
+
+                new Claim(ClaimTypes.SerialNumber, user.ID.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"] ?? Environment.GetEnvironmentVariable("Key")));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                _configuration["JwtSettings:Issuer"] ?? Environment.GetEnvironmentVariable("Issuer"),
+                _configuration["JwtSettings:Audience"] ?? Environment.GetEnvironmentVariable("Audience"),
+                claims,
+                expires: DateTime.Now.AddYears(1000),
+                signingCredentials: creds
+            );
+
+            Token userToken = new()
+            {
+                JWTToken = new JwtSecurityTokenHandler().WriteToken(token),
+                user = user
+            };
+
+            _context.Token.Add(userToken);
+            await _context.SaveChangesAsync();
             return userToken;
         }
     }

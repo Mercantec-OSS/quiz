@@ -12,12 +12,18 @@
         }
 
         [HttpGet("UserAuth")]
-        public async Task<User> GetUserRole(string token)
+        public async Task<User?> GetUserRole(string token)
         {
             var isValid = await _context.Token.AnyAsync(t => t.JWTToken == token && t.ExpiresAt >= DateTime.UtcNow);
 
             if (!isValid)
             {
+                var Token = await _context.Token.FirstOrDefaultAsync(t => t.JWTToken == token);
+                if (Token != null)
+                {
+                    _context.Token.Remove(Token);
+                    _context.SaveChanges();
+                }
                 return null; // Indicates an invalid token.
             }
 

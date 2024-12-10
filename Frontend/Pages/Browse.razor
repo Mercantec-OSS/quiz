@@ -1,7 +1,6 @@
 ﻿@page "/browse"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @using Microsoft.AspNetCore.WebUtilities;
 @using System.Collections.Generic
@@ -90,8 +89,8 @@
                     </Row>
                 </CardBody>
                 <CardFooter>
-                    <Button Color="Color.Primary" Style="width: 100%" 
-                        Clicked="() => StartQuiz(context.ID ?? 0)">
+                    <Button Color="Color.Primary" Style="width: 100%"
+                    Clicked="() => StartQuiz(context.ID ?? 0)">
                         @(context.Creator == username ? "Try quiz" : "Start")
                     </Button>
                 </CardFooter>
@@ -110,8 +109,9 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
-    
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     private List<QuizDTO> allQuizzes = new();
     private List<string> creators = new();
     private List<string> categories = new();
@@ -126,8 +126,9 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
             string searchWord = "";
@@ -138,17 +139,32 @@
             {
                 searchWord = dataValue.ToArray()[0] ?? "";
             }
-
-            Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
-
-            (HttpStatusCode statusCode, List<QuizDTO>? response) =
-                await httpHandler.GetAsync<List<QuizDTO>>(
-                    $"/api/Quizs/QuizSearch", parameters, jwt, Http);
-
-            if (statusCode == HttpStatusCode.OK)
+            HttpStatusCode statusCode;
+            List<QuizDTO> quizes;
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+            if (userRole == "Guest")
             {
-                username = await sessionStorage.GetItemAsync<string>("userUsername");
-                allQuizzes = response ?? new();
+                (statusCode, QuizDTO quiz) = await httpHandler.GetAsync<QuizDTO>(
+                        $"/api/Quizs/39", jwt);
+
+                quizes = new();
+                if (statusCode == HttpStatusCode.OK && quiz != null)
+                {
+                    quizes.Add(quiz);
+                }
+            }
+            else
+            {
+                Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
+
+                (statusCode, quizes) = await httpHandler.GetAsync<List<QuizDTO>>(
+                        $"/api/Quizs/QuizSearch", parameters, jwt);
+            }
+
+            if (statusCode == HttpStatusCode.OK && sessionStorageHandler != null)
+            {
+                username = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userUsername);
+                allQuizzes = quizes;
                 Dictionary<string, int> creators = new();
                 Dictionary<string, int> categories = new();
                 Dictionary<string, int> difficulty = new();

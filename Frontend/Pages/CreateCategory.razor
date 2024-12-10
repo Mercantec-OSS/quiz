@@ -140,8 +140,6 @@
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
 
-    [Inject] public HttpClient? Http { get; set; }
-
     private CategoryDTO? selectedCategory = null;
     private List<CategoryDTO> categories = new();
 
@@ -173,19 +171,19 @@
     {
         if (firstRender)
         {
-            if (Http == null || httpHandler == null) return;
+            if (httpHandler == null) return;
             if (jWTokenHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
 
             loading?.Start();
 
-            (HttpStatusCode statusCode, List<CategoryDTO>? response) =
-                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt, Http);
+            (HttpStatusCode statusCode, List<CategoryDTO> response) =
+                await httpHandler.GetAsync<List<CategoryDTO>>("api/Categories", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
-                categories = response ?? new();
+                categories = response;
             }
             else
             {
@@ -261,19 +259,19 @@
     {
         selectedCategory = category;
 
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         loading?.Start();
         string jwt = await jWTokenHandler.GetToken();
 
-        (HttpStatusCode statusCode, List<UnderCategoryGetDTO>? response) =
+        (HttpStatusCode statusCode, List<UnderCategoryGetDTO> response) =
                 await httpHandler.GetAsync<List<UnderCategoryGetDTO>>(
-                    $"api/UnderCategories/CategoryID/{category.ID}", jwt, Http);
+                    $"api/UnderCategories/CategoryID/{category.ID}", jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
-            underCategories = response ?? new();
+            underCategories = response;
         }
         else
         {
@@ -285,7 +283,7 @@
 
     private async Task SaveEditedCategory()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null || httpHandler == null)
+        if (this.editCategory == null || jWTokenHandler == null || httpHandler == null)
         {
             ToggleEditCategoryModal();
             return;
@@ -301,9 +299,8 @@
                 Education = this.editCategory.Education
             };
 
-        (HttpStatusCode statusCode, CategoryDTO? response) =
-           await httpHandler.PutAsync<CategoryDTO>(
-               $"/api/Categories/{editCategory.ID}", editCategory, jwt, Http);
+        HttpStatusCode statusCode = await httpHandler.PutAsync(
+               $"/api/Categories/{editCategory.ID}", editCategory, jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -320,7 +317,7 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null
+        if (this.editCategory == null || jWTokenHandler == null
             || httpHandler == null || this.editUnderCategory == null)
         {
             ToggleEditUnderCategoryModal();
@@ -336,9 +333,8 @@
                 UnderCategory = this.editUnderCategory.UnderCategory,
             };
 
-        HttpStatusCode statusCode =
-           await httpHandler.PutAsync(
-               $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt, Http);
+        HttpStatusCode statusCode = await httpHandler.PutAsync(
+               $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -355,14 +351,14 @@
 
     private async Task DeleteConfirmed()
     {
-        if (Http == null || this.editCategory == null || jWTokenHandler == null
+        if (this.editCategory == null || jWTokenHandler == null
             || httpHandler == null || underCategoryToBeDeleted == null)
             return;
 
         loading?.Start();
         string jwt = await jWTokenHandler.GetToken();
         HttpStatusCode statusCode = await httpHandler.DeleteAsync(
-                    $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt, Http);
+                    $"/api/UnderCategories/{underCategoryToBeDeleted.ID}", jwt);
 
         if (statusCode == HttpStatusCode.NoContent)
         {
@@ -383,7 +379,7 @@
         string newCategoryText = this.newCategory;
         this.newCategory = string.Empty;
 
-        if (Http == null || httpHandler == null) return;
+        if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         loading?.Start();
@@ -395,11 +391,11 @@
                 EducationID = 1,
             };
 
-        (HttpStatusCode statusCode, CategoryDTO? response) =
+        (HttpStatusCode statusCode, CategoryDTO response) =
            await httpHandler.PostAsync<CategoryDTO>(
-               $"api/Categories", newCategory, jwt, Http);
+               $"api/Categories", newCategory, jwt);
 
-        if (statusCode == HttpStatusCode.Created && response != null)
+        if (statusCode == HttpStatusCode.Created)
         {
             selectedCategory = response;
             categories.Add(response);
@@ -420,7 +416,6 @@
         this.newUnderCategory = string.Empty;
 
         if (selectedCategory == null) return;
-        if (Http == null) return;
         if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
@@ -433,11 +428,11 @@
                 CategoryID = selectedCategory.ID
             };
 
-        (HttpStatusCode statusCode, UnderCategoryGetDTO? response) =
+        (HttpStatusCode statusCode, UnderCategoryGetDTO response) =
                 await httpHandler.PostAsync<UnderCategoryGetDTO>(
-                    $"api/UnderCategories", newUnderCategories, jwt, Http);
+                    $"api/UnderCategories", newUnderCategories, jwt);
 
-        if (statusCode == HttpStatusCode.Created && response != null)
+        if (statusCode == HttpStatusCode.Created)
         {
             underCategories.Add(response);
         }

@@ -1,7 +1,6 @@
 ﻿@page "/home"
 
 @inject NavigationManager NavigationManager
-@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Home</PageTitle>
 
@@ -32,6 +31,9 @@
     [CascadingParameter(Name = "JWTokenHandler")]
     private JWTokenHandler? jWTokenHandler { get; set; }
 
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     private SearchWord searchWord = new();
     private string userRole = string.Empty;
 
@@ -39,10 +41,10 @@
     {
         if (firstRender)
         {
-            if (jWTokenHandler == null) return;
+            if (jWTokenHandler == null || sessionStorageHandler == null) return;
 
             string jwt = await jWTokenHandler.GetToken();
-            userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             if (userRole == "Teacher")
             {
                 StateHasChanged();

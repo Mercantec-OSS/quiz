@@ -3,6 +3,9 @@
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @code {
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
     private static string jwtToken = string.Empty;
     private static string userRole = string.Empty;
 
@@ -25,10 +28,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && sessionStorageHandler != null)
         {
-            jwtToken = await sessionStorage.GetItemAsync<string>("jwt");
-            userRole = await sessionStorage.GetItemAsync<string>("userRole");
+            jwtToken = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.jwt);
+            userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
             StateHasChanged();
         }
     }
@@ -42,17 +45,20 @@
                 <Dropdown Direction="Direction.End">
                     <DropdownToggle Color="Color.Light">Menu</DropdownToggle>
                     <DropdownMenu Style="z-index: 30;">
-                        <DropdownItem>
-                            <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
-                            </NavLink>
-                        </DropdownItem>
+                        @if (userRole != "Guest")
+                        {
+                            <DropdownItem>
+                                <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
+                                </NavLink>
+                            </DropdownItem>
 
-                        <DropdownItem>
-                            <NavLink class="nav-link" href="@(IsUserAllowed() ? "TeacherMyPage" : "MyPage")">
-                                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
-                            </NavLink>
-                        </DropdownItem>
+                            <DropdownItem>
+                                <NavLink class="nav-link" href="@(IsUserAllowed() ? "TeacherMyPage" : "MyPage")">
+                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                                </NavLink>
+                            </DropdownItem>
+                        }
 
                         @if (IsUserAllowed())
                         {

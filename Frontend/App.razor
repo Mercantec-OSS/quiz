@@ -1,12 +1,15 @@
 ﻿<HttpHandler />
 <LoadingSpinner />
 <JWTokenHandler />
+<SessionStorageHandler />
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <CascadingValue Name="HttpHandler" Value="HttpHandler.Instance">
             <CascadingValue Name="LoadingSpinner" Value="LoadingSpinner.Instance">
                 <CascadingValue Name="JWTokenHandler" Value="JWTokenHandler.Instance">
-                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                    <CascadingValue Name="SessionStorageHandler" Value="SessionStorageHandler.Instance">
+                        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                    </CascadingValue>
                 </CascadingValue>
             </CascadingValue>
         </CascadingValue>

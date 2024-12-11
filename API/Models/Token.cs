@@ -8,7 +8,7 @@ public class Token
     [ForeignKey("User")]
     public User user { get; set; }
 
-    public string JWTToken {  get; set; }
+    public string JWTToken {  get; set; } = string.Empty;
 
     public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(1);
 }

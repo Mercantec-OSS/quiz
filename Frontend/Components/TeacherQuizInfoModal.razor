@@ -1,4 +1,5 @@
-﻿<CustomModal Title="@quiz.Title" @ref="modal" size="ModalSize.Large" OnClose="Close">
+﻿<CustomModal Title="@quiz.Title" @ref="modal" size="ModalSize.Large" OnClose="Close"
+             OnPrimaryAction="OpenAddStudentsModal" PrimaryButtonText="Add Student(s)">
     <BodyContent>
         <GenericListComponent T="User_QuizUserInfoDTO" Items="usersToQuiz" NoItemsText="No students found assigned to this quiz">
             <BodyContent>
@@ -38,8 +39,9 @@
 
     private QuizDTO quiz = new();
     private List<User_QuizUserInfoDTO>? usersToQuiz = null;
+    private Action<QuizDTO>? openAddStudentsModal;
 
-    public async void Open(QuizDTO quiz)
+    public async void Open(QuizDTO quiz, Action<QuizDTO> openAddStudentsModal)
     {
         if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
@@ -49,6 +51,7 @@
 
         string jwt = await jWTokenHandler.GetToken();
         this.quiz = quiz;
+        this.openAddStudentsModal = openAddStudentsModal;
 
         (HttpStatusCode statusCode, List<User_QuizUserInfoDTO> response) =
            await httpHandler.GetAsync<List<User_QuizUserInfoDTO>>(
@@ -68,5 +71,11 @@
         usersToQuiz = null;
         StateHasChanged();
         modal?.Hide();
+    }
+
+    private void OpenAddStudentsModal()
+    {
+        Close();
+        openAddStudentsModal?.Invoke(quiz);
     }
 }

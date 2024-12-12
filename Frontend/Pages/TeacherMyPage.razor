@@ -37,9 +37,6 @@ NoItemsText="You haven't created any quizzes.">
                     <Button Class="btn btn-primary w-100" Clicked="() => OpenQuizModal(context)">
                         Show Students
                     </Button>
-                    <Button Class="btn btn-primary w-100" Clicked="() => OpenQuizAddStudents(context)">
-                        Add Students
-                    </Button>
                 </CardFooter>
             </Card>
         </Column>
@@ -98,11 +95,11 @@ NoItemsText="You haven't created any quizzes.">
 
     private void OpenQuizModal(QuizDTO quiz)
     {
-        teacherQuizInfoModal?.Open(quiz);
+        teacherQuizInfoModal?.Open(quiz, OpenQuizAddStudents);
     }
 
     public void OpenQuizAddStudents(QuizDTO quiz)
     {
-        teacherAddStudentToQuiz?.Open(quiz);
+        teacherAddStudentToQuiz?.Open(quiz, OpenQuizModal);
     }
 }

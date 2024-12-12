@@ -8,6 +8,7 @@
 <PageTitle>Login</PageTitle>
 
 <div class="login-container">
+    <Image Style="height: 100px;" Source="Mercantec logos/Mercantec-LOGO_XL-sort.png" Text="Mercantec logo" />
     <h1>Login</h1>
 
     @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -38,7 +39,7 @@
         </div>
     </EditForm>
 
-    <Divider />
+    <Divider class="w-100" Style="height: 1.25px;" />
 
     <Button Class="btn btn-primary" Clicked="GuestLogin">
         Guest login

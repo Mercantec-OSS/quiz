@@ -148,7 +148,7 @@
                         $"/api/Quizs/39", jwt);
 
                 quizes = new();
-                if (statusCode == HttpStatusCode.OK && quiz != null)
+                if (statusCode == HttpStatusCode.OK)
                 {
                     quizes.Add(quiz);
                 }

@@ -192,13 +192,14 @@ else
                 quiz = quizDTO;
             }
 
-            (HttpStatusCode statusCodeCuestions, List<QuestionDTO> QuestionDTOs) =
+            (HttpStatusCode statusCodeCuestions, List<QuestionDTO> QuestionsDTO) =
                 await httpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt);
 
             if (statusCodeCuestions == HttpStatusCode.OK)
             {
-                questions.AddRange(QuestionDTOs);
+                Random random = new(DateTime.UtcNow.Millisecond);
+                questions.AddRange(QuestionsDTO.OrderBy(_ => random.Next(questions.Count + 5)).ToList());
                 timer.Elapsed += OnTimedEvent;
             }
 

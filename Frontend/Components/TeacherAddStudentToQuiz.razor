@@ -41,15 +41,12 @@
     private QuizDTO quiz = new();
     private Dictionary<UserDTO, bool>? students = null;
 
-    private Action<QuizDTO>? openTeacherQuizInfo;
-
-    public async void Open(QuizDTO quiz, Action<QuizDTO> openTeacherQuizInfo)
+    public async void Open(QuizDTO quiz)
     {
         if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
-        this.openTeacherQuizInfo = openTeacherQuizInfo;
         this.quiz = quiz;
         loading?.Start();
         modal?.Show();
@@ -71,7 +68,6 @@
     {
         students = null;
         modal?.Hide();
-        openTeacherQuizInfo?.Invoke(quiz);
     }
 
     private void OnChanged(bool value, UserDTO user)

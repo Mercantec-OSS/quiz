@@ -26,6 +26,16 @@
         return userRole == "Teacher";
     }
 
+    private bool IsGuest()
+    {
+        return userRole == "Guest";
+    }
+
+    private bool isLoggedIn()
+    {
+        return string.IsNullOrEmpty(jwtToken);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && sessionStorageHandler != null)
@@ -35,69 +45,80 @@
             StateHasChanged();
         }
     }
+
+    private string LogoClick()
+    {
+        if (isLoggedIn())
+        {
+            return string.Empty;
+        }
+
+        return IsGuest() ? "browse" : "home";
+    }
 }
 
 <div class="page">
     <main>
-        <div class="top-row">
-            @if (!string.IsNullOrEmpty(jwtToken))
-            {
-                <Dropdown Direction="Direction.End">
-                    <DropdownToggle Color="Color.Light">Menu</DropdownToggle>
-                    <DropdownMenu Style="z-index: 30;">
-                        @if (userRole != "Guest")
-                        {
-                            <DropdownItem>
-                                <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
-                                </NavLink>
-                            </DropdownItem>
+        <div class="top-row d-flex justify-content-between align-items-center">
+            <NavLink class="nav-link h-100" style="padding: 0;" href="@LogoClick()" Match="NavLinkMatch.All">
+                <Image Class="h-100" Source="Mercantec logos/Mercantec-LOGO-bred-hvid.png" />
+            </NavLink>
+
+            <div class="d-flex align-items-center">
+                @if (!isLoggedIn())
+                {
+                    <Dropdown Direction="Direction.End">
+                        <DropdownToggle Color="Color.Light">Menu</DropdownToggle>
+                        <DropdownMenu Style="z-index: 30;">
+                            @if (!IsGuest())
+                            {
+                                <DropdownItem>
+                                    <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
+                                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Hjem
+                                    </NavLink>
+                                </DropdownItem>
+                                <DropdownItem>
+                                    <NavLink class="nav-link" href="@(IsUserAllowed() ? "TeacherMyPage" : "MyPage")">
+                                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                                    </NavLink>
+                                </DropdownItem>
+                            }
+
+                            @if (IsUserAllowed())
+                            {
+                                <DropdownItem>
+                                    <NavLink class="nav-link" href="create">
+                                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create question
+                                    </NavLink>
+                                </DropdownItem>
+                                <DropdownItem>
+                                    <NavLink class="nav-link" href="quiz">
+                                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create quiz
+                                    </NavLink>
+                                </DropdownItem>
+                                <DropdownItem>
+                                    <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
+                                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categori
+                                    </NavLink>
+                                </DropdownItem>
+                            }
 
                             <DropdownItem>
-                                <NavLink class="nav-link" href="@(IsUserAllowed() ? "TeacherMyPage" : "MyPage")">
-                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Page
+                                <NavLink class="nav-link" href="browse">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
                                 </NavLink>
                             </DropdownItem>
-                        }
-
-                        @if (IsUserAllowed())
-                        {
                             <DropdownItem>
-                                <NavLink class="nav-link" href="create">
-                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create question
+                                <NavLink class="nav-link" href="logout">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Logout
                                 </NavLink>
                             </DropdownItem>
-
-                            <DropdownItem>
-                                <NavLink class="nav-link" href="quiz">
-                                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create quiz
-                                </NavLink>
-                            </DropdownItem>
-
-                            <DropdownItem>
-                                <NavLink class="nav-link" href="ChooseCategoryListOrCreate">
-                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categori
-                                </NavLink>
-                            </DropdownItem>
-                        }
-
-                        <DropdownItem>
-                            <NavLink class="nav-link" href="browse">
-                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Browse
-                            </NavLink>
-                        </DropdownItem>
-
-                        <DropdownItem>
-                            <NavLink class="nav-link" href="/logout">
-                                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Logout
-                            </NavLink>
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
-            }
-
-            <div class="about mx-2">
-                <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
+                        </DropdownMenu>
+                    </Dropdown>
+                }
+                <div class="mx-2">
+                    <a href="https://www.mercantec.dk/uddannelser/gymnasiale-uddannelser/eux/eux-datatekniker-programmering" target="_blank" style="color: white;">About</a>
+                </div>
             </div>
         </div>
 

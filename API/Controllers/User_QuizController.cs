@@ -458,17 +458,23 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            else if (userResult.role.Role != "Administrator")
+            else if (userResult.role.Role != "Administrator" && userResult.role.Role != "Teacher")
             {
                 return Unauthorized("Unauthorized.");
             }
 
-            var user_Quiz = await _context.User_Quiz.
-                 FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
+            var user_Quiz = await _context.User_Quiz
+                .Include(uq => uq.quiz)
+                .ThenInclude(uq => uq.creator)
+                .FirstOrDefaultAsync(uq => uq.quiz.ID == quizId && uq.user.ID == userId);
 
             if (user_Quiz == null)
             {
                 return NotFound();
+            }
+            if (user_Quiz.quiz.creator.ID != userResult.ID)
+            {
+                return Unauthorized("Unauthorized.");
             }
 
             _context.User_Quiz.Remove(user_Quiz);

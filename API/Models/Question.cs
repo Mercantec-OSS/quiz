@@ -26,7 +26,8 @@ public class Question
     public string Picture { get; set; }
 
     public int Time { get; set; }
-
+    // This is for enabeling/disabeling
+    // fx. outdated Questions could be disabled so they cant be chosen for new quizzes
     public bool QuestionStatus { get; set; }
 
     public string QuestionType { get; set; }

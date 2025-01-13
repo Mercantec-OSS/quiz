@@ -325,7 +325,7 @@
             {
                 return Unauthorized("Invalid Token");
             }
-            else if (userResult.role.Role != "Administrator")
+            else if (userResult.role.Role != "Administrator" && userResult.ID != id)
             {
                 return Unauthorized("Unauthorized.");
             }

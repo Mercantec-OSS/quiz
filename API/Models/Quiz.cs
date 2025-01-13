@@ -3,15 +3,12 @@
 public class Quiz
 {
     [Key]
-
-    // The ID of the Quiz
     public int ID { get; set; }
 
     [ForeignKey("Creator")]
     public virtual User creator { get; set; }
 
-    // These are used to identify the quiz
-    public string Title { get; set; } // Fx. Website dev
+    public string Title { get; set; }
 
     [ForeignKey("Education")]
     public virtual Educations education { get; set; }    

@@ -3,8 +3,6 @@
 public class QuizCreateCustomDTO
 {
     public int CreatorID { get; set; }
-
-    // These are used to identify the quiz
     public string Title { get; set; } // Fx. Website dev
     public int EducationID { get; set; } // Fx. Buttons
     public int CategoryID { get; set; } // Fx. Website
@@ -15,8 +13,6 @@ public class QuizCreateCustomDTO
 public class QuizCreateRandomDTO
 {
     public int CreatorID { get; set; }
-
-    // These are used to identify the quiz
     public string Title { get; set; } // Fx. Website dev
     public int EducationID { get; set; } // Fx. Buttons
     public int CategoryID { get; set; } // Fx. Website

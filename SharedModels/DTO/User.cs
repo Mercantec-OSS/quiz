@@ -11,7 +11,6 @@ public class UserDTO
 
 public class LoginRequest
 {
-    // This is the login requirements
     public string username { get; set; }
     public string password { get; set; }
 }

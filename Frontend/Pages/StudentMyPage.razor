@@ -4,22 +4,12 @@
 <PageTitle>My page</PageTitle>
 
 <Row>
-    <Column ColumnSize="ColumnSize.Is10">
+    <Column ColumnSize="ColumnSize.Is9">
         <h1>My Page</h1>
     </Column>
-    <Column ColumnSize="ColumnSize.Is2">
+    <Column ColumnSize="ColumnSize.Is3">
         <h2>
-            Avg. score:
-            @if (quizzesLink == null)
-            {
-                <span>Loading...</span>
-            }
-            else
-            {
-                <span>
-                    @(quizzesLink.Count > 0 ? Math.Round(quizzesLink.Where(ql => ql.Completed).Average(ql => ql.Results), 2) : 0)
-                </span>
-            }
+            Avg. score: <Span>@CalculateAverage()</Span>
         </h2>
     </Column>
 </Row>
@@ -56,8 +46,8 @@ NoItemsText="You don't have any quiz assigned to you.'">
                     @if (!context.Completed)
                     {
                         <Button Class="btn btn-primary w-100"
-                        Clicked="() => Start(context.quiz.ID ?? 0)"
-                        Disabled="@context.Completed">
+                                Clicked="() => StartQuiz(context.quiz.ID ?? 0)"
+                                Disabled="@context.Completed">
                             Start
                         </Button>
                     }
@@ -101,12 +91,28 @@ NoItemsText="You don't have any quiz assigned to you.'">
             if (statusCode == HttpStatusCode.OK)
             {
                 quizzesLink = response;
-                StateHasChanged();
+                await InvokeAsync(() => StateHasChanged());
             }
         }
     }
 
-    private void Start(int quizID)
+    private string CalculateAverage()
+    {
+        if (quizzesLink == null)
+        {
+            return "Loading...";
+        }
+        else if (!quizzesLink.Any() || !quizzesLink.Any(ql => ql.Completed))
+        {
+            return "0";
+        }
+
+        List<User_QuizQuizInfoDTO> quizCompleted = quizzesLink.Where(ql => ql.Completed).ToList();
+        double result = Math.Round(quizCompleted.Average(ql => ql.Results), 2);
+        return result.ToString();
+    }
+
+    private void StartQuiz(int quizID)
     {
         if (quizID == 0)
         {

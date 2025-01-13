@@ -6,7 +6,13 @@
                 <Column ColumnSize="ColumnSize.Is6">
                     <Card>
                         <CardHeader>
-                            @context.User.username
+                            <Div Class="Split">
+                                @context.User.username
+
+                                <Button Color="Color.Primary" Clicked="() => OpenDeleteUserFromQuizConfimationModal(context)">
+                                    <i class="fa-solid fa-user-slash"></i>
+                                </Button>
+                            </Div>
                         </CardHeader>
                         <CardBody>
                             <Row>
@@ -25,6 +31,13 @@
     </BodyContent>
 </CustomModal>
 
+<CustomModal Title="@deleteConfirmationTitle" @ref="deleteConfirmationModal" size="ModalSize.Small"
+             DefaultOnClose="true" PrimaryButtonText="Confirm" OnPrimaryAction="DeletionConfirmed">
+    <BodyContent>
+        This action can't be undone.
+    </BodyContent>
+</CustomModal>
+
 @code {
     [CascadingParameter(Name = "HttpHandler")]
     private HttpHandler? httpHandler { get; set; }
@@ -36,9 +49,15 @@
     private LoadingSpinner? loading { get; set; }
 
     private CustomModal? modal;
+    private CustomModal? deleteConfirmationModal;
+
+    private const string deleteConfirmationTitleBase = "Remove ";
+    private const string deleteConfirmationTitleEnd = " form this quiz?";
+    private string deleteConfirmationTitle = "";
 
     private QuizDTO quiz = new();
     private List<User_QuizUserInfoDTO>? usersToQuiz = null;
+    private User_QuizUserInfoDTO userToBeRemoved = new();
     private Action<QuizDTO>? openAddStudentsModal;
 
     public async void Open(QuizDTO quiz, Action<QuizDTO> openAddStudentsModal)
@@ -77,5 +96,35 @@
     {
         Close();
         openAddStudentsModal?.Invoke(quiz);
+    }
+
+    private void OpenDeleteUserFromQuizConfimationModal(User_QuizUserInfoDTO user)
+    {
+        userToBeRemoved = user;
+        deleteConfirmationTitle = deleteConfirmationTitleBase + user.User.username + deleteConfirmationTitleEnd;
+        StateHasChanged();
+
+        deleteConfirmationModal?.Show();
+    }
+
+    private async void DeletionConfirmed()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        string jwt = await jWTokenHandler.GetToken();
+        loading?.Start();
+
+        HttpStatusCode statusCode = await httpHandler.DeleteAsync(
+            $"/api/User_Quiz/{quiz.ID}/{userToBeRemoved.User.ID}", jwt);
+
+        if (statusCode == HttpStatusCode.NoContent && usersToQuiz != null)
+        {
+            usersToQuiz.Remove(userToBeRemoved);
+            StateHasChanged();
+        }
+
+        deleteConfirmationModal?.Hide();
+        loading?.Stop();
     }
 }

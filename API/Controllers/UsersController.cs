@@ -197,7 +197,7 @@
         }
 
         // POST: api/Users
-        [HttpPost("Signup")]
+        [HttpPost("TeacherSignup")]
         public async Task<ActionResult<UserDTO>> PostTeacher(SignUpRequest userSignUp)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

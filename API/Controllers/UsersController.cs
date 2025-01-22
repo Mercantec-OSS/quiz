@@ -142,7 +142,6 @@
         }
 
         // POST: api/Users
-        [AllowAnonymous]
         [HttpPost("Signup")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
         {
@@ -167,6 +166,61 @@
             var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.password);
 
             var Roles = await _context.Roles.FindAsync(1);
+            if (Roles == null)
+            {
+                return NotFound();
+            }
+
+            User user = new()
+            {
+                Email = userSignUp.username + "@eud.mercantec.dk",
+                Username = userSignUp.username,
+                HashedPassword = HashedPassword,
+                role = Roles,
+                Salt = HashedPassword.Substring(0, 29),
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            var Token = GenerateJwtToken(user);
+            _context.Token.Add(Token);
+            await _context.SaveChangesAsync();
+
+            return Ok(new UserDTO()
+            {
+                ID = user.ID,
+                email = user.Email,
+                username = user.Username,
+                role = user.role.Role,
+                token = Token.JWTToken
+            });
+        }
+
+        // POST: api/Users
+        [HttpPost("TeacherSignup")]
+        public async Task<ActionResult<UserDTO>> PostTeacher(SignUpRequest userSignUp)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("Unauthorized");
+            }
+            if (await _context.Users.
+            Include(item => item.role).
+                FirstOrDefaultAsync(item => item.Username == userSignUp.username) != null)
+            {
+                return BadRequest("Username allready excist.");
+            }
+
+            var HashedPassword = BCrypt.Net.BCrypt.HashPassword(userSignUp.password);
+
+            var Roles = await _context.Roles.FindAsync(2);
             if (Roles == null)
             {
                 return NotFound();
@@ -409,7 +463,8 @@
             Token userToken = new()
             {
                 JWTToken = new JwtSecurityTokenHandler().WriteToken(token),
-                user = user
+                user = user,
+                ExpiresAt = DateTime.Now.AddYears(1000),
             };
 
             _context.Token.Add(userToken);

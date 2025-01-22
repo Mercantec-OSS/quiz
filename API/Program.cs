@@ -58,7 +58,7 @@ namespace API
 
             string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Environment.GetEnvironmentVariable("DefaultConnection");
 
-            builder.Services.AddDbContext<AppDBContext>(options => options.UseNpgsql(connectionString));
+            builder.Services.AddDbContext<AppDBContext>(options => options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 8))));
 
             builder.Services.AddAuthentication(x =>
             {

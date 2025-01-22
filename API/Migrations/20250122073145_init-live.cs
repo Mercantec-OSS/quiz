@@ -1,64 +1,74 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class inti1 : Migration
+    public partial class initlive : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "Difficulties",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Difficulty = table.Column<string>(type: "text", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Difficulty = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Difficulties", x => x.ID);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Educations",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Education = table.Column<string>(type: "text", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Education = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Educations", x => x.ID);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Role = table.Column<string>(type: "text", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Role = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.ID);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Category = table.Column<string>(type: "text", nullable: false),
-                    Education = table.Column<int>(type: "integer", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Category = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Education = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,20 +79,25 @@ namespace API.Migrations
                         principalTable: "Educations",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    HashedPassword = table.Column<string>(type: "text", nullable: false),
-                    Salt = table.Column<string>(type: "text", nullable: false),
-                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Email = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Username = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    HashedPassword = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Salt = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastLogin = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,16 +108,18 @@ namespace API.Migrations
                         principalTable: "Roles",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "UnderCategories",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UnderCategory = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UnderCategory = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Category = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,21 +130,21 @@ namespace API.Migrations
                         principalTable: "Categories",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Quizs",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Creator = table.Column<int>(type: "integer", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Education = table.Column<int>(type: "integer", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false),
-                    Difficulty = table.Column<int>(type: "integer", nullable: false),
-                    Timer = table.Column<int>(type: "integer", nullable: false),
-                    QuestionAmount = table.Column<int>(type: "integer", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Creator = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Education = table.Column<int>(type: "int", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Difficulty = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -156,24 +173,54 @@ namespace API.Migrations
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Token",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    User = table.Column<int>(type: "int", nullable: false),
+                    JWTToken = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Token", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Token_Users_User",
+                        column: x => x.User,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Creator = table.Column<int>(type: "integer", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false),
-                    UnderCategory = table.Column<int>(type: "integer", nullable: false),
-                    Difficulty = table.Column<int>(type: "integer", nullable: false),
-                    PossibleAnswers = table.Column<string[]>(type: "text[]", nullable: false),
-                    CorrectAnswer = table.Column<int[]>(type: "integer[]", nullable: false),
-                    Picture = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<int>(type: "integer", nullable: false),
-                    QuestionStatus = table.Column<bool>(type: "boolean", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Creator = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    UnderCategory = table.Column<int>(type: "int", nullable: false),
+                    Difficulty = table.Column<int>(type: "int", nullable: false),
+                    PossibleAnswers = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CorrectAnswer = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Picture = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Time = table.Column<int>(type: "int", nullable: false),
+                    QuestionStatus = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    QuestionType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -202,23 +249,25 @@ namespace API.Migrations
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "User_Quiz",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Quiz = table.Column<int>(type: "integer", nullable: false),
-                    User = table.Column<int>(type: "integer", nullable: false),
-                    Completed = table.Column<bool>(type: "boolean", nullable: false),
-                    Results = table.Column<int>(type: "integer", nullable: false),
-                    QuizEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Quiz = table.Column<int>(type: "int", nullable: false),
+                    User = table.Column<int>(type: "int", nullable: false),
+                    Completed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Results = table.Column<double>(type: "double", nullable: false),
+                    QuizEndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    TimeUsed = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User_Quiz", x => x.ID);
+                    table.PrimaryKey("PK_User_Quiz", x => x.Id);
                     table.ForeignKey(
                         name: "FK_User_Quiz_Quizs_Quiz",
                         column: x => x.Quiz,
@@ -231,20 +280,21 @@ namespace API.Migrations
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Quiz_Question",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Quiz = table.Column<int>(type: "integer", nullable: false),
-                    Question = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Quiz = table.Column<int>(type: "int", nullable: false),
+                    Question = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Quiz_Question", x => x.ID);
+                    table.PrimaryKey("PK_Quiz_Question", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Quiz_Question_Questions_Question",
                         column: x => x.Question,
@@ -257,7 +307,8 @@ namespace API.Migrations
                         principalTable: "Quizs",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_Education",
@@ -315,6 +366,11 @@ namespace API.Migrations
                 column: "Education");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Token_User",
+                table: "Token",
+                column: "User");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UnderCategories_Category",
                 table: "UnderCategories",
                 column: "Category");
@@ -340,6 +396,9 @@ namespace API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Quiz_Question");
+
+            migrationBuilder.DropTable(
+                name: "Token");
 
             migrationBuilder.DropTable(
                 name: "User_Quiz");

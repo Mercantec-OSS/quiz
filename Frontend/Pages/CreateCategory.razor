@@ -1,9 +1,9 @@
 ﻿@page "/createCategory"
 
-<PageTitle>Create Categori</PageTitle>
+<PageTitle>Create Category</PageTitle>
 
 <Div style="display: flex; align-items: center; flex-direction: column;">
-    <h1>Create Kategori</h1>
+    <h1>Create Category</h1>
 
     <Div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
         <Dropdown @ref="dropdown" Display="Display.InlineBlock">
@@ -29,11 +29,11 @@
 
         <Button Class="btn btn-warning" Disabled="@(selectedCategory == null)"
                 Clicked="() => ToggleEditCategoryModal(selectedCategory)">
-            Edit Categori
+            Edit Category
         </Button>
 
         <Button Class="btn btn-success" Clicked="OpenModalAddNewCategory">
-            Add Categori
+            Add Category
         </Button>
     </Div>
 </Div>
@@ -116,7 +116,7 @@
     </BodyContent>
 </CustomModal>
 
-<CustomModal Title="Are you sure you want to  delete this under kategori?" @ref="modalDeleteConfirmation" OnClose="() => CloseModal(modalDeleteConfirmation)"
+<CustomModal Title="Are you sure you want to  delete this under category?" @ref="modalDeleteConfirmation" OnClose="() => CloseModal(modalDeleteConfirmation)"
              OnPrimaryAction="DeleteConfirmed" PrimaryButtonText="Delete" size="ModalSize.Default">
     <BodyContent>
         You can't undo this action.
@@ -317,8 +317,7 @@
 
     private async Task SaveEditedUnderCategory()
     {
-        if (this.editCategory == null || jWTokenHandler == null
-            || httpHandler == null || this.editUnderCategory == null)
+        if (jWTokenHandler == null || httpHandler == null || this.editUnderCategory == null)
         {
             ToggleEditUnderCategoryModal();
             return;
@@ -330,15 +329,15 @@
         UnderCategoryGetDTO editUnderCategory = new()
             {
                 ID = this.editUnderCategory.ID,
-                UnderCategory = this.editUnderCategory.UnderCategory,
+                UnderCategory = editUnderCategoryText,
             };
 
         HttpStatusCode statusCode = await httpHandler.PutAsync(
                $"/api/UnderCategories/{editUnderCategory.ID}", editUnderCategory, jwt);
 
-        if (statusCode == HttpStatusCode.OK)
+        if (statusCode == HttpStatusCode.NoContent)
         {
-            this.editUnderCategory.UnderCategory = editUnderCategory.UnderCategory;
+            this.editUnderCategory.UnderCategory = editUnderCategoryText;
         }
         else
         {
@@ -351,8 +350,7 @@
 
     private async Task DeleteConfirmed()
     {
-        if (this.editCategory == null || jWTokenHandler == null
-            || httpHandler == null || underCategoryToBeDeleted == null)
+        if (jWTokenHandler == null || httpHandler == null || underCategoryToBeDeleted == null)
             return;
 
         loading?.Start();

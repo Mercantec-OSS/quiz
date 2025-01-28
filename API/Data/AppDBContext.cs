@@ -1,13 +1,8 @@
 ﻿namespace API.Data
 {
 
-    public class AppDBContext : DbContext
+    public class AppDBContext(DbContextOptions<AppDBContext> options) : DbContext(options)
     {
-        public AppDBContext(DbContextOptions<AppDBContext> options)
-            : base(options)
-        {
-
-        }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Difficulties> Difficulties { get; set; }
         public DbSet<Educations> Educations { get; set; }
@@ -20,5 +15,4 @@
         public DbSet<User_Quiz> User_Quiz { get; set; }
         public DbSet<Token> Token {  get; set; }
     }
-
 }

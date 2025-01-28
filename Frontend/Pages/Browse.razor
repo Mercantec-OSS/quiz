@@ -142,7 +142,7 @@
 
             // Test quiz / quiz all users can use.
             (HttpStatusCode statusCodeOfTestQuiz, QuizDTO testQuiz) =
-                await httpHandler.GetAsync<QuizDTO>($"/api/Quizs/39", jwt);
+                await httpHandler.GetAsync<QuizDTO>($"/api/Quizs/1", jwt);
 
             HttpStatusCode statusCode = HttpStatusCode.OK;
             List<QuizDTO> quizes = new();

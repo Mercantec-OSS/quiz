@@ -81,7 +81,7 @@ public partial class HttpHandler
         {
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JWTtoken);
         }
-        HttpResponseMessage response = await Http.PutAsync(path, Serialize(dto));
+        HttpResponseMessage response = await Http.PostAsync(path, Serialize(dto));
         string content = await response.Content.ReadAsStringAsync();
         T result = Successful(response.StatusCode, HttpStatusCode.Created, needDefualtCheck) ? Deserialize<T>(content) : new T();
         return (response.StatusCode, result);

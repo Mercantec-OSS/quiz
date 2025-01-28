@@ -9,3 +9,12 @@
 
 NOTE: for this to work you need your appsetting to be up to date 
 	  and you can not be running it.
+
+
+efter at have uploaded backenden til live skal man køre på serveren
+
+1.	systemctl restart api.service
+
+2.	systemctl status api.service
+
+3.	systemctl reload apache2

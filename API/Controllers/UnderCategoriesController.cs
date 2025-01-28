@@ -86,7 +86,7 @@
         // PUT: api/UnderCategories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUnderCategories(int id, UnderCategories underCategories)
+        public async Task<IActionResult> PutUnderCategories(int id, UnderCategoryGetDTO underCategoriesDTO)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var userResult = await _tokenController.GetUserRole(token);
@@ -100,10 +100,16 @@
                 return Unauthorized("Unauthorized.");
             }
 
-            if (id != underCategories.ID)
+            if (id != underCategoriesDTO.ID)
             {
                 return BadRequest();
             }
+
+            UnderCategories underCategories = new()
+            {
+                ID = id,
+                UnderCategory = underCategoriesDTO.UnderCategory,
+            };
 
             _context.Entry(underCategories).State = EntityState.Modified;
 

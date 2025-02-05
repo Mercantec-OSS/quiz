@@ -9,81 +9,65 @@
     @foreach (var question in questionsHandler)
     {
         <div>
-            <h5>Spørgsmål @((questionsHandler.IndexOf(question) + 1))</h5>
+            <h5>Question @((questionsHandler.IndexOf(question) + 1))</h5>
 
-            <input type="text" placeholder="Skriv spørgsmål" @bind="question.questionModel.QuestionText"> <br> <br>
+            <input type="text" placeholder="Type Questions..." @bind="question.questionModel.QuestionText"> <br> <br>
 
-            @* simple drop down menu, very  important *@
-            <div class="drop-menu">
-                <table>
-                    <tr>
-                        <td>
-                            <Dropdown Display="Display.InlineBlock">
-                                <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedCategory == null ? "Vælg Kategori" : question.selectedCategory.Category)
-                                </DropdownToggle>
-                                <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (CategoryDTO category in categories)
-                                    {
-                                        <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
-                                    }
-                                </DropdownMenu>
-                            </Dropdown>
-                        </td>
-                        <td>
-                            <Dropdown Display="Display.InlineBlock">
-                                <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedUnderCategory == null ? "Vælg Underkategori" : question.selectedUnderCategory.UnderCategory)
-                                </DropdownToggle>
-                                <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
-                                    {
-                                        <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
-                                    }
-                                </DropdownMenu>
-                            </Dropdown>
-                        </td>
-                        <td>
-                            <Dropdown Display="Display.InlineBlock">
-                                <DropdownToggle Color="Color.Primary">
-                                    @(question.selectedDifficulty == null ? "Vælg Niveau" : question.selectedDifficulty.Difficulty)
-                                </DropdownToggle>
-                                <DropdownMenu MaxMenuHeight="100px">
-                                    @foreach (DifficultyDTO difficulty in difficulties)
-                                    {
-                                        <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
-                                    }
-                                </DropdownMenu>
-                            </Dropdown>
-                        </td>
-                        <td>
-                            <label for="Time">Tid</label>
-                            <input type="number" placeholder="Tid (sek)" @bind="question.questionModel.Time" min="10" step="5" style="width: 90px;">
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            @* end of dropdown menu  *@
-            <br />
 
-            <div class="answer-option">
+            <Dropdown Display="Display.InlineBlock">
+                <DropdownToggle Color="Color.Primary">
+                    @(question.selectedCategory == null ? "Choose Category" : question.selectedCategory.Category)
+                </DropdownToggle>
+                <DropdownMenu MaxMenuHeight="100px">
+                    @foreach (CategoryDTO category in categories)
+                    {
+                        <DropdownItem @onclick="() => SelectCategory(category, question)">@category.Category</DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+
+            <Dropdown Display="Display.InlineBlock">
+                <DropdownToggle Color="Color.Primary">
+                    @(question.selectedUnderCategory == null ? "Choose Undercategory" : question.selectedUnderCategory.UnderCategory)
+                </DropdownToggle>
+                <DropdownMenu MaxMenuHeight="100px">
+                    @foreach (UnderCategoryGetDTO underCategory in underCategories)
+                    {
+                        <DropdownItem @onclick="() => SelectUnderCategory(underCategory, question)">@underCategory.UnderCategory</DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+
+            <Dropdown Display="Display.InlineBlock">
+                <DropdownToggle Color="Color.Primary">
+                    @(question.selectedDifficulty == null ? "Choose Difficulty" : question.selectedDifficulty.Difficulty)
+                </DropdownToggle>
+                <DropdownMenu MaxMenuHeight="100px">
+                    @foreach (DifficultyDTO difficulty in difficulties)
+                    {
+                        <DropdownItem @onclick="() => SelectDifficulties(difficulty, question)">@difficulty.Difficulty</DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+
+            <label for="Time">Time</label>
+            <input type="number" placeholder="Time (sek)" @bind="question.questionModel.Time" min="10" step="5" style="width: 96px;">
+
+            <div class="mt-3 mb-4">
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[0]" />
-                <input type="text" placeholder="Valgmulighed 1" @bind="question.questionModel.Answer1" />
+                <input type="text" placeholder="Answer 1..." @bind="question.questionModel.Answer1" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[1]" />
-                <input type="text" placeholder="Valgmulighed 2" @bind="question.questionModel.Answer2" />
+                <input type="text" placeholder="Answer 2..." @bind="question.questionModel.Answer2" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[2]" />
-                <input type="text" placeholder="Valgmulighed 3" @bind="question.questionModel.Answer3" />
+                <input type="text" placeholder="Answer 3..." @bind="question.questionModel.Answer3" />
 
                 <input type="checkbox" @bind="question.questionModel.CorrectAnswers[3]" />
-                <input type="text" placeholder="Valmulighed 4" @bind="question.questionModel.Answer4" />
+                <input type="text" placeholder="Answer 4..." @bind="question.questionModel.Answer4" />
+            </div>
 
-            </div> 
-            
-            <br> <br>
-
-            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Slet Spørgsmål</button>
+            <button class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Delete question</button>
         </div>
         <hr />
     }
@@ -92,53 +76,35 @@
 <div>
     @if (questionsHandler.Count >= MaxQuestions)
     {
-        <p style="color:red"> MAXIMUM ANTAL SPØRGSMÅL NÅET!!! (@MaxQuestions)</p>
+        <p style="color:red"> Max quantity questions reached!!! (@MaxQuestions)</p>
     }
 
-    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(questionsHandler.Count >= MaxQuestions)">Tilføj spørgsmål</button>
+    <button class="btn btn-primary" @onclick="AddNewQuestion" disabled="@(questionsHandler.Count >= MaxQuestions)">Add question</button>
 
-    <button class="btn btn-success" @onclick="SaveQuestions">Gem spørgsmål</button>
-
+    <button class="btn btn-success" @onclick="SaveQuestions">Save question(s)</button>
 </div>
 
-<br />
-
-<div class="button-upload">
-    <h6>Upload spørgsmål fra Excel</h6>
+<div class="mt-3">
+    <h6>Upload questions from Excel</h6>
     <Label for="file-upload" class="upload-button">
         <i class="fa-solid fa-upload"></i>
     </Label>
     <InputFile id="file-upload" style="display: none;" OnChange="UploadExcel" />
 </div>
 
-@if (createdQuestions)
-{
-    <div class="model custom-modal">
-        <h4>Spørgsmål gemt succesfuldt</h4>
-        <div class="m-1 Split">
-            <button class="btn btn-outline-dark" @onclick="ToggleCreatedConfirmed">Close</button>
-        </div>
-    </div>
-
-    <div @onclick="ToggleCreatedConfirmed" class="modal-overlay"></div>
-}
+<CustomModal Title="Spørgsmål gemt succesfuldt" @ref="createdQuestions" size="ModalSize.Small" />
 
 @code {
     public class QuestionModel
     {
-        public int Id { get; set; }
         public string QuestionText { get; set; } = string.Empty;
-        public string Categories { get; set; } = string.Empty;
-        public string UnderCategories { get; set; } = string.Empty;
         public string Answer1 { get; set; } = string.Empty;
         public string Answer2 { get; set; } = string.Empty;
         public string Answer3 { get; set; } = string.Empty;
         public string Answer4 { get; set; } = string.Empty;
         public bool[] CorrectAnswers { get; set; } = new bool[4]; //New property for multiple correct answers
-        public string Difficulties { get; set; } = string.Empty;
         public bool QuestionStatus { get; set; }
         public int? Time { get; set; }
-        public int User { get; set; }
         public string Picture { get; set; } = string.Empty;
     }
 
@@ -160,7 +126,7 @@
     private List<CategoryDTO> categories = new();
     private List<UnderCategoryGetDTO> underCategories = new();
 
-    private bool createdQuestions = false;
+    private CustomModal? createdQuestions;
 
     private const int MaxQuestions = 25;
     private List<QuestionHandling> questionsHandler = new();
@@ -173,6 +139,9 @@
 
     [CascadingParameter(Name = "LoadingSpinner")]
     private LoadingSpinner? loading { get; set; }
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
 
     //getting info from API/DB
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -213,9 +182,9 @@
         }
     }
 
-    private void ToggleCreatedConfirmed()
+    private void ShowCreatedConfirmed()
     {
-        createdQuestions = !createdQuestions;
+        createdQuestions?.Show();
     }
 
     //method to add new question to the quiz
@@ -227,19 +196,15 @@
         }
     }
 
-    //method to check if an answer is selected
-    private bool IsChecked(string selectedAnswer, string option)
-    {
-        return selectedAnswer == option;
-    }
-
     // save questions to database, to save for other use
     private async Task SaveQuestions()
     {
         if (httpHandler == null) return;
         if (jWTokenHandler == null) return;
+        if (sessionStorageHandler == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
+        int creatorId = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
         loading?.Start();
 
         foreach (QuestionHandling question in questionsHandler)
@@ -260,11 +225,6 @@
             if (question.selectedUnderCategory == null)
             {
                 //@ error message
-                return;
-            }
-
-            if (question.questionModel == null)
-            {
                 return;
             }
 
@@ -290,7 +250,7 @@
                     Time = question.questionModel.Time ?? 0,
                     Difficulty = question.selectedDifficulty.ID,
                     QuestionStatus = true,
-                    Creator = 1,
+                    Creator = creatorId,
                 };
 
             try
@@ -313,22 +273,8 @@
             }
         }
         questionsHandler.Clear();
-        ToggleCreatedConfirmed();
+        ShowCreatedConfirmed();
         loading?.Stop();
-    }
-
-    //Helper method to map Selected answer
-    private int ConvertAnswerToId(String selectedAnswer)
-    {
-        //this is a simple way
-        switch (selectedAnswer)
-        {
-            case "option1": return 1;
-            case "option2": return 2;
-            case "option3": return 3;
-            case "option4": return 4;
-            default: return 0; //No Answer selected
-        }
     }
 
     // Set the selected item and close the dropdown
@@ -363,15 +309,13 @@
             // Set the license context
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            var file = e.File;
-
-            if (file == null)
+            if (e.File == null)
             {
                 return;
             }
 
             using var stream = new MemoryStream();
-            await file.OpenReadStream().CopyToAsync(stream);
+            await e.File.OpenReadStream().CopyToAsync(stream);
             using var package = new OfficeOpenXml.ExcelPackage(stream);
 
             var worksheet = package.Workbook.Worksheets[0]; // Get the first worksheet
@@ -379,25 +323,39 @@
 
             for (int row = 2; row <= rowCount; row++) // Assuming row 1 has headers
             {
-                var question = new QuestionModel
+                QuestionHandling question = new()
                     {
-                        QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
-                        Categories = worksheet.Cells[row, 2].Value?.ToString() ?? "",
-                        UnderCategories = worksheet.Cells[row, 3].Value?.ToString() ?? "",
-                        Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
-                        Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
-                        Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
-                        Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? "",
-                        // Coulmn 8 is answers, added below.
-                        Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "",
-                        Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30, // Default 30 seconds
-                        Difficulties = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned",
-                        QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1",
-                        User = int.TryParse(worksheet.Cells[row, 13].Value?.ToString(), out int userId) ? userId : 1,
+                        questionModel = new()
+                        {
+                            QuestionText = worksheet.Cells[row, 1].Value?.ToString() ?? "",
+                            // Column 2 is categories, added below.
+                            // Column 3 is under categories, added below.
+                            Answer1 = worksheet.Cells[row, 4].Value?.ToString() ?? "",
+                            Answer2 = worksheet.Cells[row, 5].Value?.ToString() ?? "",
+                            Answer3 = worksheet.Cells[row, 6].Value?.ToString() ?? "",
+                            Answer4 = worksheet.Cells[row, 7].Value?.ToString() ?? "",
+                            // Coulmn 8 is answers, added below.
+                            Picture = worksheet.Cells[row, 9].Value?.ToString() ?? "",
+                            Time = int.TryParse(worksheet.Cells[row, 10].Value?.ToString(), out int time) ? time : 30, // Default 30 seconds
+                            // Coulmn 11 Difficulty , added below.
+                            QuestionStatus = worksheet.Cells[row, 12].Value?.ToString()?.ToLower() == "true" || worksheet.Cells[row, 12].Value?.ToString() == "1",
+                        },
                     };
 
+                string categoryFromExcel = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                question.selectedCategory = categories.
+                    FirstOrDefault(c => c.Category == categoryFromExcel);
+
+                string underCategoryFromExcel = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+                question.selectedUnderCategory = underCategories.
+                    FirstOrDefault(uc => uc.UnderCategory == underCategoryFromExcel);
+
+                string difficultyFromExcel = worksheet.Cells[row, 11].Value?.ToString() ?? "Unassigned";
+                question.selectedDifficulty = difficulties
+                    .FirstOrDefault(d => d.Difficulty == categoryFromExcel);
+
                 // Process Correct Answers (assuming "Correct" column has comma-separated correct answer indices)
-                var correctAnswers = worksheet.Cells[row, 8].Value?.ToString();
+                string correctAnswers = worksheet.Cells[row, 8].Value?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(correctAnswers))
                 {
                     var correctIndices = correctAnswers.Split(',')
@@ -409,15 +367,12 @@
                     {
                         if (correctIndices[i] <= 4) // Assuming only 4 answers
                         {
-                            question.CorrectAnswers[correctIndices[i] - 1] = true;
+                            question.questionModel.CorrectAnswers[correctIndices[i] - 1] = true;
                         }
                     }
                 }
 
-                questionsHandler.Add(new()
-                    {
-                        questionModel = question
-                    });
+                questionsHandler.Add(question);
             }
         }
         catch (Exception ex)

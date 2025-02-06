@@ -197,7 +197,7 @@
                 return BadRequest("Your new password can't be empty");
             }
             var user = await _context.Users.FindAsync(id);
-            if (user.HashedPassword == "ADLogin")
+            if (user.HashedPassword == "ADLogin" || user.HashedPassword == "Guest")
             {
                 return BadRequest("You can't change the password of a user using their uni login");
             }

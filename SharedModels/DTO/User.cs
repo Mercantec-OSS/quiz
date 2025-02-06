@@ -21,6 +21,12 @@ public class SignUpRequest
     public string password { get; set; }
 }
 
+public class UpdatePassword
+{
+    public int ID { get; set; }
+    public string password { get; set; }
+}
+
 public class UpdateUserDTO
 {
     public int ID { get; set; }

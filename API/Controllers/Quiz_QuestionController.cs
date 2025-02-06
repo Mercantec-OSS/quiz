@@ -12,7 +12,7 @@
             _context = context;
             _tokenController = new TokenController(context);
         }
-
+        
         // GET: api/Quiz_Question
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quiz_QuestionDTO>>> GetQuiz_Question()

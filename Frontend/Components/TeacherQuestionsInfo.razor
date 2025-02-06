@@ -1,0 +1,166 @@
+﻿<CustomModal Title="@quiz.Title" @ref="modal" DefaultOnClose="true">
+    <BodyContent>
+        <Button Class="w-100 mb-3" Color="Color.Primary">
+            Add/Edit Questions
+        </Button>
+        <GenericListComponent T="QuestionDTO" Items="questions"
+        NoItemsText="No question found assigned to this quiz">
+            <BodyContent>
+                <Card Class="my-1">
+                    <CardHeader>
+                        <Div Class="Split">
+                            @context.Title
+
+                            <Button Color="Color.Primary" Clicked="() => OpenDeleteQuestionFromQuizConfimationModal(context)">
+                                <i class="fa-solid fa-trash"></i>
+                            </Button>
+                        </Div>
+                    </CardHeader>
+                    <CardBody>
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <p class="card-text">Creator: @context.Creator</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <p class="card-text">Category: @context.Category</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <p class="card-text">Under Category: @context.UnderCategory</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <p class="card-text">Difficulty: @context.Difficulty</p>
+                            </Column>
+                        </Row>
+
+                        <Divider />
+
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <p class="card-text">Time: @context.Time</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <p class="card-text">Status: @context.QuestionStatus</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <p class="card-text">Type: @context.QuestionType</p>
+                            </Column>
+                        </Row>
+
+                        <Divider />
+
+                        Answers:
+                        <Row>
+                            @foreach (var item in context.PossibleAnswers)
+                            {
+                                <Column>
+                                    <p class="card-text">@item</p>
+                                </Column>
+                            }
+                        </Row>
+
+                        <Divider />
+
+                        Right Answers number:
+                        <Row>
+                            @foreach (var item in context.CorrectAnswer)
+                            {
+                                <Column>
+                                    <p class="card-text">@item</p>
+                                </Column>
+                            }
+                        </Row>
+                    </CardBody>
+                </Card>
+            </BodyContent>
+        </GenericListComponent>
+    </BodyContent>
+</CustomModal>
+
+<CustomModal Title="Are you sure you want to remove this question from this quiz?"
+@ref="deleteConfirmationModal" size="ModalSize.Small" DefaultOnClose="true"
+PrimaryButtonText="Confirm" OnPrimaryAction="DeletionConfirmed">
+    <BodyContent>
+        This action can't be undone.
+    </BodyContent>
+</CustomModal>
+
+@code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
+    private CustomModal? modal;
+    private CustomModal? deleteConfirmationModal;
+
+    private QuizDTO quiz = new();
+    private List<QuestionDTO>? questions;
+    private QuestionDTO questionsToBeRemoved = new();
+    private Action<QuizDTO>? OnRemoveQuestion;
+
+    public async void Open(QuizDTO quiz, Action<QuizDTO> OnRemoveQuestion)
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        modal?.Show();
+        loading?.Start();
+
+        string jwt = await jWTokenHandler.GetToken();
+        this.quiz = quiz;
+        this.OnRemoveQuestion = OnRemoveQuestion;
+
+        (HttpStatusCode statusCode, List<QuestionDTO> response) =
+          await httpHandler.GetAsync<List<QuestionDTO>>(
+              $"/api/Questions/ByQuizID/{quiz.ID}", jwt);
+
+        if (statusCode == HttpStatusCode.OK)
+        {
+            questions = response;
+            StateHasChanged();
+        }
+
+        loading?.Stop();
+    }
+
+    public void Close()
+    {
+        questions?.Clear();
+        StateHasChanged();
+        modal?.Hide();
+    }
+
+    private void OpenDeleteQuestionFromQuizConfimationModal(QuestionDTO question)
+    {
+        questionsToBeRemoved = question;
+        StateHasChanged();
+
+        deleteConfirmationModal?.Show();
+    }
+
+    private async void DeletionConfirmed()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        string jwt = await jWTokenHandler.GetToken();
+        loading?.Start();
+
+        HttpStatusCode statusCode = await httpHandler.DeleteAsync(
+            $"/api/Quiz_Question/{quiz.ID}/{questionsToBeRemoved.ID}", jwt);
+
+        if (statusCode == HttpStatusCode.NoContent && questions != null)
+        {
+            questions.Remove(questionsToBeRemoved);
+            StateHasChanged();
+        }
+
+        OnRemoveQuestion?.Invoke(quiz);
+        deleteConfirmationModal?.Hide();
+        loading?.Stop();
+    }
+}

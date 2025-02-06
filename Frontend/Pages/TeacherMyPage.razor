@@ -2,8 +2,9 @@
 
 @inject NavigationManager NavigationManager
 
-<TeacherQuizInfoModal @ref="teacherQuizInfoModal" />
+<TeacherUserInfoModal @ref="teacherQuizInfoModal" />
 <TeacherAddStudentToQuiz @ref="teacherAddStudentToQuiz" />
+<TeacherQuestionsInfo @ref="teacherQuestionsInfo" />
 
 <PageTitle>My page</PageTitle>
 
@@ -15,7 +16,13 @@ NoItemsText="You haven't created any quizzes.">
         <Column ColumnSize="ColumnSize.Is4">
             <Card>
                 <CardHeader>
-                    @context.Title
+                    <Div Class="Split">
+                        @context.Title
+
+                        <Button Color="Color.Primary" Clicked="() => OpenDeleteQuizConfimationModal(context)">
+                            <i class="fa-solid fa-trash"></i>
+                        </Button>
+                    </Div>
                 </CardHeader>
                 <CardBody>
                     <Row>
@@ -31,17 +38,31 @@ NoItemsText="You haven't created any quizzes.">
                     </Row>
                 </CardBody>
                 <CardFooter>
-                    <Button Class="btn btn-primary w-100" Clicked="() => OpenQuizModal(context)">
-                        Show Questions
-                    </Button>
-                    <Button Class="btn btn-primary w-100" Clicked="() => OpenQuizModal(context)">
-                        Show Students
-                    </Button>
+                    <Row>
+                        <Column>
+                            <Button Class="btn btn-primary w-100" Clicked="() => OpenQeustionModal(context)">
+                                Show Questions
+                            </Button>
+                        </Column>
+                        <Column>
+                            <Button Class="btn btn-primary w-100" Clicked="() => OpenQuizModal(context)">
+                                Show Students
+                            </Button>
+                        </Column>
+                    </Row>
                 </CardFooter>
             </Card>
         </Column>
     </BodyContent>
 </GenericListComponent>
+
+<CustomModal Title="Are you sure you want to delete this quiz" @ref="deleteConfirmationModal" size="ModalSize.Small"
+             DefaultOnClose="true" PrimaryButtonText="Confirm" OnPrimaryAction="DeletionConfirmed">
+    <BodyContent>
+        This action can't be undone.
+        All student assigned to this quiz losses their score.
+    </BodyContent>
+</CustomModal>
 
 @code {
     [CascadingParameter(Name = "HttpHandler")]
@@ -56,10 +77,14 @@ NoItemsText="You haven't created any quizzes.">
     [CascadingParameter(Name = "SessionStorageHandler")]
     private SessionStorageHandler? sessionStorageHandler { get; set; }
 
-    private TeacherQuizInfoModal? teacherQuizInfoModal;
+    private TeacherUserInfoModal? teacherQuizInfoModal;
     private TeacherAddStudentToQuiz? teacherAddStudentToQuiz;
+    private TeacherQuestionsInfo? teacherQuestionsInfo;
+
+    private CustomModal? deleteConfirmationModal;
 
     private List<QuizDTO>? quizzesMaked;
+    private QuizDTO quizToBeDeleted = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -93,6 +118,21 @@ NoItemsText="You haven't created any quizzes.">
         }
     }
 
+    private void RemoveCountOnquestion(QuizDTO quiz)
+    {
+        QuizDTO? quizFound = quizzesMaked?.First(q => q.ID == quiz.ID);
+        if (quizFound != null)
+        {
+            quizFound.QestionsAmount--;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenQeustionModal(QuizDTO quiz)
+    {
+        teacherQuestionsInfo?.Open(quiz, RemoveCountOnquestion);
+    }
+
     private void OpenQuizModal(QuizDTO quiz)
     {
         teacherQuizInfoModal?.Open(quiz, OpenQuizAddStudents);
@@ -101,5 +141,34 @@ NoItemsText="You haven't created any quizzes.">
     public void OpenQuizAddStudents(QuizDTO quiz)
     {
         teacherAddStudentToQuiz?.Open(quiz, OpenQuizModal);
+    }
+
+    private void OpenDeleteQuizConfimationModal(QuizDTO quiz)
+    {
+        quizToBeDeleted = quiz;
+        StateHasChanged();
+
+        deleteConfirmationModal?.Show();
+    }
+
+    private async void DeletionConfirmed()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        string jwt = await jWTokenHandler.GetToken();
+        loading?.Start();
+
+        HttpStatusCode statusCode = await httpHandler.DeleteAsync(
+            $"/api/Quizs/{quizToBeDeleted.ID}", jwt);
+
+        if (statusCode == HttpStatusCode.NoContent && quizzesMaked != null)
+        {
+            quizzesMaked.Remove(quizToBeDeleted);
+            StateHasChanged();
+        }
+
+        deleteConfirmationModal?.Hide();
+        loading?.Stop();
     }
 }

@@ -289,7 +289,8 @@
                 FirstOrDefaultAsync(item => item.Username == login.username);
             if (userFinder == null || userFinder.HashedPassword == "ADLogin")
             {
-                //check up against AD
+                //check up against AD if you cant use this you might need to change your password
+                //https://bas.mercantec.dk to change password
                 var connection = Service.LdapService.ValidateAsync(login.username, login.password);
                 if (connection)
                 {

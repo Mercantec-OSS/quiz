@@ -21,7 +21,7 @@ builder.Services
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://mercantec-quiz.onrender.com"),
+    BaseAddress = new Uri("https://quiz.socdata.dk"),
     Timeout = TimeSpan.FromSeconds(25),
 });
 

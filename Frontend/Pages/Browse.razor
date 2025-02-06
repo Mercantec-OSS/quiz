@@ -139,21 +139,15 @@
             {
                 searchWord = dataValue.ToArray()[0] ?? "";
             }
-            HttpStatusCode statusCode;
-            List<QuizDTO> quizes;
-            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
-            if (userRole == "Guest")
-            {
-                (statusCode, QuizDTO quiz) = await httpHandler.GetAsync<QuizDTO>(
-                        $"/api/Quizs/39", jwt);
 
-                quizes = new();
-                if (statusCode == HttpStatusCode.OK)
-                {
-                    quizes.Add(quiz);
-                }
-            }
-            else
+            // Test quiz / quiz all users can use.
+            (HttpStatusCode statusCodeOfTestQuiz, QuizDTO testQuiz) =
+                await httpHandler.GetAsync<QuizDTO>($"/api/Quizs/1", jwt);
+
+            HttpStatusCode statusCode = HttpStatusCode.OK;
+            List<QuizDTO> quizes = new();
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+            if (userRole != "Guest")
             {
                 Dictionary<string, string> parameters = new() { { "searchWord", searchWord } };
 
@@ -161,8 +155,10 @@
                         $"/api/Quizs/QuizSearch", parameters, jwt);
             }
 
-            if (statusCode == HttpStatusCode.OK && sessionStorageHandler != null)
+            if (statusCode == HttpStatusCode.OK && sessionStorageHandler != null &&
+                statusCodeOfTestQuiz == HttpStatusCode.OK)
             {
+                quizes.Insert(0, testQuiz);
                 username = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userUsername);
                 allQuizzes = quizes;
                 Dictionary<string, int> creators = new();

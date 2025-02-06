@@ -74,7 +74,7 @@ public partial class HttpHandler
         }
     }
 
-    public async Task<(HttpStatusCode, T)> PostAsync<T>(string path, object dto, string JWTtoken, bool needDefualtCheck = true)
+    public async Task<(HttpStatusCode, T)> PostAsync<T>(string path, object dto, string JWTtoken, HttpStatusCode wants = HttpStatusCode.Created, bool needDefualtCheck = true)
         where T : new()
     {
         if (!string.IsNullOrEmpty(JWTtoken))
@@ -83,7 +83,7 @@ public partial class HttpHandler
         }
         HttpResponseMessage response = await Http.PostAsync(path, Serialize(dto));
         string content = await response.Content.ReadAsStringAsync();
-        T result = Successful(response.StatusCode, HttpStatusCode.Created, needDefualtCheck) ? Deserialize<T>(content) : new T();
+        T result = Successful(response.StatusCode, wants, needDefualtCheck) ? Deserialize<T>(content) : new T();
         return (response.StatusCode, result);
     }
 

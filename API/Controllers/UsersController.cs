@@ -169,6 +169,55 @@
             return StatusCode(201, "Sucess");
         }
 
+        [HttpPut("ResetPassword/{id}")]
+        public async Task<IActionResult> PutUserPassword(int id, UpdatePassword updatepassword)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userResult = await _tokenController.GetUserRole(token);
+
+            if (userResult == null)
+            {
+                return Unauthorized("Invalid Token");
+            }
+            else if (userResult.ID != id && userResult.role.Role != "Administrator")
+            {
+                return Unauthorized("You can only change your own password.");
+            }
+
+            if (id != updatepassword.ID)
+            {
+                return BadRequest();
+            }
+            if (!UserExists(id))
+            {
+                return NotFound();
+            }
+            if (updatepassword.password == null || updatepassword.password == string.Empty)
+            {
+                return BadRequest("Your new password can't be empty");
+            }
+            var user = await _context.Users.FindAsync(id);
+            if (user.HashedPassword == "ADLogin")
+            {
+                return BadRequest("You can't change the password of a user using their uni login");
+            }
+            var HashedPassword = BCrypt.Net.BCrypt.HashPassword(updatepassword.password);
+
+            user.HashedPassword = HashedPassword;
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "Could not save changes");
+            }
+
+            return StatusCode(201, "Sucess");
+        }
+
         // POST: api/Users
         [HttpPost("Signup")]
         public async Task<ActionResult<UserDTO>> PostUser(SignUpRequest userSignUp)
@@ -340,11 +389,11 @@
 
             Token token = await _context.Token.FirstOrDefaultAsync(t => t.user.ID == userFinder.ID)
                 ?? new();
-            
+
             var validate = await _tokenController.GetUserRole(token.JWTToken);
-            if(validate == null) token = await GenerateJwtTokenForGuest(userFinder);
-            
-            
+            if (validate == null) token = await GenerateJwtTokenForGuest(userFinder);
+
+
             return Ok(new UserDTO()
             {
                 ID = userFinder.ID,

@@ -24,6 +24,11 @@ public partial class HttpHandler
         Instance = this;
     }
 
+    public void Logout()
+    {
+        Http.DefaultRequestHeaders.Authorization = null;
+    }
+
     public async Task<(HttpStatusCode, T)> GetAsync<T>(string path, string JWTtoken, bool needDefualtCheck = true)
         where T : new()
     {

@@ -8,7 +8,7 @@
     <Button Class="btn btn-success mb-2" Clicked="OpenAddTeacher">Add Teacher</Button>
 
     <GenericListComponent T="UserDTO" Items="teachers"
-                          NoItemsText="No students found assigned to this quiz">
+    NoItemsText="No students found assigned to this quiz">
         <BodyContent>
             <Column ColumnSize="ColumnSize.Is6">
                 <Card>
@@ -39,7 +39,7 @@
 </Div>
 
 <CustomModal Title="Add teacher" @ref="addTeacherModal" size="ModalSize.Default" DefaultOnClose="true"
-             OnPrimaryAction="AddTeacher" PrimaryButtonText="Add Teacher">
+OnPrimaryAction="AddTeacher" PrimaryButtonText="Add Teacher">
     <BodyContent>
         <Form>
             <Field>
@@ -80,7 +80,7 @@
 </CustomModal>
 
 <CustomModal Title="New/set password" @ref="changePasswordModal" size="ModalSize.Default" DefaultOnClose="true"
-             OnPrimaryAction="ChangeTeacherPassword" PrimaryButtonText="Save">
+OnPrimaryAction="ChangeTeacherPassword" PrimaryButtonText="Save">
     <BodyContent>
         <Form>
             <Field>
@@ -113,11 +113,13 @@
 </CustomModal>
 
 <CustomModal Title="DELETE A TEACHER!" @ref="deleteTeacherModal" size="ModalSize.Default" DefaultOnClose="true"
-             OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
+OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
     <BodyContent>
         Are you sure?!
     </BodyContent>
 </CustomModal>
+
+<CustomModal Title="Successful!" @ref="successModal" size="ModalSize.Default" OnClose="CloseSuccessfulPopup" />
 
 @code {
     [CascadingParameter(Name = "HttpHandler")]
@@ -135,6 +137,7 @@
     private CustomModal? addTeacherModal;
     private CustomModal? changePasswordModal;
     private CustomModal? deleteTeacherModal;
+    private CustomModal? successModal;
 
     private List<UserDTO>? teachers = null;
 
@@ -171,7 +174,7 @@
 
             (HttpStatusCode statusCode, List<UserDTO> response) =
                 await httpHandler.GetAsync<List<UserDTO>>(
-                    $"/api/Users", jwt);
+                    $"/api/Users/AllTeachers", jwt);
 
             if (statusCode == HttpStatusCode.OK)
             {
@@ -190,11 +193,18 @@
         }
     }
 
+    private void CloseSuccessfulPopup()
+    {
+        ClosePopup(successModal);
+        ClosePopup(changePasswordModal);
+    }
+
     private void OpenAddTeacher()
     {
         newTeacherUsername = string.Empty;
         newTeacherPassword = string.Empty;
         newTeacherPasswordConfirm = string.Empty;
+        newTeacherPasswordsMatch = true;
         addTeacherModal?.Show();
     }
 
@@ -252,7 +262,7 @@
         if (jWTokenHandler == null) return;
         if (teacherPasswordChange == null) return;
 
-        if (newTeacherPassword != newTeacherPasswordConfirm)
+        if (this.newPassword != newPasswordConfirm)
         {
             newPasswordsMatch = false;
             return;
@@ -260,20 +270,20 @@
         newPasswordsMatch = true;
 
         string jwt = await jWTokenHandler.GetToken();
-        UserDTO newPassword = new()
+        UpdatePassword newPassword = new()
             {
                 ID = teacherPasswordChange.ID,
+                password = this.newPassword
             };
 
         loading?.Start();
 
-        // http request.
         HttpStatusCode statusCode =
-            await httpHandler.PutAsync($"/api/Users/TeacherSignup", newPassword, jwt);
+            await httpHandler.PutAsync($"/api/Users/ResetPassword/{teacherPasswordChange.ID}", newPassword, jwt);
 
         if (statusCode == HttpStatusCode.Created)
         {
-
+            successModal?.Show();
         }
 
         loading?.Stop();

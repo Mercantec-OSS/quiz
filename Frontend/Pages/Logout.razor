@@ -12,7 +12,9 @@
 </div>
 
 @code {
-    [Inject] public HttpClient? Http { get; set; }
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -22,7 +24,12 @@
             MainLayout.RemoveItems();
             StateHasChanged();
 
-            NavigationManager.NavigateTo("/");
+            if (httpHandler != null)
+            {
+                httpHandler.Logout();
+            }
+
+            NavigationManager.NavigateTo("/", forceLoad: true);
         }
     }
 }

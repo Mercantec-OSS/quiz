@@ -1,0 +1,315 @@
+﻿@page "/adminPage"
+
+@inject NavigationManager NavigationManager
+
+<h3>AdminPage</h3>
+
+<Div Class="py-3">
+    <Button Class="btn btn-success mb-2" Clicked="OpenAddTeacher">Add Teacher</Button>
+
+    <GenericListComponent T="UserDTO" Items="teachers"
+    NoItemsText="No students found assigned to this quiz">
+        <BodyContent>
+            <Column ColumnSize="ColumnSize.Is6">
+                <Card>
+                    <CardHeader>
+                        @context.username
+                    </CardHeader>
+                    <CardBody>
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <p class="card-text">Email: @context.email</p>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Button Class="btn btn-warning" Clicked="() => OpenChangePassword(context)">
+                                    New/set password
+                                </Button>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is3">
+                                <Button Class="btn btn-danger" Clicked="() =>OpenDeleteTeacherConfirmation(context)">
+                                    Delete
+                                </Button>
+                            </Column>
+                        </Row>
+                    </CardBody>
+                </Card>
+            </Column>
+        </BodyContent>
+    </GenericListComponent>
+</Div>
+
+<CustomModal Title="Add teacher" @ref="addTeacherModal" size="ModalSize.Default" DefaultOnClose="true"
+OnPrimaryAction="AddTeacher" PrimaryButtonText="Add Teacher">
+    <BodyContent>
+        <Form>
+            <Field>
+                <FieldLabel>
+                    Username
+                </FieldLabel>
+                <FieldBody>
+                    <TextEdit @bind-Text="@newTeacherUsername" Placeholder="Username" Role="TextRole.Email" />
+                </FieldBody>
+            </Field>
+            <Field>
+                <FieldLabel>
+                    Password
+                </FieldLabel>
+                <FieldBody>
+                    <TextEdit @bind-Text="@newTeacherPassword" Placeholder="********" Role="TextRole.Password" autocomplete="new-password" />
+                </FieldBody>
+            </Field>
+            <Field>
+                <FieldLabel>
+                    Repeat Password
+                </FieldLabel>
+                <FieldBody>
+                    <TextEdit @bind-Text="@newTeacherPasswordConfirm" Placeholder="********" Role="TextRole.Password" autocomplete="new-password" />
+                </FieldBody>
+            </Field>
+        </Form>
+
+        @if (!newTeacherPasswordsMatch)
+        {
+            <Div Class="m-1" style="color: red">
+                <Span>
+                    Password doesn't match.
+                </Span>
+            </Div>
+        }
+    </BodyContent>
+</CustomModal>
+
+<CustomModal Title="New/set password" @ref="changePasswordModal" size="ModalSize.Default" DefaultOnClose="true"
+OnPrimaryAction="ChangeTeacherPassword" PrimaryButtonText="Save">
+    <BodyContent>
+        <Form>
+            <Field>
+                <FieldLabel>
+                    Password
+                </FieldLabel>
+                <FieldBody>
+                    <TextEdit @bind-Text="@newPassword" Placeholder="********" Role="TextRole.Password" autocomplete="new-password" />
+                </FieldBody>
+            </Field>
+            <Field>
+                <FieldLabel>
+                    Repeat Password
+                </FieldLabel>
+                <FieldBody>
+                    <TextEdit @bind-Text="@newPasswordConfirm" Placeholder="********" Role="TextRole.Password" autocomplete="new-password" />
+                </FieldBody>
+            </Field>
+        </Form>
+
+        @if (!newPasswordsMatch)
+        {
+            <Div Class="m-1" style="color: red">
+                <Span>
+                    Password doesn't match.
+                </Span>
+            </Div>
+        }
+    </BodyContent>
+</CustomModal>
+
+<CustomModal Title="DELETE A TEACHER!" @ref="deleteTeacherModal" size="ModalSize.Default" DefaultOnClose="true"
+OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
+    <BodyContent>
+        Are you sure?!
+    </BodyContent>
+</CustomModal>
+
+<CustomModal Title="Successful!" @ref="successModal" size="ModalSize.Default" OnClose="CloseSuccessfulPopup" />
+
+@code {
+    [CascadingParameter(Name = "HttpHandler")]
+    private HttpHandler? httpHandler { get; set; }
+
+    [CascadingParameter(Name = "JWTokenHandler")]
+    private JWTokenHandler? jWTokenHandler { get; set; }
+
+    [CascadingParameter(Name = "LoadingSpinner")]
+    private LoadingSpinner? loading { get; set; }
+
+    [CascadingParameter(Name = "SessionStorageHandler")]
+    private SessionStorageHandler? sessionStorageHandler { get; set; }
+
+    private CustomModal? addTeacherModal;
+    private CustomModal? changePasswordModal;
+    private CustomModal? deleteTeacherModal;
+    private CustomModal? successModal;
+
+    private List<UserDTO>? teachers = null;
+
+    private string newTeacherUsername = string.Empty;
+    private string newTeacherPassword = string.Empty;
+    private string newTeacherPasswordConfirm = string.Empty;
+    private bool newTeacherPasswordsMatch = true;
+
+    private string newPassword = string.Empty;
+    private string newPasswordConfirm = string.Empty;
+    private UserDTO? teacherPasswordChange;
+    private bool newPasswordsMatch = true;
+
+    private UserDTO? teacherToDelete;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (httpHandler == null) return;
+            if (jWTokenHandler == null) return;
+            if (sessionStorageHandler == null) return;
+
+            string jwt = await jWTokenHandler.GetToken();
+            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+
+            if (userRole != "Administrator")
+            {
+                NavigationManager.NavigateTo("/home");
+                return;
+            }
+
+            loading?.Start();
+
+            (HttpStatusCode statusCode, List<UserDTO> response) =
+                await httpHandler.GetAsync<List<UserDTO>>(
+                    $"/api/Users/AllTeachers", jwt);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                teachers = response;
+                StateHasChanged();
+            }
+            loading?.Stop();
+        }
+    }
+
+    private async void ClosePopup(CustomModal? modal)
+    {
+        if (modal != null)
+        {
+            await modal.Hide();
+        }
+    }
+
+    private void CloseSuccessfulPopup()
+    {
+        ClosePopup(successModal);
+        ClosePopup(changePasswordModal);
+    }
+
+    private void OpenAddTeacher()
+    {
+        newTeacherUsername = string.Empty;
+        newTeacherPassword = string.Empty;
+        newTeacherPasswordConfirm = string.Empty;
+        newTeacherPasswordsMatch = true;
+        addTeacherModal?.Show();
+    }
+
+    private void OpenChangePassword(UserDTO user)
+    {
+        newPassword = string.Empty;
+        newPasswordConfirm = string.Empty;
+        teacherPasswordChange = user;
+        changePasswordModal?.Show();
+    }
+
+    private void OpenDeleteTeacherConfirmation(UserDTO user)
+    {
+        teacherToDelete = user;
+        deleteTeacherModal?.Show();
+    }
+
+    private async void AddTeacher()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+
+        if (newTeacherPassword != newTeacherPasswordConfirm)
+        {
+            newTeacherPasswordsMatch = false;
+            return;
+        }
+
+        newTeacherPasswordsMatch = true;
+        string jwt = await jWTokenHandler.GetToken();
+        SignUpRequest signUp = new()
+            {
+                username = newTeacherUsername,
+                password = newTeacherPassword
+            };
+
+        loading?.Start();
+        (HttpStatusCode statusCode, UserDTO response) =
+            await httpHandler.PostAsync<UserDTO>($"/api/Users/TeacherSignup", signUp, jwt, HttpStatusCode.OK);
+
+        if (statusCode == HttpStatusCode.OK)
+        {
+            teachers ??= new();
+            teachers.Add(response);
+            StateHasChanged();
+            ClosePopup(addTeacherModal);
+        }
+
+        loading?.Stop();
+    }
+
+    private async void ChangeTeacherPassword()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+        if (teacherPasswordChange == null) return;
+
+        if (this.newPassword != newPasswordConfirm)
+        {
+            newPasswordsMatch = false;
+            return;
+        }
+        newPasswordsMatch = true;
+
+        string jwt = await jWTokenHandler.GetToken();
+        UpdatePassword newPassword = new()
+            {
+                ID = teacherPasswordChange.ID,
+                password = this.newPassword
+            };
+
+        loading?.Start();
+
+        HttpStatusCode statusCode =
+            await httpHandler.PutAsync($"/api/Users/ResetPassword/{teacherPasswordChange.ID}", newPassword, jwt);
+
+        if (statusCode == HttpStatusCode.Created)
+        {
+            successModal?.Show();
+        }
+
+        loading?.Stop();
+    }
+
+    private async void DeleteTheacher()
+    {
+        if (httpHandler == null) return;
+        if (jWTokenHandler == null) return;
+        if (teacherToDelete == null) return;
+
+        string jwt = await jWTokenHandler.GetToken();
+
+        loading?.Start();
+
+        HttpStatusCode statusCode =
+            await httpHandler.DeleteAsync($"/api/Users/{teacherToDelete.ID}", jwt);
+
+        if (statusCode == HttpStatusCode.NoContent)
+        {
+            teachers?.Remove(teacherToDelete);
+            teacherToDelete = null;
+            StateHasChanged();
+            ClosePopup(deleteTeacherModal);
+        }
+
+        loading?.Stop();
+    }
+}

@@ -243,7 +243,8 @@ OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
 
         loading?.Start();
         (HttpStatusCode statusCode, UserDTO response) =
-            await httpHandler.PostAsync<UserDTO>($"/api/Users/TeacherSignup", signUp, jwt, HttpStatusCode.OK);
+            await httpHandler.PostAsync<UserDTO>($"/api/Users/TeacherSignup", 
+                signUp, jwt, HttpStatusCode.OK);
 
         if (statusCode == HttpStatusCode.OK)
         {
@@ -279,7 +280,8 @@ OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
         loading?.Start();
 
         HttpStatusCode statusCode =
-            await httpHandler.PutAsync($"/api/Users/ResetPassword/{teacherPasswordChange.ID}", newPassword, jwt);
+            await httpHandler.PutAsync($"/api/Users/ResetPassword/{teacherPasswordChange.ID}", 
+                newPassword, jwt);
 
         if (statusCode == HttpStatusCode.Created)
         {
@@ -296,7 +298,6 @@ OnPrimaryAction="DeleteTheacher" PrimaryButtonText="Confirm">
         if (teacherToDelete == null) return;
 
         string jwt = await jWTokenHandler.GetToken();
-
         loading?.Start();
 
         HttpStatusCode statusCode =

@@ -20,8 +20,8 @@
 
             if (string.IsNullOrEmpty(jwt))
             {
-                // If no JWT exists, navigate to the login page
-                NavigationManager.NavigateTo("/");
+                // If no JWT exists, navigate to the logout to remove everything.
+                NavigationManager.NavigateTo("/logout");
                 return string.Empty; // Return empty string as a fallback
             }
         }

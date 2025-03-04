@@ -135,6 +135,7 @@ else
 
     private Timer timer = new(1000)
         {
+            Enabled = false,
             AutoReset = true,
         };
 
@@ -166,43 +167,51 @@ else
                 return;
             }
 
-            int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
-            (HttpStatusCode statusCodeUserQuiz, User_QuizDTO userQuiz) =
-                await httpHandler.GetAsync<User_QuizDTO>(
-                    $"/api/User_Quiz/{quizID}/{userID}", jwt, false);
-
-            string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
-            if (userRole == "Student" && statusCodeUserQuiz == HttpStatusCode.NotFound)
-            {
-                // Isn't invited to this quiz or has completed it before.
-                NavigationManager.NavigateTo("/browse");
-                return;
-            }
-            else
-            {
-                this.userQuiz = userQuiz;
-            }
-
             (HttpStatusCode statusCodeQuiz, QuizDTO quizDTO) =
                await httpHandler.GetAsync<QuizDTO>(
                    $"/api/Quizs/{quizID}", jwt);
 
-            if (statusCodeQuiz == HttpStatusCode.OK)
+            if (statusCodeQuiz != HttpStatusCode.OK)
             {
-                quiz = quizDTO;
+                // There isn't a quiz with this id.
+                NavigationManager.NavigateTo("/browse");
+                return;
+            }
+            quiz = quizDTO;
+
+            int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
+
+            if (!IgnoreQuizUpdate(quiz))
+            {
+                (HttpStatusCode statusCodeUserQuiz, User_QuizDTO userQuiz) =
+                    await httpHandler.GetAsync<User_QuizDTO>(
+                        $"/api/User_Quiz/{quizID}/{userID}", jwt, false);
+
+                string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
+                if (userRole == "Student" && statusCodeUserQuiz == HttpStatusCode.NotFound)
+                {
+                    // Isn't invited to this quiz or has completed it before.
+                    NavigationManager.NavigateTo("/browse");
+                    return;
+                }
+                this.userQuiz = userQuiz;
             }
 
-            (HttpStatusCode statusCodeCuestions, List<QuestionDTO> QuestionsDTO) =
+            (HttpStatusCode statusCodeQuestions, List<QuestionDTO> QuestionsDTO) =
                 await httpHandler.GetAsync<List<QuestionDTO>>(
                     $"/api/Questions/ByQuizID/{quizID}", jwt);
 
-            if (statusCodeCuestions == HttpStatusCode.OK)
+            if (statusCodeQuestions != HttpStatusCode.OK || !QuestionsDTO.Any())
             {
-                Random random = new(DateTime.UtcNow.Millisecond);
-                questions.AddRange(QuestionsDTO.OrderBy(_ => random.Next(questions.Count + 5)).ToList());
-                timer.Elapsed += OnTimedEvent;
+                // If it fall in here... how?
+                // how did the question get deleted but not the quiz?
+                NavigationManager.NavigateTo("/browse");
+                return;
             }
 
+            Random random = new(DateTime.UtcNow.Millisecond);
+            questions.AddRange(QuestionsDTO.OrderBy(_ => random.Next(questions.Count + 5)).ToList());
+            timer.Elapsed += OnTimedEvent;
             loading?.Stop();
         }
     }
@@ -300,11 +309,9 @@ else
         if (currentTime.TimeOfDay.TotalSeconds <= 0)
         {
             SkipQuestion();
+            return;
         }
-        else
-        {
-            InvokeAsync(StateHasChanged);
-        }
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task OpenSummery()
@@ -319,8 +326,8 @@ else
         }
 
         StateHasChanged();
-
         loading?.Start();
+
         string jwt = await jWTokenHandler.GetToken();
         int userID = await sessionStorageHandler.GetItem<int>(SessionStorageHandler.Item.userID);
 
@@ -344,22 +351,18 @@ else
         userGotRightInProcents = Math.Round((double)answeredCorrectly.Count(isCorrect =>
             isCorrect.AnsweredCorrect) / questions.Count * 100, 2);
 
+        const int defaultPoints = 100;
         for (int i = 0; i < questions.Count; i++)
         {
             DifficultyDTO? questionDifficulty = difficulties?
                 .FirstOrDefault(d => questions[i].Difficulty == d.Difficulty);
 
-            int questionPoints = 0;
-            if (questionDifficulty == null)
-            {
-                // Gets default
-                questionPoints = 100;
-            }
-            else
+            int questionPoints = defaultPoints;
+            if (questionDifficulty != null)
             {
                 int difference = questionDifficulty.ID - quizDifficulty.ID;
                 int difficultyAddition = (1 + difference / 10);
-                questionPoints = 100 * difficultyAddition;
+                questionPoints *= difficultyAddition;
             }
 
             pointsPossible += questionPoints;
@@ -370,32 +373,32 @@ else
         }
 
         StateHasChanged();
-
         GetSummeryChartDataAndUpdate();
 
         string userRole = await sessionStorageHandler.GetItem<string>(SessionStorageHandler.Item.userRole);
-        if (userRole == "Teacher" || userRole == "Guest")
+        if (userRole == "Teacher" || userRole == "Guest" || userRole == "Administrator")
         {
             loading?.Stop();
             return;
         }
-
-        User_QuizDTO updateUserQuiz = new()
-            {
-                Completed = true,
-                QuizID = quizID,
-                UserID = userID,
-                Results = userGotRightInProcents,
-                TimeUsed = 0,
-            };
-
-        HttpStatusCode statusCodeUserQuiz =
-           await httpHandler.PutAsync(
-                   $"/api/User_Quiz", updateUserQuiz, jwt);
-
-        if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
+        if (!IgnoreQuizUpdate(quiz))
         {
-            throw new Exception();
+            User_QuizDTO updateUserQuiz = new()
+                {
+                    Completed = true,
+                    QuizID = quizID,
+                    UserID = userID,
+                    Results = userGotRightInProcents,
+                    TimeUsed = 0,
+                };
+
+            HttpStatusCode statusCodeUserQuiz =
+               await httpHandler.PutAsync($"/api/User_Quiz", updateUserQuiz, jwt);
+
+            if (statusCodeUserQuiz != HttpStatusCode.OK && statusCodeUserQuiz != HttpStatusCode.NoContent)
+            {
+                throw new Exception();
+            }
         }
 
         loading?.Stop();
@@ -420,9 +423,9 @@ else
         await barChartNumber.AddLabelsDatasetsAndUpdate(
             categoryPercentages.Select(c => c.Category).ToArray(),
             GetBarChartDataset<int>(["Total", "Correct"],
-                [
+                        [
                     categoryPercentages.Select(c => c.Total).ToList(),
-    categoryPercentages.Select(c => c.CorrectAnwsered).ToList()
+                    categoryPercentages.Select(c => c.CorrectAnwsered).ToList()
                 ]
             )
         );
@@ -452,6 +455,11 @@ else
                 Data = dataSet,
                 BackgroundColor = new List<string> { ChartBackgroundColors[index % ChartBackgroundColors.Length] }
             }).ToArray();
+    }
+
+    private bool IgnoreQuizUpdate(QuizDTO quiz)
+    {
+        return quiz.Category == "Tutorial";
     }
 
     private class QuizInfo(string category, bool answeredCorrect)

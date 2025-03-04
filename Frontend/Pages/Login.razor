@@ -85,7 +85,7 @@
                 if (dTO == null)
                     return;
 
-                SuccessfullyLoggedIn(dTO, "/home");
+                SuccessfullyLoggedIn(dTO, dTO.role != "Administrator" ? "/home" : "/adminPage");
             }
             else
             {

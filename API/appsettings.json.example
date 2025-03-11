@@ -6,7 +6,7 @@
     }
   },
   "ConnectionStrings": {
-    "DefaultConnection": ""
+    "DefaultConnection": "Server=DBIP;Port=DBPort;Database=DBName;User=DBUser;Password=DBPassword;"
   },
 
   "JwtSettings": {
